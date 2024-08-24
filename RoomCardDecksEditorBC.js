@@ -19,10 +19,13 @@ import(
   ).toFixed(0)}`
 );
 
+import { createUI } from "./renderer.js";
+
 (function () {
   "use strict";
 
   //#region UI
+  const { showButton } = createUI();
   let isVisibleMainWindow = false;
 
   showButton.addEventListener("click", function () {
