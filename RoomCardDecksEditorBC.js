@@ -22,27 +22,9 @@ import(
 (function () {
   "use strict";
 
-  //open Player.Game.ClubCard. and get all decks    GameClubCardParameters ???
-  /*interface GameClubCardParameters {
-        Deck: string[];
-        DeckName?: string[];
-        Reward?: string;
-        Status?: OnlineGameStatus;
-        PlayerSlot?: number;
-    }*/
+  //#region UI
+  let isVisibleMainWindow = false;
 
-  // Создаем кнопку для отображения mainWindow
-  const showButton = document.createElement("button");
-  showButton.textContent = "Show Main Window";
-  showButton.style.position = "absolute";
-  showButton.style.top = "10px";
-  showButton.style.left = "50%";
-  showButton.style.transform = "translateX(-50%)";
-  showButton.style.padding = "10px 20px";
-  showButton.style.background = "red";
-  document.body.appendChild(showButton);
-
-  // Обработчик клика по showButton
   showButton.addEventListener("click", function () {
     if (isVisibleMainWindow == true) {
       mainWindow.style.display = "none";
@@ -52,8 +34,7 @@ import(
     }
     isVisibleMainWindow = !isVisibleMainWindow;
   });
-
-  let isVisibleMainWindow = false;
+  //#endregion
 
   // Создаем основной контейнер окна
   const mainWindow = document.createElement("div");
@@ -66,7 +47,7 @@ import(
   mainWindow.style.backgroundColor = "white";
   mainWindow.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
   mainWindow.style.display = "none";
-  mainWindow.style.zIndex = "9999"; // ????????
+  mainWindow.style.zIndex = "9999"; // ???????? look very bad
   document.body.appendChild(mainWindow);
 
   // Создаем контейнер для верхней панели
@@ -108,11 +89,13 @@ import(
   bottomPanel.style.borderTop = "2px solid black";
   mainWindow.appendChild(bottomPanel);
 
+  const cells = [];
   // Создаем 30 ячеек для отображения массива данных
   for (let i = 0; i < 30; i++) {
     const cell = document.createElement("div");
     cell.style.border = "1px solid black";
     cell.style.backgroundColor = "white";
+    cells.push(cell);
     bottomPanel.appendChild(cell);
   }
 
@@ -137,6 +120,13 @@ import(
         let selectedIndex = comboBox.value;
         let encodedDeck = playerData.Deck[selectedIndex];
         let decodedDeck = decodeStringDeckToID(encodedDeck);
+
+        for (let i = 0; i < decodedDeck.length; i++) {
+          if (i < cells.length) {
+            cells[i].textContent = `${decodedDeck[i]}`;
+          }
+        }
+
         console.log(`Selected Deck: ${playerData.DeckName[selectedIndex]}`);
         console.log(`Decoded Deck IDs:`, decodedDeck);
       });

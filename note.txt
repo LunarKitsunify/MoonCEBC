@@ -1,0 +1,9 @@
+
+  //open Player.Game.ClubCard. and get all decks    GameClubCardParameters ???
+  /*interface GameClubCardParameters {
+        Deck: string[];
+        DeckName?: string[];
+        Reward?: string;
+        Status?: OnlineGameStatus;
+        PlayerSlot?: number;
+    }*/
