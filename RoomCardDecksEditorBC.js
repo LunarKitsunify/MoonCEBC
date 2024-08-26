@@ -40,16 +40,12 @@
   showButton.style.backgroundSize = "cover";
   showButton.style.backgroundPosition = "center";
   showButton.style.position = "absolute";
-  showButton.style.width = "2.7%"; //40
-  showButton.style.height = "10.8%"; //80
+  showButton.style.width = "2.7%";
+  showButton.style.height = "10.8%";
   showButton.style.top = "0px";
-  //showButton.style.left = "50%";
-  //showButton.style.transform = "translateX(-50%)";
-
   showButton.style.right = "50%";
   showButton.style.transform = "translateX(calc(50% - 45%))";
   showButton.style.padding = "1px 2px";
-  showButton.style.zIndex = "9999"; // delete
   document.body.appendChild(showButton);
   showButton.addEventListener("click", function () {
     if (isVisibleMainWindow == true) {
@@ -64,7 +60,6 @@
   //#endregion
 
   //#region mainWindow
-  //Backgrounds/ClubCardPlayBoard1.jpg
   const mainWindow = document.createElement("div");
   mainWindow.style.position = "fixed";
   mainWindow.style.top = "50%";
@@ -93,7 +88,6 @@
   topPanel.style.display = "flex";
   topPanel.style.justifyContent = "center";
   topPanel.style.alignItems = "center";
-  //topPanel.style.backgroundColor = "green";
   topPanel.style.borderBottom = "2px solid black";
   topPanel.style.boxSizing = "border-box";
   topPanel.style.height = `${topPanelHeight}px`;
@@ -132,22 +126,20 @@
   bottomPanel.style.borderTop = "2px solid black";
   bottomPanel.style.overflow = "hidden";
   bottomPanel.style.gridAutoRows = "1fr";
-  //bottomPanel.style.backgroundColor = "blue";
   mainWindow.appendChild(bottomPanel);
 
   for (let i = 0; i < 30; i++) {
     const cardCell = document.createElement("div");
-    //cell.style.border = "1px solid black";
     cardCell.style.boxSizing = "border-box";
-    //cell.style.height = "100%";
-    cardCell.style.margin = "1px";
-    //cell.style.position = "relative";
-    cardCell.style.marginLeft = "1px";
-    cardCell.style.marginRight = "1px";
+    //TODO need more test wirg margin. phone ???
+    cardCell.style.margin = "5%";
+    cardCell.style.marginLeft = "5%";
+    cardCell.style.marginRight = "5%";
+    cardCell.style.position = "relative";
     cardCell.style.justifyContent = "center";
-    cardCell.style.display = "flex";
-    cardCell.style.minHeight = "0";
-    cardCell.style.minWidth = "0";
+    cardCell.style.alignItems = "center";
+    cardCell.style.display = "inline-block";
+    //cardCell.style.background = "blue";
     cells.push(cardCell);
     bottomPanel.appendChild(cardCell);
   }
@@ -158,6 +150,7 @@
 
   function LoadPlayerData() {
     if (Player.Game.ClubCard === undefined) return;
+
     let playerData = Player.Game.ClubCard;
 
     comboBox.innerHTML = "";
@@ -193,7 +186,6 @@
     for (let id of decodedDeck)
       DeckCards.push(ClubCardList.find((card) => card.ID === id));
 
-    //DeckCards.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
     DeckCards.sort((a, b) =>
       a.Type === "Event"
         ? 1
@@ -205,6 +197,11 @@
     for (let i = 0; i < DeckCards.length; i++) {
       if (i < cells.length) {
         cells[i].innerHTML = "";
+
+        //TODO look bad, i think need ome time read Text_ClubCard.csv and save data.
+        DeckCards[i].Title = ClubCardTextGet("Title " + DeckCards[i].Name);
+        DeckCards[i].Text = ClubCardTextGet("Text " + DeckCards[i].Name);
+
         DrawCard(DeckCards[i], cells[i]);
       }
     }
@@ -229,27 +226,31 @@
 
     //#region Background
 
+    //backgroundContainer.style.display = "inline-block";
     backgroundContainer.style.position = "relative";
-    backgroundContainer.style.top = "50%";
-    backgroundContainer.style.left = "50%";
-    backgroundContainer.style.transform = "translate(-50%, -50%)";
-    backgroundContainer.style.width = "100%";
+    backgroundContainer.style.overflow = "hidden";
+    backgroundContainer.style.margin = "0 auto";
     backgroundContainer.style.height = "100%";
-    backgroundContainer.style.display = "flex";
+    //backgroundContainer.style.background = "yellow";
+    //backgroundContainer.style.width = "100%";
+    //backgroundContainer.style.top = "50%";
+    //backgroundContainer.style.left = "50%";
+    //backgroundContainer.style.transform = "translate(-50%, -50%)";
+    //backgroundContainer.style.display = "flex";
+    backgroundContainer.style.display = "inline - block";
     backgroundContainer.style.justifyContent = "center";
-    backgroundContainer.style.alignItems = "center";
+    //backgroundContainer.style.alignItems = "center";
 
     img.src =
       "Screens/MiniGame/ClubCard/" + Card.Type + "/" + Card.Name + ".png";
+    img.style.height = "78%";
+    img.style.position = "absolute";
+    img.style.top = "22%";
     img.style.maxWidth = "100%";
     img.style.maxHeight = "100%";
-    img.style.height = "78%";
     img.style.objectFit = "contain";
-    img.style.position = "absolute";
-    img.style.top = "0";
     img.style.left = "50%";
     img.style.transform = "translateX(-50%)";
-    img.style.marginTop = "22%";
 
     imgFrame.src =
       "Screens/MiniGame/ClubCard/Frame/" +
@@ -257,10 +258,20 @@
       (Card.Reward != null ? "Reward" : "") +
       Level.toString() +
       ".png";
-    imgFrame.style.maxWidth = "100%";
-    imgFrame.style.maxHeight = "100%";
-    imgFrame.style.objectFit = "contain";
+    imgFrame.style.height = "100%";
+    imgFrame.style.width = "auto";
     imgFrame.style.position = "absolute";
+    imgFrame.style.objectFit = "contain";
+    imgFrame.style.left = "50%";
+    imgFrame.style.transform = "translateX(-50%)";
+    imgFrame.style.display = "block";
+    img.onload = function () {
+      //TODO I really don't like this implementation.
+      //Sometimes it slows down and does not render files.
+      //And also it doesn't update when the browser window size changes.
+      const imgWidth = imgFrame.offsetWidth;
+      backgroundContainer.style.width = `${imgWidth}px`;
+    };
 
     backgroundContainer.appendChild(imgFrame); // Сначала добавляем рамку
     backgroundContainer.appendChild(img);
@@ -276,8 +287,7 @@
     nameElement.style.top = "1%";
     nameElement.style.left = "50%";
     nameElement.style.transform = "translateX(-50%)";
-    nameElement.style.fontSize = "0.8em";
-    //nameElement.style.fontSize = "1% Arial";
+    nameElement.style.fontSize = "60%";
     nameElement.style.textAlign = "center";
     nameElement.style.fontWeight = "bold";
     nameElement.style.lineHeight = "0.8";
@@ -291,11 +301,13 @@
     const topLeftContainer = document.createElement("div");
     topLeftContainer.style.position = "absolute";
     topLeftContainer.style.top = "20%";
-    topLeftContainer.style.left = "20%";
+    topLeftContainer.style.left = "5%";
     topLeftContainer.style.display = "flex";
     topLeftContainer.style.flexDirection = "column";
-    topLeftContainer.style.gap = "8%";
+    topLeftContainer.style.gap = "10%";
+    //topLeftContainer.style.background = "green";
 
+    //Liability Icon
     if (Card.Group && Card.Group.includes("Liability")) {
       const liabilityIcon = document.createElement("img");
       liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
@@ -304,6 +316,7 @@
       topLeftContainer.appendChild(liabilityIcon);
     }
 
+    //Card.RequiredLevel
     if (Card.RequiredLevel > 1) {
       const levelBoard = document.createElement("div");
       levelBoard.style.width = iconSize;
@@ -335,7 +348,114 @@
       levelBoard.appendChild(levelElement);
     }
 
+    //Card.FamePerTurn
+    if (Card.FamePerTurn != null) {
+      const fameBoard = document.createElement("div");
+      fameBoard.style.width = iconSize;
+      fameBoard.style.height = "auto";
+      fameBoard.style.position = "relative";
+      topLeftContainer.appendChild(fameBoard);
+
+      const fameElement = document.createElement("div");
+      fameElement.textContent = Card.FamePerTurn;
+      fameElement.style.textAlign = "center";
+      fameElement.style.fontSize = "0.8em";
+      fameElement.style.fontWeight = "bold";
+      fameElement.style.position = "absolute";
+      fameElement.style.width = "100%";
+      fameElement.style.maxWidth = "100%";
+      fameElement.style.maxHeight = "100%";
+      fameElement.style.top = "50%";
+      fameElement.style.left = "50%";
+      fameElement.style.transform = "translate(-50%, -60%)";
+
+      const fameIcon = document.createElement("img");
+      fameIcon.src = "Screens/MiniGame/ClubCard/Bubble/Fame.png";
+      fameIcon.style.width = "100%";
+      fameIcon.style.maxWidth = "100%";
+      fameIcon.style.maxHeight = "100%";
+      fameIcon.style.objectFit = "contain";
+
+      fameBoard.appendChild(fameIcon);
+      fameBoard.appendChild(fameElement);
+    }
+
+    //Card.MoneyPerTurn
+    if (Card.MoneyPerTurn != null) {
+      const moneyBoard = document.createElement("div");
+      moneyBoard.style.width = iconSize;
+      moneyBoard.style.height = "auto";
+      moneyBoard.style.position = "relative";
+      topLeftContainer.appendChild(moneyBoard);
+
+      const moneyElement = document.createElement("div");
+      moneyElement.textContent = Card.MoneyPerTurn;
+      moneyElement.style.textAlign = "center";
+      moneyElement.style.fontSize = "0.8em";
+      moneyElement.style.fontWeight = "bold";
+      moneyElement.style.position = "absolute";
+      moneyElement.style.width = "100%";
+      moneyElement.style.maxWidth = "100%";
+      moneyElement.style.maxHeight = "100%";
+      moneyElement.style.top = "50%";
+      moneyElement.style.left = "50%";
+      moneyElement.style.transform = "translate(-50%, -60%)";
+
+      const moneyIcon = document.createElement("img");
+      moneyIcon.src = "Screens/MiniGame/ClubCard/Bubble/Money.png";
+      moneyIcon.style.width = "100%";
+      moneyIcon.style.maxWidth = "100%";
+      moneyIcon.style.maxHeight = "100%";
+      moneyIcon.style.objectFit = "contain";
+
+      moneyBoard.appendChild(moneyIcon);
+      moneyBoard.appendChild(moneyElement);
+    }
+
     backgroundContainer.appendChild(topLeftContainer);
+    //#endregion
+
+    //#region Bottom Info Panel
+    const bottomContainer = document.createElement("div");
+    bottomContainer.style.position = "absolute";
+    bottomContainer.style.bottom = "0";
+    bottomContainer.style.width = "100%";
+    bottomContainer.style.height = "45%";
+    bottomContainer.style.justifyContent = "center";
+    //ackgroundContainer.style.alignItems = "center";
+    bottomContainer.style.display = "flex";
+    bottomContainer.style.flexDirection = "column";
+    bottomContainer.style.textAlign = "center";
+    bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
+    //bottomContainer.style.left = "2%";
+    //bottomContainer.style.right = "2%";
+
+    const groupElement = document.createElement("div");
+    groupElement.textContent = `${Card.Group ? Card.Group.join(", ") : ""}`;
+    //groupElement.style.position = "absolute";
+    groupElement.style.fontSize = "55%";
+    groupElement.style.textAlign = "center";
+    groupElement.style.fontWeight = "bold";
+    groupElement.style.lineHeight = "0.8";
+    groupElement.style.flex = "0 0 20%";
+    groupElement.style.whiteSpace = "normal";
+    //groupElement.style.marginBottom = "45%";
+    //groupElement.style.bottom = "50%";
+    bottomContainer.appendChild(groupElement);
+
+    const descriptionElement = document.createElement("div");
+    descriptionElement.textContent = Card.Text;
+    descriptionElement.style.fontSize = "50%";
+    descriptionElement.style.fontWeight = "bold";
+    descriptionElement.style.textAlign = "center";
+    descriptionElement.style.lineHeight = "1";
+    descriptionElement.style.whiteSpace = "normal";
+    descriptionElement.style.flex = "1";
+    descriptionElement.style.margin = "2%";
+    //descriptionElement.style.marginBottom = "5%";
+    bottomContainer.appendChild(descriptionElement);
+
+    backgroundContainer.appendChild(bottomContainer);
     //#endregion
   }
 
