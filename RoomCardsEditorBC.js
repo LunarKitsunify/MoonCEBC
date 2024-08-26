@@ -1,11 +1,9 @@
 // ==UserScript==
-// @name RoomCardDecksEditorBC
+// @name Room Cards Editor BC
 // @namespace https://www.bondageprojects.com/
 // @version 1.0.0
-// @description A brief description of what your script does
+// @description Addon for viewing and customizing card decks without Npc room.
 // @author Kitsunify
-// @match https://example.com/*
-// @match https://www.example.com/*
 // @match http://localhost:*/*
 // @match https://bc-cards-test.netlify.app/*
 // @match https://bondageprojects.elementfx.com/*
@@ -19,7 +17,7 @@
 // ==/UserScript==
 
 /*import(
-        `https://lunarkitsunify.github.io/RoomCardDecksEditorBC/RoomCardDecksEditorBC.js?v=${(
+        `https://lunarkitsunify.github.io/RoomCardsEditorBC/RoomCardsEditorBC.js?v=${(
           Date.now() / 10000
         ).toFixed(0)}`
       );*/
@@ -27,10 +25,21 @@
 (function () {
   "use strict";
 
-  //#region UI
-
+  const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+  let CardTextContent = null;
+  const ClubCardConsoleTest = "Room Cards Editor BC";
   let isVisibleMainWindow = false;
   const cells = [];
+
+  function AddonLoad() {
+    console.log(`${ClubCardConsoleTest} Start Load`);
+    CardTextContent = new TextCache(CardTextPath); //Load Cards data from BC Server
+    console.log(`${ClubCardConsoleTest} Load Complete`);
+  }
+
+  AddonLoad();
+
+  //#region UI
 
   //#region showButton
 
@@ -169,7 +178,7 @@
         UpdateSelecteDeck(playerData);
       });
     } else {
-      console.error("DeckName is empty or undefined.");
+      console.log(`${ClubCardConsoleTest} DeckName is empty or undefined`);
     }
   }
 
@@ -183,25 +192,28 @@
     let encodedDeck = playerData.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
     let DeckCards = [];
-    for (let id of decodedDeck)
-      DeckCards.push(ClubCardList.find((card) => card.ID === id));
+    let deckData = [];
 
-    DeckCards.sort((a, b) =>
-      a.Type === "Event"
-        ? 1
-        : b.Type === "Event"
-        ? -1
-        : a.RequiredLevel - b.RequiredLevel
-    );
+    for (let id of decodedDeck) {
+      let cardData = ClubCardList.find((card) => card.ID === id);
+      if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
+
+      cardData.Text = CardTextContent.get("Text " + cardData.Name);
+
+      deckData.push(cardData);
+    }
+
+    let events = deckData.filter((card) => card.Type === "Event");
+    let normalCards = deckData.filter((card) => card.Type !== "Event");
+
+    events.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
+    normalCards.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
+
+    DeckCards = [...normalCards, ...events];
 
     for (let i = 0; i < DeckCards.length; i++) {
       if (i < cells.length) {
         cells[i].innerHTML = "";
-
-        //TODO look bad, i think need ome time read Text_ClubCard.csv and save data.
-        DeckCards[i].Title = ClubCardTextGet("Title " + DeckCards[i].Name);
-        DeckCards[i].Text = ClubCardTextGet("Text " + DeckCards[i].Name);
-
         DrawCard(DeckCards[i], cells[i]);
       }
     }
@@ -226,20 +238,14 @@
 
     //#region Background
 
-    //backgroundContainer.style.display = "inline-block";
     backgroundContainer.style.position = "relative";
     backgroundContainer.style.overflow = "hidden";
     backgroundContainer.style.margin = "0 auto";
     backgroundContainer.style.height = "100%";
+    backgroundContainer.style.visibility = "hidden";
     //backgroundContainer.style.background = "yellow";
-    //backgroundContainer.style.width = "100%";
-    //backgroundContainer.style.top = "50%";
-    //backgroundContainer.style.left = "50%";
-    //backgroundContainer.style.transform = "translate(-50%, -50%)";
-    //backgroundContainer.style.display = "flex";
     backgroundContainer.style.display = "inline - block";
     backgroundContainer.style.justifyContent = "center";
-    //backgroundContainer.style.alignItems = "center";
 
     img.src =
       "Screens/MiniGame/ClubCard/" + Card.Type + "/" + Card.Name + ".png";
@@ -265,17 +271,24 @@
     imgFrame.style.left = "50%";
     imgFrame.style.transform = "translateX(-50%)";
     imgFrame.style.display = "block";
-    img.onload = function () {
+    imgFrame.onload = function () {
       //TODO I really don't like this implementation.
       //Sometimes it slows down and does not render files.
       //And also it doesn't update when the browser window size changes.
       const imgWidth = imgFrame.offsetWidth;
       backgroundContainer.style.width = `${imgWidth}px`;
+      backgroundContainer.style.visibility = "visible";
     };
 
-    backgroundContainer.appendChild(imgFrame); // Сначала добавляем рамку
+    /*imgFrame.addEventListener('load', () => {
+      const imgWidth = imgFrame.offsetWidth;
+      backgroundContainer.style.width = `${imgWidth}px`;
+      backgroundContainer.style.visibility = "visible";
+    });*/
+
+    backgroundContainer.appendChild(imgFrame);
     backgroundContainer.appendChild(img);
-    cardCell.appendChild(backgroundContainer);
+    //cardCell.appendChild(backgroundContainer);
 
     //#endregion
 
@@ -422,25 +435,19 @@
     bottomContainer.style.width = "100%";
     bottomContainer.style.height = "45%";
     bottomContainer.style.justifyContent = "center";
-    //ackgroundContainer.style.alignItems = "center";
     bottomContainer.style.display = "flex";
     bottomContainer.style.flexDirection = "column";
     bottomContainer.style.textAlign = "center";
     bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
-    //bottomContainer.style.left = "2%";
-    //bottomContainer.style.right = "2%";
 
     const groupElement = document.createElement("div");
     groupElement.textContent = `${Card.Group ? Card.Group.join(", ") : ""}`;
-    //groupElement.style.position = "absolute";
     groupElement.style.fontSize = "55%";
     groupElement.style.textAlign = "center";
     groupElement.style.fontWeight = "bold";
     groupElement.style.lineHeight = "0.8";
     groupElement.style.flex = "0 0 20%";
     groupElement.style.whiteSpace = "normal";
-    //groupElement.style.marginBottom = "45%";
-    //groupElement.style.bottom = "50%";
     bottomContainer.appendChild(groupElement);
 
     const descriptionElement = document.createElement("div");
@@ -452,11 +459,12 @@
     descriptionElement.style.whiteSpace = "normal";
     descriptionElement.style.flex = "1";
     descriptionElement.style.margin = "2%";
-    //descriptionElement.style.marginBottom = "5%";
     bottomContainer.appendChild(descriptionElement);
 
     backgroundContainer.appendChild(bottomContainer);
     //#endregion
+
+    cardCell.appendChild(backgroundContainer);
   }
 
   //#region encode/decode functions
