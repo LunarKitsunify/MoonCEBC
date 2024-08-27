@@ -15,55 +15,30 @@
 // @run-at document-end
 // ==/UserScript==
 
-//import bcModSDK from "bondage-club-mod-sdk";
 /*import(
-            `https://lunarkitsunify.github.io/RoomCardsEditorBC/RoomCardsEditorBC.js?v=${(
-              Date.now() / 10000
-            ).toFixed(0)}`
-          );*/
+    `https://lunarkitsunify.github.io/RoomCardDecksEditorBC/MoonCEBC.js?v=${(
+      Date.now() / 10000
+    ).toFixed(0)}`
+  );*/
 
 (function () {
   "use strict";
 
-  //var bcModSdk=function(){"use strict";const o="1.2.0";function e(o){alert("Mod ERROR:\n"+o);const e=new Error(o);throw console.error(e),e}const t=new TextEncoder;function n(o){return!!o&&"object"==typeof o&&!Array.isArray(o)}function r(o){const e=new Set;return o.filter((o=>!e.has(o)&&e.add(o)))}const i=new Map,a=new Set;function c(o){a.has(o)||(a.add(o),console.warn(o))}function s(o){const e=[],t=new Map,n=new Set;for(const r of f.values()){const i=r.patching.get(o.name);if(i){e.push(...i.hooks);for(const[e,a]of i.patches.entries())t.has(e)&&t.get(e)!==a&&c(`ModSDK: Mod '${r.name}' is patching function ${o.name} with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${e}\nPatch1:\n${t.get(e)||""}\nPatch2:\n${a}`),t.set(e,a),n.add(r.name)}}e.sort(((o,e)=>e.priority-o.priority));const r=function(o,e){if(0===e.size)return o;let t=o.toString().replaceAll("\r\n","\n");for(const[n,r]of e.entries())t.includes(n)||c(`ModSDK: Patching ${o.name}: Patch ${n} not applied`),t=t.replaceAll(n,r);return(0,eval)(`(${t})`)}(o.original,t);let i=function(e){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookChainExit)||void 0===i?void 0:i.call(t,o.name,n),c=r.apply(this,e);return null==a||a(),c};for(let t=e.length-1;t>=0;t--){const n=e[t],r=i;i=function(e){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookEnter)||void 0===i?void 0:i.call(t,o.name,n.mod),c=n.hook.apply(this,[e,o=>{if(1!==arguments.length||!Array.isArray(e))throw new Error(`Mod ${n.mod} failed to call next hook: Expected args to be array, got ${typeof o}`);return r.call(this,o)}]);return null==a||a(),c}}return{hooks:e,patches:t,patchesSources:n,enter:i,final:r}}function l(o,e=!1){let r=i.get(o);if(r)e&&(r.precomputed=s(r));else{let e=window;const a=o.split(".");for(let t=0;t<a.length-1;t++)if(e=e[a[t]],!n(e))throw new Error(`ModSDK: Function ${o} to be patched not found; ${a.slice(0,t+1).join(".")} is not object`);const c=e[a[a.length-1]];if("function"!=typeof c)throw new Error(`ModSDK: Function ${o} to be patched not found`);const l=function(o){let e=-1;for(const n of t.encode(o)){let o=255&(e^n);for(let e=0;e<8;e++)o=1&o?-306674912^o>>>1:o>>>1;e=e>>>8^o}return((-1^e)>>>0).toString(16).padStart(8,"0").toUpperCase()}(c.toString().replaceAll("\r\n","\n")),d={name:o,original:c,originalHash:l};r=Object.assign(Object.assign({},d),{precomputed:s(d),router:()=>{},context:e,contextProperty:a[a.length-1]}),r.router=function(o){return function(...e){return o.precomputed.enter.apply(this,[e])}}(r),i.set(o,r),e[r.contextProperty]=r.router}return r}function d(){for(const o of i.values())o.precomputed=s(o)}function p(){const o=new Map;for(const[e,t]of i)o.set(e,{name:e,original:t.original,originalHash:t.originalHash,sdkEntrypoint:t.router,currentEntrypoint:t.context[t.contextProperty],hookedByMods:r(t.precomputed.hooks.map((o=>o.mod))),patchedByMods:Array.from(t.precomputed.patchesSources)});return o}const f=new Map;function u(o){f.get(o.name)!==o&&e(`Failed to unload mod '${o.name}': Not registered`),f.delete(o.name),o.loaded=!1,d()}function g(o,t){o&&"object"==typeof o||e("Failed to register mod: Expected info object, got "+typeof o),"string"==typeof o.name&&o.name||e("Failed to register mod: Expected name to be non-empty string, got "+typeof o.name);let r=`'${o.name}'`;"string"==typeof o.fullName&&o.fullName||e(`Failed to register mod ${r}: Expected fullName to be non-empty string, got ${typeof o.fullName}`),r=`'${o.fullName} (${o.name})'`,"string"!=typeof o.version&&e(`Failed to register mod ${r}: Expected version to be string, got ${typeof o.version}`),o.repository||(o.repository=void 0),void 0!==o.repository&&"string"!=typeof o.repository&&e(`Failed to register mod ${r}: Expected repository to be undefined or string, got ${typeof o.version}`),null==t&&(t={}),t&&"object"==typeof t||e(`Failed to register mod ${r}: Expected options to be undefined or object, got ${typeof t}`);const i=!0===t.allowReplace,a=f.get(o.name);a&&(a.allowReplace&&i||e(`Refusing to load mod ${r}: it is already loaded and doesn't allow being replaced.\nWas the mod loaded multiple times?`),u(a));const c=o=>{let e=g.patching.get(o.name);return e||(e={hooks:[],patches:new Map},g.patching.set(o.name,e)),e},s=(o,t)=>(...n)=>{var i,a;const c=null===(a=(i=m.errorReporterHooks).apiEndpointEnter)||void 0===a?void 0:a.call(i,o,g.name);g.loaded||e(`Mod ${r} attempted to call SDK function after being unloaded`);const s=t(...n);return null==c||c(),s},p={unload:s("unload",(()=>u(g))),hookFunction:s("hookFunction",((o,t,n)=>{"string"==typeof o&&o||e(`Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`);const i=l(o),a=c(i);"number"!=typeof t&&e(`Mod ${r} failed to hook function '${o}': Expected priority number, got ${typeof t}`),"function"!=typeof n&&e(`Mod ${r} failed to hook function '${o}': Expected hook function, got ${typeof n}`);const s={mod:g.name,priority:t,hook:n};return a.hooks.push(s),d(),()=>{const o=a.hooks.indexOf(s);o>=0&&(a.hooks.splice(o,1),d())}})),patchFunction:s("patchFunction",((o,t)=>{"string"==typeof o&&o||e(`Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`);const i=l(o),a=c(i);n(t)||e(`Mod ${r} failed to patch function '${o}': Expected patches object, got ${typeof t}`);for(const[n,i]of Object.entries(t))"string"==typeof i?a.patches.set(n,i):null===i?a.patches.delete(n):e(`Mod ${r} failed to patch function '${o}': Invalid format of patch '${n}'`);d()})),removePatches:s("removePatches",(o=>{"string"==typeof o&&o||e(`Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`);const t=l(o);c(t).patches.clear(),d()})),callOriginal:s("callOriginal",((o,t,n)=>{"string"==typeof o&&o||e(`Mod ${r} failed to call a function: Expected function name string, got ${typeof o}`);const i=l(o);return Array.isArray(t)||e(`Mod ${r} failed to call a function: Expected args array, got ${typeof t}`),i.original.apply(null!=n?n:globalThis,t)})),getOriginalHash:s("getOriginalHash",(o=>{"string"==typeof o&&o||e(`Mod ${r} failed to get hash: Expected function name string, got ${typeof o}`);return l(o).originalHash}))},g={name:o.name,fullName:o.fullName,version:o.version,repository:o.repository,allowReplace:i,api:p,loaded:!0,patching:new Map};return f.set(o.name,g),Object.freeze(p)}function h(){const o=[];for(const e of f.values())o.push({name:e.name,fullName:e.fullName,version:e.version,repository:e.repository});return o}let m;const y=void 0===window.bcModSdk?window.bcModSdk=function(){const e={version:o,apiVersion:1,registerMod:g,getModsInfo:h,getPatchingInfo:p,errorReporterHooks:Object.seal({apiEndpointEnter:null,hookEnter:null,hookChainExit:null})};return m=e,Object.freeze(e)}():(n(window.bcModSdk)||e("Failed to init Mod SDK: Name already in use"),1!==window.bcModSdk.apiVersion&&e(`Failed to init Mod SDK: Different version already loaded ('1.2.0' vs '${window.bcModSdk.version}')`),window.bcModSdk.version!==o&&alert(`Mod SDK warning: Loading different but compatible versions ('1.2.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`),window.bcModSdk);return"undefined"!=typeof exports&&(Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=y),y}();
-
-  //#region bcModSDK     // bcModSdk
-
-  /*const modApi = bcModSdk.registerMod({
-        name: "CardsEditorBC",
-        fullName: "Cards Editor BC",
-        version: "1.0.0",
-        repository: "https://github.com/LunarKitsunify/RoomCardDecksEditorBC",
-      });*/
-
-  //test hook
-
-  /*modApi.hookFunction("DrawButton", 2, (args, next) => {
-        if (args[6] == "Icons/BCARSettings.png") args[6] = "Icons/Magic.png";
-        return next(args);
-      });*/
-
-  /*BRBD.hookFunction("DrawButton", -100, (args, next) => {
-        if (JSON.stringify(args) === JSON.stringify([1490, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX"]))
-        {
-            DrawButton(1490, 800, 300, 90, "Blocked", "#C4C4C4", "", "BCX Reset Button Disabler is Enabled");
-            return;
-        };
-        if (JSON.stringify(args) === JSON.stringify([120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules"]))
-        {
-            DrawButton(120, 200, 400, 90, "Blocked", "#C4C4C4", "", "BCX Reset Button Disabler is Enabled");
-            return;
-        };
-        return next(args);
-    });*/
-
-  //#endregion
-
   const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
   let CardTextContent = null;
-  const AddonName = "Cards Editor BC";
+  const AddonName = "Moon Cards Editor BC";
   let isVisibleMainWindow = false;
   const cells = [];
+
+  //#region Size and color customization for the card rendering
+
+  const requiredLevelTestColor = "#FF5733";
+  const fameTextColor = "#3357FF";
+  const moneyTextColor = "#006400";
+  const cardNameFontSize = "60%";
+  const cardGroupFontSize = "55%";
+  const cardTextFontSize = "50%";
+  //#endregion
 
   //#region UI
 
@@ -80,20 +55,6 @@
   showButton.style.left = "1.5%";
   showButton.style.transform = "translateX(calc(50% - 45%))";
   showButton.style.padding = "1px 2px";
-
-  /*const showButton = document.createElement("button");
-    showButton.style.backgroundImage =
-      "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
-    showButton.style.backgroundSize = "cover";
-    showButton.style.backgroundPosition = "center";
-    showButton.style.position = "absolute";
-    showButton.style.width = "2.7%";
-    showButton.style.height = "10.8%";
-    showButton.style.top = "0px";
-    showButton.style.right = "50%";
-    showButton.style.transform = "translateX(calc(50% - 45%))";
-    showButton.style.padding = "1px 2px";*/
-
   showButton.style.display = "none";
   showButton.addEventListener("click", function () {
     if (isVisibleMainWindow == true) {
@@ -207,10 +168,10 @@
     CardTextContent = new TextCache(CardTextPath); //Load Cards data from BC Server
     console.log(`${AddonName} Load Complete`);
 
-    setInterval(checkRoomStatus, 500);
+    setInterval(UpdateStatusShowButton, 500);
   }
 
-  function checkRoomStatus() {
+  function UpdateStatusShowButton() {
     const isClubCardsGame = ChatRoomGame;
     const isInChatRoom = ServerPlayerIsInChatRoom();
     if (isInChatRoom && isClubCardsGame == "ClubCard")
@@ -227,10 +188,12 @@
 
     if (playerData.DeckName && playerData.DeckName.length > 0) {
       playerData.DeckName.forEach((name, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.textContent = name;
-        comboBox.appendChild(option);
+        if (name != null && name != "") {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = name;
+          comboBox.appendChild(option);
+        }
       });
 
       UpdateSelecteDeck(playerData);
@@ -241,6 +204,27 @@
     } else {
       console.log(`${AddonName} DeckName is empty or undefined`);
     }
+  }
+  /**
+   * Updated  the text by mask, for InnerHTML
+   * @param {String} text -Normal Card Text
+   * @returns {String} -  Updated for InnerHTML Card Text
+   */
+  function formatTextForInnerHTML(text) {
+    const fameRegex = /[+-]?\d*\s*fame/gi;
+    const moneyRegex = /[+-]?\d*\s*money/gi;
+
+    const formattedText = text
+      .replace(
+        fameRegex,
+        (match) => `<span style='color: ${fameTextColor};'>${match}</span>`
+      )
+      .replace(
+        moneyRegex,
+        (match) => `<span style='color: ${moneyTextColor};'>${match}</span>`
+      );
+
+    return formattedText;
   }
 
   /**
@@ -259,10 +243,13 @@
       let cardData = ClubCardList.find((card) => card.ID === id);
       if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
 
-      cardData.Text = CardTextContent.get("Text " + cardData.Name).replace(
+      const cardText = CardTextContent.get("Text " + cardData.Name).replace(
         /<F>/g,
         ""
       );
+
+      formatTextForInnerHTML;
+      cardData.Text = formatTextForInnerHTML(cardText);
 
       deckData.push(cardData);
     }
@@ -297,7 +284,7 @@
 
   /**
    * function to draw a card
-   * @param {ClubCard} Card - массив карт.
+   * @param {ClubCard} Card - ClubCard from BC.
    * @param {HTMLDivElement} cardCell fill for card data
    * @returns {void} - Nothing
    */
@@ -319,7 +306,6 @@
     backgroundContainer.style.margin = "0 auto";
     backgroundContainer.style.height = "100%";
     backgroundContainer.style.visibility = "hidden";
-    //backgroundContainer.style.background = "yellow";
     backgroundContainer.style.display = "inline - block";
     backgroundContainer.style.justifyContent = "center";
 
@@ -357,31 +343,30 @@
     };
 
     /*imgFrame.addEventListener('load', () => {
-          const imgWidth = imgFrame.offsetWidth;
-          backgroundContainer.style.width = `${imgWidth}px`;
-          backgroundContainer.style.visibility = "visible";
-        });*/
+            const imgWidth = imgFrame.offsetWidth;
+            backgroundContainer.style.width = `${imgWidth}px`;
+            backgroundContainer.style.visibility = "visible";
+          });*/
 
     backgroundContainer.appendChild(imgFrame);
     backgroundContainer.appendChild(img);
-    //cardCell.appendChild(backgroundContainer);
 
     //#endregion
 
     //#region Card Name
 
-    const nameElement = document.createElement("div");
-    nameElement.textContent = Card.Name;
-    nameElement.style.position = "absolute";
-    nameElement.style.top = "1%";
-    nameElement.style.left = "50%";
-    nameElement.style.transform = "translateX(-50%)";
-    nameElement.style.fontSize = "60%";
-    nameElement.style.textAlign = "center";
-    nameElement.style.fontWeight = "bold";
-    nameElement.style.lineHeight = "0.8";
-    nameElement.style.whiteSpace = "normal";
-    backgroundContainer.appendChild(nameElement);
+    const cardNameTextElement = document.createElement("div");
+    cardNameTextElement.textContent = Card.Name;
+    cardNameTextElement.style.position = "absolute";
+    cardNameTextElement.style.top = "1%";
+    cardNameTextElement.style.left = "50%";
+    cardNameTextElement.style.transform = "translateX(-50%)";
+    cardNameTextElement.style.fontSize = cardNameFontSize;
+    cardNameTextElement.style.textAlign = "center";
+    cardNameTextElement.style.fontWeight = "bold";
+    cardNameTextElement.style.lineHeight = "0.8";
+    cardNameTextElement.style.whiteSpace = "normal";
+    backgroundContainer.appendChild(cardNameTextElement);
 
     //#endregion
 
@@ -413,19 +398,19 @@
       levelBoard.style.position = "relative";
       topLeftContainer.appendChild(levelBoard);
 
-      const levelElement = document.createElement("div");
-      levelElement.textContent = Card.RequiredLevel;
-      levelElement.style.textAlign = "center";
-      levelElement.style.color = "#FF5733";
-      levelElement.style.fontSize = "0.8em";
-      levelElement.style.fontWeight = "bold";
-      levelElement.style.position = "absolute";
-      levelElement.style.width = "100%";
-      levelElement.style.maxWidth = "100%";
-      levelElement.style.maxHeight = "100%";
-      levelElement.style.top = "50%";
-      levelElement.style.left = "50%";
-      levelElement.style.transform = "translate(-50%, -60%)";
+      const requiredLevelTest = document.createElement("div");
+      requiredLevelTest.textContent = Card.RequiredLevel;
+      requiredLevelTest.style.textAlign = "center";
+      requiredLevelTest.style.color = requiredLevelTestColor;
+      requiredLevelTest.style.fontSize = "0.8em";
+      requiredLevelTest.style.fontWeight = "bold";
+      requiredLevelTest.style.position = "absolute";
+      requiredLevelTest.style.width = "100%";
+      requiredLevelTest.style.maxWidth = "100%";
+      requiredLevelTest.style.maxHeight = "100%";
+      requiredLevelTest.style.top = "50%";
+      requiredLevelTest.style.left = "50%";
+      requiredLevelTest.style.transform = "translate(-50%, -60%)";
 
       const requiredLevelIcon = document.createElement("img");
       requiredLevelIcon.src = "Screens/MiniGame/ClubCard/Bubble/Level.png";
@@ -435,7 +420,7 @@
       requiredLevelIcon.style.objectFit = "contain";
 
       levelBoard.appendChild(requiredLevelIcon);
-      levelBoard.appendChild(levelElement);
+      levelBoard.appendChild(requiredLevelTest);
     }
 
     //Card.FamePerTurn
@@ -446,19 +431,19 @@
       fameBoard.style.position = "relative";
       topLeftContainer.appendChild(fameBoard);
 
-      const fameElement = document.createElement("div");
-      fameElement.textContent = Card.FamePerTurn;
-      fameElement.style.textAlign = "center";
-      fameElement.style.color = "#3357FF";
-      fameElement.style.fontSize = "0.8em";
-      fameElement.style.fontWeight = "bold";
-      fameElement.style.position = "absolute";
-      fameElement.style.width = "100%";
-      fameElement.style.maxWidth = "100%";
-      fameElement.style.maxHeight = "100%";
-      fameElement.style.top = "50%";
-      fameElement.style.left = "50%";
-      fameElement.style.transform = "translate(-50%, -60%)";
+      const fameText = document.createElement("div");
+      fameText.textContent = Card.FamePerTurn;
+      fameText.style.textAlign = "center";
+      fameText.style.color = fameTextColor;
+      fameText.style.fontSize = "0.8em";
+      fameText.style.fontWeight = "bold";
+      fameText.style.position = "absolute";
+      fameText.style.width = "100%";
+      fameText.style.maxWidth = "100%";
+      fameText.style.maxHeight = "100%";
+      fameText.style.top = "50%";
+      fameText.style.left = "50%";
+      fameText.style.transform = "translate(-50%, -60%)";
 
       const fameIcon = document.createElement("img");
       fameIcon.src = "Screens/MiniGame/ClubCard/Bubble/Fame.png";
@@ -468,7 +453,7 @@
       fameIcon.style.objectFit = "contain";
 
       fameBoard.appendChild(fameIcon);
-      fameBoard.appendChild(fameElement);
+      fameBoard.appendChild(fameText);
     }
 
     //Card.MoneyPerTurn
@@ -479,19 +464,19 @@
       moneyBoard.style.position = "relative";
       topLeftContainer.appendChild(moneyBoard);
 
-      const moneyElement = document.createElement("div");
-      moneyElement.textContent = Card.MoneyPerTurn;
-      moneyElement.style.textAlign = "center";
-      moneyElement.style.color = "#006400";
-      moneyElement.style.fontSize = "0.8em";
-      moneyElement.style.fontWeight = "bold";
-      moneyElement.style.position = "absolute";
-      moneyElement.style.width = "100%";
-      moneyElement.style.maxWidth = "100%";
-      moneyElement.style.maxHeight = "100%";
-      moneyElement.style.top = "50%";
-      moneyElement.style.left = "50%";
-      moneyElement.style.transform = "translate(-50%, -60%)";
+      const moneyText = document.createElement("div");
+      moneyText.textContent = Card.MoneyPerTurn;
+      moneyText.style.textAlign = "center";
+      moneyText.style.color = moneyTextColor;
+      moneyText.style.fontSize = "0.8em";
+      moneyText.style.fontWeight = "bold";
+      moneyText.style.position = "absolute";
+      moneyText.style.width = "100%";
+      moneyText.style.maxWidth = "100%";
+      moneyText.style.maxHeight = "100%";
+      moneyText.style.top = "50%";
+      moneyText.style.left = "50%";
+      moneyText.style.transform = "translate(-50%, -60%)";
 
       const moneyIcon = document.createElement("img");
       moneyIcon.src = "Screens/MiniGame/ClubCard/Bubble/Money.png";
@@ -501,7 +486,7 @@
       moneyIcon.style.objectFit = "contain";
 
       moneyBoard.appendChild(moneyIcon);
-      moneyBoard.appendChild(moneyElement);
+      moneyBoard.appendChild(moneyText);
     }
 
     backgroundContainer.appendChild(topLeftContainer);
@@ -522,26 +507,28 @@
     bottomContainer.style.borderRadius = "0 0 15 px 15px";
     bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
 
-    const groupElement = document.createElement("div");
-    groupElement.textContent = `${Card.Group ? Card.Group.join(", ") : ""}`;
-    groupElement.style.fontSize = "55%";
-    groupElement.style.textAlign = "center";
-    groupElement.style.fontWeight = "bold";
-    groupElement.style.lineHeight = "0.8";
-    groupElement.style.flex = "0 0 20%";
-    groupElement.style.whiteSpace = "normal";
-    bottomContainer.appendChild(groupElement);
+    const cardGroupTextElement = document.createElement("div");
+    cardGroupTextElement.textContent = `${
+      Card.Group ? Card.Group.join(", ") : ""
+    }`;
+    cardGroupTextElement.style.fontSize = cardGroupFontSize;
+    cardGroupTextElement.style.textAlign = "center";
+    cardGroupTextElement.style.fontWeight = "bold";
+    cardGroupTextElement.style.lineHeight = "0.8";
+    cardGroupTextElement.style.flex = "0 0 20%";
+    cardGroupTextElement.style.whiteSpace = "normal";
+    bottomContainer.appendChild(cardGroupTextElement);
 
-    const descriptionElement = document.createElement("div");
-    descriptionElement.textContent = Card.Text;
-    descriptionElement.style.fontSize = "50%";
-    descriptionElement.style.fontWeight = "bold";
-    descriptionElement.style.textAlign = "center";
-    descriptionElement.style.lineHeight = "1";
-    descriptionElement.style.whiteSpace = "normal";
-    descriptionElement.style.flex = "1";
-    descriptionElement.style.margin = "2%";
-    bottomContainer.appendChild(descriptionElement);
+    const cardDescriptionTextElement = document.createElement("div");
+    cardDescriptionTextElement.innerHTML = Card.Text;
+    cardDescriptionTextElement.style.fontSize = cardTextFontSize;
+    cardDescriptionTextElement.style.fontWeight = "bold";
+    cardDescriptionTextElement.style.textAlign = "center";
+    cardDescriptionTextElement.style.lineHeight = "1";
+    cardDescriptionTextElement.style.whiteSpace = "normal";
+    cardDescriptionTextElement.style.flex = "1";
+    cardDescriptionTextElement.style.margin = "2%";
+    bottomContainer.appendChild(cardDescriptionTextElement);
 
     backgroundContainer.appendChild(bottomContainer);
     //#endregion
