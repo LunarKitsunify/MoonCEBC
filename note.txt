@@ -1,14 +1,4 @@
-    // ****************************   PREFERENCES   *********************************
-
-    PreferenceSubscreenList.splice(15, 0, "BCARSettings");
-    modApi.hookFunction("TextGet", 2, (args, next) => {
-        if (args[0] == "HomepageBCARSettings") return "BCAR+ Settings";
-        return next(args);
-    });
-    modApi.hookFunction("DrawButton", 2, (args, next) => {
-        if (args[6] == "Icons/BCARSettings.png") args[6] = "Icons/Magic.png";
-        return next(args);
-    });
+Backgrounds\SheetWhite.jpg
 
 
 In short you need the const bcModSdk line, the const SDK = bcModSdk.registerMod line, 

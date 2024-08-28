@@ -1,6 +1,11 @@
 1.Add all reward cards command or button
 2.Size customization
 3.customization of the card background and cover.
+4.prohibit transferring yourself to the game if you are not a player and you have enabled this function. 
+5.Make it possible to save info from the user and hide the button or not, 
+depending on the current game in the room and the player's choice.
+6.make deck import/export
+7.deck stats - count game and win rate/ maybe top cards opponent when lose
 
 
 
