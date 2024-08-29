@@ -401,9 +401,10 @@ import(
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
   const moneyTextColor = "#006400";
-  const cardNameFontSize = "60%";
-  const cardGroupFontSize = "55%";
-  const cardTextFontSize = "50%";
+  const cardNameFontSize = "0.75vw";
+  const cardGroupFontSize = "0.70vw";
+  const cardTextFontSize = "0.63vw";
+  const cardValueFontSize = "0.70vw";
   //#endregion
 
   //#endregion
@@ -475,12 +476,9 @@ import(
   mainWindow.style.height = "100%";
   mainWindow.style.border = "3px solid black";
   mainWindow.style.boxSizing = "border-box";
-  //mainWindow.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
   mainWindow.style.display = "none";
-  //mainWindow.style.display = "block";
   mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
   mainWindow.style.backgroundImage = ClubCardPlayBoardBackgroundPath;
-  //mainWindow.style.backgroundImage = "url('https://i.imgur.com/22H94gG.jpeg')";
   mainWindow.style.backgroundSize = "cover";
   mainWindow.style.backgroundPosition = "center";
   document.body.appendChild(mainWindow);
@@ -556,6 +554,53 @@ import(
     exitButton.addEventListener("click", onClick);
 
     return exitDiv; // Return the created element
+  }
+
+  /**
+   * Creates a board element with an icon and text, appends it to the specified parent container,
+   * and returns the created board element.
+   *
+   * @param {string} iconSrc - The source path of the icon image.
+   * @param {string|number} textContent - The text content to display in the board.
+   * @param {string} textColor - The color of the text.
+   * @returns {HTMLElement} The created board element.
+   */
+  function createBoard(iconSrc, textContent, textColor) {
+    const board = document.createElement("div");
+    board.style.paddingTop = "15%";
+    board.style.width = "auto";
+    board.style.height = "auto";
+    board.style.position = "relative";
+    board.style.display = "flex";
+    board.style.alignItems = "center";
+    board.style.justifyContent = "center";
+
+    const textElement = document.createElement("div");
+    textElement.textContent = textContent;
+    textElement.style.textAlign = "center";
+    textElement.style.color = textColor;
+    textElement.style.fontSize = cardValueFontSize;
+    textElement.style.fontWeight = "bold";
+    textElement.style.position = "absolute";
+    textElement.style.width = "100%";
+    textElement.style.maxWidth = "100%";
+    textElement.style.maxHeight = "100%";
+    textElement.style.top = "50%";
+    textElement.style.left = "50%";
+    textElement.style.transform = "translate(-50%, -40%)";
+
+    const icon = document.createElement("img");
+    icon.src = iconSrc;
+    icon.style.width = "100%";
+    icon.style.maxWidth = "100%";
+    icon.style.maxHeight = "100%";
+    icon.style.objectFit = "contain";
+    icon.style.display = "block";
+
+    board.appendChild(icon);
+    board.appendChild(textElement);
+
+    return board;
   }
 
   //#endregion
@@ -868,20 +913,7 @@ import(
     backgroundContainer.style.display = "inline - block";
     backgroundContainer.style.justifyContent = "center";
     backgroundContainer.style.userSelect = "none";
-    //backgroundContainer.style.pointerEvents = "none";
-    //backgroundContainer.style.zIndex = "10";
-    //TODO dont work
-    backgroundContainer.addEventListener("click", () => {
-      console.log("Click");
-    });
-    backgroundContainer.addEventListener("onmouseover", () => {
-      backgroundContainer.style.border = "1px solid green";
-      console.log("Over");
-    });
-    backgroundContainer.addEventListener("onmouseleave ", () => {
-      backgroundContainer.style.border = "none";
-      console.log("Leave");
-    });
+    backgroundContainer.style.backgroundColor = "transparent";
 
     const imgFrame = document.createElement("img");
     imgFrame.src =
@@ -911,9 +943,9 @@ import(
     const img = document.createElement("img");
     img.src =
       "Screens/MiniGame/ClubCard/" + Card.Type + "/" + Card.Name + ".png";
-    img.style.height = "78%";
+    img.style.height = "82%";
     img.style.position = "absolute";
-    img.style.top = "22%";
+    img.style.top = "18%";
     img.style.maxWidth = "100%";
     img.style.maxHeight = "100%";
     img.style.objectFit = "contain";
@@ -940,30 +972,59 @@ import(
 
     //#endregion
 
-    //#region  TopLeftPanel
-    let iconSize = "13px";
-    const topLeftContainer = document.createElement("div");
-    topLeftContainer.style.position = "absolute";
-    topLeftContainer.style.top = "20%";
-    topLeftContainer.style.left = "5%";
-    topLeftContainer.style.display = "flex";
-    topLeftContainer.style.flexDirection = "column";
-    topLeftContainer.style.gap = "10%";
-    //topLeftContainer.style.background = "green";
+    //#region  TvalueCardPanel
+    const valueCardPanel = document.createElement("div");
+    valueCardPanel.style.position = "absolute";
+    valueCardPanel.style.top = "13%";
+    valueCardPanel.style.left = "3%";
+    valueCardPanel.style.width = "17%";
+    valueCardPanel.style.display = "flex";
+    valueCardPanel.style.flexDirection = "column";
+    valueCardPanel.style.gap = "10%";
 
     //Liability Icon
     if (Card.Group && Card.Group.includes("Liability")) {
       const liabilityIcon = document.createElement("img");
       liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
-      liabilityIcon.style.width = iconSize;
-      liabilityIcon.style.height = "auto";
-      topLeftContainer.appendChild(liabilityIcon);
+      liabilityIcon.style.maxWidth = "100%"; //iconSize;
+      liabilityIcon.style.maxHeight = "100%";
+      liabilityIcon.style.objectFit = "contain";
+      liabilityIcon.style.display = "block";
+      valueCardPanel.appendChild(liabilityIcon);
     }
 
+    if (Card.RequiredLevel > 1) {
+      const levelBoard = createBoard(
+        "Screens/MiniGame/ClubCard/Bubble/Level.png",
+        Card.RequiredLevel,
+        requiredLevelTestColor
+      );
+      valueCardPanel.appendChild(levelBoard);
+    }
+
+    if (Card.FamePerTurn != null) {
+      const fameBoard = createBoard(
+        "Screens/MiniGame/ClubCard/Bubble/Fame.png",
+        Card.FamePerTurn,
+        fameTextColor
+      );
+      valueCardPanel.appendChild(fameBoard);
+    }
+
+    if (Card.MoneyPerTurn != null) {
+      const moneyBoard = createBoard(
+        "Screens/MiniGame/ClubCard/Bubble/Money.png",
+        Card.MoneyPerTurn,
+        moneyTextColor
+      );
+      valueCardPanel.appendChild(moneyBoard);
+    }
+
+    /*
     //Card.RequiredLevel
     if (Card.RequiredLevel > 1) {
       const levelBoard = document.createElement("div");
-      levelBoard.style.width = iconSize;
+      levelBoard.style.width = "auto"; //iconSize;
       levelBoard.style.height = "auto";
       levelBoard.style.position = "relative";
       topLeftContainer.appendChild(levelBoard);
@@ -988,6 +1049,7 @@ import(
       requiredLevelIcon.style.maxWidth = "100%";
       requiredLevelIcon.style.maxHeight = "100%";
       requiredLevelIcon.style.objectFit = "contain";
+      requiredLevelIcon.style.display = "block";
 
       levelBoard.appendChild(requiredLevelIcon);
       levelBoard.appendChild(requiredLevelTest);
@@ -996,7 +1058,7 @@ import(
     //Card.FamePerTurn
     if (Card.FamePerTurn != null) {
       const fameBoard = document.createElement("div");
-      fameBoard.style.width = iconSize;
+      fameBoard.style.width = "auto"; //iconSize;
       fameBoard.style.height = "auto";
       fameBoard.style.position = "relative";
       topLeftContainer.appendChild(fameBoard);
@@ -1029,7 +1091,7 @@ import(
     //Card.MoneyPerTurn
     if (Card.MoneyPerTurn != null) {
       const moneyBoard = document.createElement("div");
-      moneyBoard.style.width = iconSize;
+      moneyBoard.style.width = "auto"; //iconSize;
       moneyBoard.style.height = "auto";
       moneyBoard.style.position = "relative";
       topLeftContainer.appendChild(moneyBoard);
@@ -1057,9 +1119,9 @@ import(
 
       moneyBoard.appendChild(moneyIcon);
       moneyBoard.appendChild(moneyText);
-    }
+    }*/
 
-    backgroundContainer.appendChild(topLeftContainer);
+    backgroundContainer.appendChild(valueCardPanel);
     //#endregion
 
     //#region Bottom Info Panel
