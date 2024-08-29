@@ -372,23 +372,31 @@ var bcModSdk = (function () {
 
 //#endregion
 
-/*import(
-      `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
-        Date.now() / 10000
-      ).toFixed(0)}`
-    );*/
+import(
+  `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
+    Date.now() / 10000
+  ).toFixed(0)}`
+);
 
 (function () {
   "use strict";
 
+  //#region Const
   const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+  const ClubCardPlayBoardBackgroundPath =
+    "url('Backgrounds/ClubCardPlayBoard1.jpg')";
+  const BCExitIconPath = "Icons/Exit.png";
   let CardTextContent = null;
   const AddonName = "Moon Cards Editor BC";
   let isVisibleMainWindow = false;
   const cells = [];
   const w = window;
+  const currentDeck = [];
 
-  //#region Size and color customization for the card rendering
+  //#region Size and color customization
+
+  const TopPanelHeight = "6%";
+  const TopPanelTextSize = "1.5vw";
 
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
@@ -396,6 +404,8 @@ var bcModSdk = (function () {
   const cardNameFontSize = "60%";
   const cardGroupFontSize = "55%";
   const cardTextFontSize = "50%";
+  //#endregion
+
   //#endregion
 
   //#region BC Mod SDK Stuff
@@ -461,57 +471,214 @@ var bcModSdk = (function () {
   mainWindow.style.top = "50%";
   mainWindow.style.left = "50%";
   mainWindow.style.transform = "translate(-50%, -50%)";
-  mainWindow.style.width = "95%";
-  mainWindow.style.height = "95%";
+  mainWindow.style.width = "100%";
+  mainWindow.style.height = "100%";
   mainWindow.style.border = "3px solid black";
   mainWindow.style.boxSizing = "border-box";
-  mainWindow.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
+  //mainWindow.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
   mainWindow.style.display = "none";
-  mainWindow.style.zIndex = "9999"; // ???????? look very bad
-
-  mainWindow.style.backgroundImage =
-    "url('Backgrounds/ClubCardPlayBoard1.jpg')"; // Укажите путь к вашему фоновому изображению
-  mainWindow.style.backgroundSize = "cover"; // Изображение на всю область
-  mainWindow.style.backgroundPosition = "center"; // Центрируем изображение
-
+  //mainWindow.style.display = "block";
+  mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
+  mainWindow.style.backgroundImage = ClubCardPlayBoardBackgroundPath;
+  //mainWindow.style.backgroundImage = "url('https://i.imgur.com/22H94gG.jpeg')";
+  mainWindow.style.backgroundSize = "cover";
+  mainWindow.style.backgroundPosition = "center";
   document.body.appendChild(mainWindow);
 
   //#endregion
 
-  //#region Top Panel
-  const topPanelHeight = 40;
-  const topPanel = document.createElement("div");
-  topPanel.style.display = "flex";
-  topPanel.style.justifyContent = "center";
-  topPanel.style.alignItems = "center";
-  topPanel.style.borderBottom = "2px solid black";
-  topPanel.style.boxSizing = "border-box";
-  topPanel.style.height = `${topPanelHeight}px`;
-  topPanel.style.width = "100%";
+  //#region Create UI Object func
 
-  mainWindow.appendChild(topPanel);
+  /**
+   * Creates a button with an optional image or text.
+   *
+   * @param {string} content - The text for the button (if the button is text-based). If null, the button will have an image.
+   * @param {string} imageSrc - The path to the image. If null, the button will have text.
+   * @param {function} onClick - The event handler function for the button click.
+   * @param {string} width - Width from parent space
+   * @param {string} height - Height from parent space
+   * @param {string} paddingTop - The top padding of the button.
+   * @param {string} paddingBottom - The bottom padding of the button.
+   * @param {string} marginRight - The right margin of the button.
+   * @param {string} justifyContent - The alignment of the exitDiv content.
+   * @returns {HTMLDivElement} The created button element.
+   */
+  function createButton(
+    content,
+    imageSrc,
+    onClick,
+    width,
+    height,
+    paddingTop,
+    paddingBottom,
+    marginRight,
+    justifyContent
+  ) {
+    const exitDiv = document.createElement("div");
+    exitDiv.style.width = width;
+    exitDiv.style.height = height;
+    exitDiv.style.display = "flex";
+    exitDiv.style.alignItems = "center";
+    exitDiv.style.justifyContent = justifyContent;
 
-  const comboBox = document.createElement("select");
-  comboBox.style.flex = "1";
-  comboBox.style.marginRight = "10px";
-  comboBox.style.border = "2px solid black";
-  comboBox.style.color = "green";
-  comboBox.style.alignContent = "center";
-  comboBox.style.textAlign = "center";
-  topPanel.appendChild(comboBox);
+    const exitButton = document.createElement("button");
+    exitButton.style.paddingTop = paddingTop;
+    exitButton.style.paddingBottom = paddingBottom;
+    exitButton.style.marginRight = marginRight;
+    exitButton.style.height = "100%";
+    exitButton.style.padding = "0";
+    exitButton.style.display = "flex";
+    exitButton.style.alignItems = "center";
+    exitButton.style.justifyContent = "center";
 
-  //need edit
-  for (let i = 0; i < 5; i++) {
-    const button = document.createElement("button");
-    button.textContent = "Button";
-    button.style.flex = "1";
-    button.style.marginLeft = "10px";
-    button.style.border = "2px solid black";
-    button.style.backgroundColor = "lightgray";
-    button.style.color = "green";
-    //topPanel.appendChild(button);
+    // Check for image path
+    if (imageSrc) {
+      const exitButtonImg = document.createElement("img");
+      exitButtonImg.src = imageSrc;
+      exitButtonImg.style.maxWidth = "90%";
+      exitButtonImg.style.maxHeight = "90%";
+      exitButtonImg.style.objectFit = "contain";
+      exitButtonImg.style.display = "block";
+      exitButton.appendChild(exitButtonImg);
+    } else {
+      // If no image is provided, create a text element
+      const buttonText = document.createElement("span");
+      buttonText.textContent = content;
+      buttonText.style.marginLeft = "1vw";
+      buttonText.style.marginRight = "1vw";
+      buttonText.style.fontSize = TopPanelTextSize;
+      exitButton.appendChild(buttonText);
+    }
+
+    exitDiv.appendChild(exitButton);
+
+    // Add click event handler
+    exitButton.addEventListener("click", onClick);
+
+    return exitDiv; // Return the created element
   }
 
+  //#endregion
+
+  //#region Top Panel ViewMode
+  const topDivContentViewMode = document.createElement("div");
+  topDivContentViewMode.style.display = "flex";
+  topDivContentViewMode.style.borderBottom = "2px solid black";
+  topDivContentViewMode.style.boxSizing = "border-box";
+  topDivContentViewMode.style.alignItems = "center";
+  topDivContentViewMode.style.height = TopPanelHeight;
+  topDivContentViewMode.style.width = "100%";
+  //topDivContentViewMode.style.background = "white";
+  topDivContentViewMode.style.backgroundImage =
+    "url('https://i.imgur.com/22H94gG.jpeg')";
+  topDivContentViewMode.style.backgroundSize = "cover";
+  topDivContentViewMode.style.backgroundPosition = "center";
+
+  const topDivLeftGroup = document.createElement("div");
+  topDivLeftGroup.style.display = "flex";
+  topDivLeftGroup.style.flexDirection = "row";
+  topDivLeftGroup.style.gap = "30px";
+  topDivLeftGroup.style.justifyContent = "flex-start";
+  topDivLeftGroup.style.alignItems = "center";
+  topDivLeftGroup.style.width = "80%";
+  topDivLeftGroup.style.height = "100%";
+  topDivLeftGroup.style.marginLeft = "2%";
+  topDivLeftGroup.style.boxSizing = "border-box";
+
+  const decksCombobox = document.createElement("select");
+  decksCombobox.style.width = "20%";
+  decksCombobox.style.height = "80%";
+  decksCombobox.style.alignContent = "center";
+  decksCombobox.style.textAlign = "center";
+  decksCombobox.style.border = "2px solid black";
+  decksCombobox.style.fontSize = TopPanelTextSize;
+
+  const editButton = createButton(
+    "Edit",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const exportButton = createButton(
+    "Export",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const importButton = createButton(
+    "Import",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const settingsButton = createButton(
+    "Settings",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const exitButtonWithImage = createButton(
+    null,
+    BCExitIconPath,
+    () => {
+      if (isVisibleMainWindow == true) {
+        mainWindow.style.display = "none";
+      } else {
+        mainWindow.style.display = "block";
+        LoadPlayerData();
+      }
+      isVisibleMainWindow = !isVisibleMainWindow;
+    },
+    "20%",
+    "80%",
+    "5%",
+    "5%",
+    "5%",
+    "flex-end"
+  );
+
+  topDivLeftGroup.appendChild(decksCombobox);
+  topDivLeftGroup.appendChild(editButton);
+  topDivLeftGroup.appendChild(exportButton);
+  topDivLeftGroup.appendChild(importButton);
+  topDivLeftGroup.appendChild(settingsButton);
+  //
+  topDivContentViewMode.appendChild(topDivLeftGroup);
+  topDivContentViewMode.appendChild(exitButtonWithImage);
+  //
+  mainWindow.appendChild(topDivContentViewMode);
   //#endregion
 
   //#region Bottom Panel
@@ -520,7 +687,7 @@ var bcModSdk = (function () {
   bottomPanel.style.display = "grid";
   bottomPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
   bottomPanel.style.gridTemplateRows = "repeat(3, 1fr)";
-  bottomPanel.style.height = `calc(100% - ${topPanelHeight}px)`;
+  bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
   bottomPanel.style.borderTop = "2px solid black";
   bottomPanel.style.overflow = "hidden";
   bottomPanel.style.gridAutoRows = "1fr";
@@ -577,7 +744,7 @@ var bcModSdk = (function () {
 
     let playerData = Player.Game.ClubCard;
 
-    comboBox.innerHTML = "";
+    decksCombobox.innerHTML = "";
 
     if (playerData.DeckName && playerData.DeckName.length > 0) {
       playerData.DeckName.forEach((name, index) => {
@@ -585,13 +752,13 @@ var bcModSdk = (function () {
           const option = document.createElement("option");
           option.value = index;
           option.textContent = name;
-          comboBox.appendChild(option);
+          decksCombobox.appendChild(option);
         }
       });
 
       UpdateSelecteDeck(playerData);
 
-      comboBox.addEventListener("change", function () {
+      decksCombobox.addEventListener("change", function () {
         UpdateSelecteDeck(playerData);
       });
     } else {
@@ -626,7 +793,7 @@ var bcModSdk = (function () {
    * @returns {void} - Nothing
    */
   function UpdateSelecteDeck(playerData) {
-    let selectedIndex = comboBox.value;
+    let selectedIndex = decksCombobox.value;
     let encodedDeck = playerData.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
     let DeckCards = [];
