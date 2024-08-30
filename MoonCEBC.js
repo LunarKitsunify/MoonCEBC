@@ -372,11 +372,11 @@ var bcModSdk = (function () {
 
 //#endregion
 
-import(
+/*import(
   `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
     Date.now() / 10000
   ).toFixed(0)}`
-);
+);*/
 
 (function () {
   "use strict";
@@ -391,7 +391,11 @@ import(
   let isVisibleMainWindow = false;
   const cells = [];
   const w = window;
-  const currentDeck = [];
+  var ClubCardMouseOverCard = [];
+  var ClubCardCurrentDeck = [];
+  var ClubCardBuilderList = [];
+  var ClubCardBuilderDeckSize = 30;
+  const PageMode = "ViewDeck"; // ViewDeck,EditDeck,Settings
 
   //#region Size and color customization
 
@@ -401,7 +405,7 @@ import(
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
   const moneyTextColor = "#006400";
-  const cardNameFontSize = "0.75vw";
+  const cardNameFontSize = "0.75em"; //"0.75vw";
   const cardGroupFontSize = "0.70vw";
   const cardTextFontSize = "0.63vw";
   const cardValueFontSize = "0.70vw";
@@ -613,7 +617,6 @@ import(
   topDivContentViewMode.style.alignItems = "center";
   topDivContentViewMode.style.height = TopPanelHeight;
   topDivContentViewMode.style.width = "100%";
-  //topDivContentViewMode.style.background = "white";
   topDivContentViewMode.style.backgroundImage =
     "url('https://i.imgur.com/22H94gG.jpeg')";
   topDivContentViewMode.style.backgroundSize = "cover";
@@ -635,7 +638,7 @@ import(
   decksCombobox.style.height = "80%";
   decksCombobox.style.alignContent = "center";
   decksCombobox.style.textAlign = "center";
-  decksCombobox.style.border = "2px solid black";
+  decksCombobox.style.border = "0.5px solid black";
   decksCombobox.style.fontSize = TopPanelTextSize;
 
   const editButton = createButton(
@@ -727,20 +730,38 @@ import(
   //#endregion
 
   //#region Bottom Panel
-
   const bottomPanel = document.createElement("div");
-  bottomPanel.style.display = "grid";
-  bottomPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
-  bottomPanel.style.gridTemplateRows = "repeat(3, 1fr)";
+  bottomPanel.style.display = "flex";
+  bottomPanel.style.width = "100%";
   bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
-  bottomPanel.style.borderTop = "2px solid black";
-  bottomPanel.style.overflow = "hidden";
-  bottomPanel.style.gridAutoRows = "1fr";
   mainWindow.appendChild(bottomPanel);
+
+  const cardsCollectionPanel = document.createElement("div");
+  cardsCollectionPanel.style.display = "grid";
+  cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
+  cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
+  cardsCollectionPanel.style.height = "100%";
+  cardsCollectionPanel.style.width = "77%";
+  cardsCollectionPanel.style.overflow = "hidden";
+  cardsCollectionPanel.style.gridAutoRows = "1fr";
+  cardsCollectionPanel.style.border = "2px solid black";
+  cardsCollectionPanel.style.background = "blue";
+  bottomPanel.appendChild(cardsCollectionPanel);
+
+  const cardInfoPanel = document.createElement("div");
+  cardInfoPanel.style.height = "100%";
+  cardInfoPanel.style.width = "23%";
+  cardInfoPanel.style.background = "green";
+  cardInfoPanel.style.display = "flex";
+  cardInfoPanel.style.alignItems = "center";
+  cardInfoPanel.style.justifyContent = "center";
+  bottomPanel.appendChild(cardInfoPanel);
 
   for (let i = 0; i < 30; i++) {
     const cardCell = document.createElement("div");
     cardCell.style.boxSizing = "border-box";
+    cardCell.style.paddingLeft = "2px";
+    cardCell.style.paddingRight = "2px";
     //TODO need more test with margin. smartphone ???
     cardCell.style.margin = "1%";
     cardCell.style.marginLeft = "5%";
@@ -754,7 +775,7 @@ import(
     });
     //cardCell.style.background = "blue";
     cells.push(cardCell);
-    bottomPanel.appendChild(cardCell);
+    cardsCollectionPanel.appendChild(cardCell);
   }
 
   //#endregion
@@ -841,7 +862,6 @@ import(
     let selectedIndex = decksCombobox.value;
     let encodedDeck = playerData.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
-    let DeckCards = [];
     let deckData = [];
 
     for (let id of decodedDeck) {
@@ -877,12 +897,12 @@ import(
       return levelComparison;
     });
 
-    DeckCards = [...normalCards, ...events];
+    ClubCardCurrentDeck = [...normalCards, ...events];
 
-    for (let i = 0; i < DeckCards.length; i++) {
+    for (let i = 0; i < ClubCardCurrentDeck.length; i++) {
       if (i < cells.length) {
         cells[i].innerHTML = "";
-        DrawCard(DeckCards[i], cells[i]);
+        DrawCard(ClubCardCurrentDeck[i], cells[i]);
       }
     }
   }
@@ -891,14 +911,14 @@ import(
    * function to draw a card
    * @param {ClubCard} Card - ClubCard from BC.
    * @param {HTMLDivElement} cardCell fill for card data
+   * @param {boolean} isCurrentCardInfoCell property for separating logical cards from the array and for one enlarged card
    * @returns {void} - Nothing
    */
-  function DrawCard(Card, cardCell) {
+  function DrawCard(Card, cardCell, isCurrentCardInfoCell = false) {
     let Level =
       Card.RequiredLevel == null || Card.RequiredLevel <= 1
         ? 1
         : Card.RequiredLevel;
-    let Color = ClubCardColor[Level];
     if (Card.Type == null) Card.Type = "Member";
 
     //#region Background
@@ -908,12 +928,44 @@ import(
     backgroundContainer.style.position = "relative";
     backgroundContainer.style.overflow = "hidden";
     backgroundContainer.style.margin = "0 auto";
+    //
+    backgroundContainer.style.paddingBottom = "1.5px";
+    backgroundContainer.style.paddingTop = "1.5px";
+    backgroundContainer.style.border = "1.5px solid black";
+    backgroundContainer.style.backgroundColor = "lightblue";
+    backgroundContainer.style.borderRadius = "5px";
+    //
     backgroundContainer.style.height = "100%";
+    backgroundContainer.style.width = "auto";
+
     backgroundContainer.style.visibility = "hidden";
     backgroundContainer.style.display = "inline - block";
     backgroundContainer.style.justifyContent = "center";
     backgroundContainer.style.userSelect = "none";
-    backgroundContainer.style.backgroundColor = "transparent";
+
+    backgroundContainer.style.background = "yellow";
+
+    backgroundContainer.addEventListener("click", () => {
+      alert("Container clicked!");
+    });
+    backgroundContainer.addEventListener("mouseover", () => {
+      if (isCurrentCardInfoCell == false) {
+        backgroundContainer.style.border = "1.5px solid red";
+
+        if (ClubCardMouseOverCard != Card) {
+          ClubCardMouseOverCard = Card;
+          cardInfoPanel.innerHTML = "";
+          DrawCard(ClubCardMouseOverCard, cardInfoPanel, true);
+        }
+
+        //TODO You can mouse over one card and it will infinitely trigger mouseove.
+        //Is it possible to limit this?
+      }
+    });
+    backgroundContainer.addEventListener("mouseout", () => {
+      backgroundContainer.style.border = "1.5px solid black";
+    });
+    //backgroundContainer.style.backgroundColor = "transparent";
 
     const imgFrame = document.createElement("img");
     imgFrame.src =
@@ -930,6 +982,7 @@ import(
     imgFrame.style.top = "0";
     imgFrame.style.transform = "translateX(-50%)";
     imgFrame.style.display = "block";
+    imgFrame.style.pointerEvents = "none";
     imgFrame.addEventListener("load", () => {
       //TODO I really don't like this implementation.
       //Sometimes it slows down and does not render files.
@@ -951,6 +1004,7 @@ import(
     img.style.objectFit = "contain";
     img.style.left = "50%";
     img.style.transform = "translateX(-50%)";
+    img.style.pointerEvents = "none";
     backgroundContainer.appendChild(img);
 
     //#endregion
@@ -966,13 +1020,13 @@ import(
     cardNameTextElement.style.fontSize = cardNameFontSize;
     cardNameTextElement.style.textAlign = "center";
     cardNameTextElement.style.fontWeight = "bold";
-    cardNameTextElement.style.lineHeight = "0.8";
+    //cardNameTextElement.style.lineHeight = "0.8";
     cardNameTextElement.style.whiteSpace = "normal";
     backgroundContainer.appendChild(cardNameTextElement);
 
     //#endregion
 
-    //#region  TvalueCardPanel
+    //#region  ValueCardPanel
     const valueCardPanel = document.createElement("div");
     valueCardPanel.style.position = "absolute";
     valueCardPanel.style.top = "13%";
@@ -1020,114 +1074,13 @@ import(
       valueCardPanel.appendChild(moneyBoard);
     }
 
-    /*
-    //Card.RequiredLevel
-    if (Card.RequiredLevel > 1) {
-      const levelBoard = document.createElement("div");
-      levelBoard.style.width = "auto"; //iconSize;
-      levelBoard.style.height = "auto";
-      levelBoard.style.position = "relative";
-      topLeftContainer.appendChild(levelBoard);
-
-      const requiredLevelTest = document.createElement("div");
-      requiredLevelTest.textContent = Card.RequiredLevel;
-      requiredLevelTest.style.textAlign = "center";
-      requiredLevelTest.style.color = requiredLevelTestColor;
-      requiredLevelTest.style.fontSize = "0.8em";
-      requiredLevelTest.style.fontWeight = "bold";
-      requiredLevelTest.style.position = "absolute";
-      requiredLevelTest.style.width = "100%";
-      requiredLevelTest.style.maxWidth = "100%";
-      requiredLevelTest.style.maxHeight = "100%";
-      requiredLevelTest.style.top = "50%";
-      requiredLevelTest.style.left = "50%";
-      requiredLevelTest.style.transform = "translate(-50%, -60%)";
-
-      const requiredLevelIcon = document.createElement("img");
-      requiredLevelIcon.src = "Screens/MiniGame/ClubCard/Bubble/Level.png";
-      requiredLevelIcon.style.width = "100%";
-      requiredLevelIcon.style.maxWidth = "100%";
-      requiredLevelIcon.style.maxHeight = "100%";
-      requiredLevelIcon.style.objectFit = "contain";
-      requiredLevelIcon.style.display = "block";
-
-      levelBoard.appendChild(requiredLevelIcon);
-      levelBoard.appendChild(requiredLevelTest);
-    }
-
-    //Card.FamePerTurn
-    if (Card.FamePerTurn != null) {
-      const fameBoard = document.createElement("div");
-      fameBoard.style.width = "auto"; //iconSize;
-      fameBoard.style.height = "auto";
-      fameBoard.style.position = "relative";
-      topLeftContainer.appendChild(fameBoard);
-
-      const fameText = document.createElement("div");
-      fameText.textContent = Card.FamePerTurn;
-      fameText.style.textAlign = "center";
-      fameText.style.color = fameTextColor;
-      fameText.style.fontSize = "0.8em";
-      fameText.style.fontWeight = "bold";
-      fameText.style.position = "absolute";
-      fameText.style.width = "100%";
-      fameText.style.maxWidth = "100%";
-      fameText.style.maxHeight = "100%";
-      fameText.style.top = "50%";
-      fameText.style.left = "50%";
-      fameText.style.transform = "translate(-50%, -60%)";
-
-      const fameIcon = document.createElement("img");
-      fameIcon.src = "Screens/MiniGame/ClubCard/Bubble/Fame.png";
-      fameIcon.style.width = "100%";
-      fameIcon.style.maxWidth = "100%";
-      fameIcon.style.maxHeight = "100%";
-      fameIcon.style.objectFit = "contain";
-
-      fameBoard.appendChild(fameIcon);
-      fameBoard.appendChild(fameText);
-    }
-
-    //Card.MoneyPerTurn
-    if (Card.MoneyPerTurn != null) {
-      const moneyBoard = document.createElement("div");
-      moneyBoard.style.width = "auto"; //iconSize;
-      moneyBoard.style.height = "auto";
-      moneyBoard.style.position = "relative";
-      topLeftContainer.appendChild(moneyBoard);
-
-      const moneyText = document.createElement("div");
-      moneyText.textContent = Card.MoneyPerTurn;
-      moneyText.style.textAlign = "center";
-      moneyText.style.color = moneyTextColor;
-      moneyText.style.fontSize = "0.8em";
-      moneyText.style.fontWeight = "bold";
-      moneyText.style.position = "absolute";
-      moneyText.style.width = "100%";
-      moneyText.style.maxWidth = "100%";
-      moneyText.style.maxHeight = "100%";
-      moneyText.style.top = "50%";
-      moneyText.style.left = "50%";
-      moneyText.style.transform = "translate(-50%, -60%)";
-
-      const moneyIcon = document.createElement("img");
-      moneyIcon.src = "Screens/MiniGame/ClubCard/Bubble/Money.png";
-      moneyIcon.style.width = "100%";
-      moneyIcon.style.maxWidth = "100%";
-      moneyIcon.style.maxHeight = "100%";
-      moneyIcon.style.objectFit = "contain";
-
-      moneyBoard.appendChild(moneyIcon);
-      moneyBoard.appendChild(moneyText);
-    }*/
-
     backgroundContainer.appendChild(valueCardPanel);
     //#endregion
 
     //#region Bottom Info Panel
     const bottomContainer = document.createElement("div");
     bottomContainer.style.position = "absolute";
-    bottomContainer.style.bottom = "1%";
+    bottomContainer.style.bottom = "0";
     bottomContainer.style.width = "98%";
     bottomContainer.style.height = "45%";
     bottomContainer.style.justifyContent = "center";

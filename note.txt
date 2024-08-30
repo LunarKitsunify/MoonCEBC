@@ -1,5 +1,8 @@
 Backgrounds\SheetWhite.jpg
 
+deckname max 20 
+ElementCreateInput("InputName", "text", "", "20");
+
 
 In short you need the const bcModSdk line, the const SDK = bcModSdk.registerMod line, 
 and something like the SDK.hookFunction line but for the function you're interested in

@@ -14,18 +14,11 @@ Ideas Moon Card Editor:
 -Moon Ears in Background
 (Wood colour and like a stamp?)
 
--Full screen
-(setting or button?)
--a X to close it
-(maybe top right and make deck selection smaller?)
-
--option to close it with Esc
-(or different key)
-
--changing description Size
-(setting?)
-
 -Changing the Cards of a deck
 
--Moving the button to open Main Window
-(maybe bottom right next to the text box and small for ear and tail wiggle?)
+
+
+fix 
+
+1.image inside card button
+2.the bottom panel trims the edges of the cards on the right
