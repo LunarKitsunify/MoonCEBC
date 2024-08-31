@@ -372,11 +372,11 @@ var bcModSdk = (function () {
 
 //#endregion
 
-/*import(
+import(
   `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
     Date.now() / 10000
   ).toFixed(0)}`
-);*/
+);
 
 (function () {
   "use strict";
