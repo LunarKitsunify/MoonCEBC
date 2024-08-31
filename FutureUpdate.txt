@@ -20,5 +20,4 @@ Ideas Moon Card Editor:
 
 fix 
 
-1.image inside card button
-2.the bottom panel trims the edges of the cards on the right
+1. f11 mode  or limit the height of the card too much due to lack of space in width.

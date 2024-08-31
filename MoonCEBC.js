@@ -372,27 +372,58 @@ var bcModSdk = (function () {
 
 //#endregion
 
-import(
+/*import(
   `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
     Date.now() / 10000
   ).toFixed(0)}`
-);
+);*/
 
 (function () {
   "use strict";
 
   //#region Const
+  const WindowStatus = Object.freeze({
+    VIEW: "ViewDeck",
+    EDIT: "EditDeck",
+    SETTINGS: "Settings",
+  });
+  const CardTypes = Object.freeze({
+    ALL_CARDS: { value: "All Cards", text: "All Cards" },
+    EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
+    UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
+    REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
+    LIABILITY: { value: "Liability", text: "Liability" },
+    STAFF: { value: "Staff", text: "Staff" },
+    POLICE: { value: "Police", text: "Police" },
+    CRIMINAL: { value: "Criminal", text: "Criminal" },
+    FETISHIST: { value: "Fetishist", text: "Fetishist" },
+    PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
+    MAID: { value: "Maid", text: "Maid" },
+    ASYLUM_PATIENT: { value: "AsylumPatient", text: "Asylum Patient" },
+    ASYLUM_NURSE: { value: "AsylumNurse", text: "Asylum Nurse" },
+    DOMINANT: { value: "Dominant", text: "Dominant" },
+    MISTRESS: { value: "Mistress", text: "Mistress" },
+    ABDL_BABY: { value: "ABDLBaby", text: "ABDL Baby" },
+    ABDL_MOMMY: { value: "ABDLMommy", text: "ABDL Mommy" },
+    COLLEGE_STUDENT: { value: "CollegeStudent", text: "College Student" },
+    COLLEGE_TEACHER: { value: "CollegeTeacher", text: "College Teacher" },
+  });
+
+  const MoonCEBCBuilderDeckSize = 30;
+  const MoonCEBCAddonName = "Moon Cards Editor BC";
   const MoonCEBCCardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
   const MoonCEBCBoardBackgroundPath =
     "url('Backgrounds/ClubCardPlayBoard1.jpg')";
   const MoonCEBCExitIconPath = "Icons/Exit.png";
   let MoonCEBCTextContent = null;
-  const MoonCEBCAddonName = "Moon Cards Editor BC";
   let MoonCEBCMouseOverCard = [];
-  let MoonCEBCCurrentDeck = [];
-  let MoonCEBCBuilderList = [];
-  const MoonCEBCBuilderDeckSize = 30;
-  let MoonCEBCPageMode = "ViewDeck"; // ViewDeck,EditDeck,Settings
+  let MoonCEBCCurrentDeck = []; // variable to save data when switching to Edit mode and canceling.
+  let MoonCEBCCurrent30Cards = [];
+  let MoonCEBCBuilderCurrentGroupsList = [];
+  let MoonCEBCCurrentGroup = "All Cards";
+  let MoonCEBCCurrentCardsListPage = 0;
+  let MoonCEBCPageMode = WindowStatus.VIEW;
+  let MooonCEBCPlayerData = null;
   let isVisibleMainWindow = false;
   const CardCells = [];
   const w = window;
@@ -410,10 +441,14 @@ import(
   const cardTextFontSize = "0.63vw";
   const cardValueFontSize = "0.70vw";
 
-  const bigCardNameFontSize = "2.25vw";
-  const bigCardGroupFontSize = "2.10vw";
-  const bigCardTextFontSize = "1.89vw";
-  const bigCardValueFontSize = "2.10vw";
+  const bigCardNameFontSize =
+    (parseFloat(cardNameFontSize) * 3).toFixed(2) + "vw";
+  const bigCardGroupFontSize =
+    (parseFloat(cardGroupFontSize) * 3).toFixed(2) + "vw";
+  const bigCardTextFontSize =
+    (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
+  const bigCardValueFontSize =
+    (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
   //#endregion
 
   //#endregion
@@ -427,7 +462,7 @@ import(
     repository: "https://github.com/LunarKitsunify/RoomCardDecksEditorBC",
   });
 
-  modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
+  /*modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
     console.log("TestHook ClubCardLoad");
     next();
   });
@@ -435,7 +470,7 @@ import(
   modApi.hookFunction("ClubCardRenderCard", 0, (args, next) => {
     console.log("TestHook ClubCardRenderCard");
     next(args);
-  });
+  });*/
 
   modApi.hookFunction("MainRun", 0, (args, next) => {
     //TODO Hook ChatRoomRun and do it with a DrawButton?
@@ -447,52 +482,6 @@ import(
   //#endregion
 
   //#region UI
-
-  //#region showButton
-  const showButton = document.createElement("button");
-  showButton.style.backgroundImage =
-    "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
-  showButton.style.backgroundSize = "cover";
-  showButton.style.backgroundPosition = "center";
-  showButton.style.position = "absolute";
-  showButton.style.width = "2.23%";
-  showButton.style.height = "5%";
-  showButton.style.bottom = "0px";
-  showButton.style.left = "1.5%";
-  showButton.style.transform = "translateX(calc(50% - 45%))";
-  showButton.style.padding = "1px 2px";
-  showButton.style.display = "none";
-  showButton.addEventListener("click", function () {
-    if (isVisibleMainWindow == true) {
-      mainWindow.style.display = "none";
-    } else {
-      mainWindow.style.display = "block";
-      LoadPlayerData();
-    }
-    isVisibleMainWindow = !isVisibleMainWindow;
-  });
-  document.body.appendChild(showButton);
-
-  //#endregion
-
-  //#region mainWindow
-  const mainWindow = document.createElement("div");
-  mainWindow.style.position = "fixed";
-  mainWindow.style.top = "50%";
-  mainWindow.style.left = "50%";
-  mainWindow.style.transform = "translate(-50%, -50%)";
-  mainWindow.style.width = "100%";
-  mainWindow.style.height = "100%";
-  mainWindow.style.border = "3px solid black";
-  mainWindow.style.boxSizing = "border-box";
-  mainWindow.style.display = "none";
-  mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
-  mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
-  mainWindow.style.backgroundSize = "cover";
-  mainWindow.style.backgroundPosition = "center";
-  document.body.appendChild(mainWindow);
-
-  //#endregion
 
   //#region Create UI Object func
 
@@ -613,301 +602,6 @@ import(
     return board;
   }
 
-  //#endregion
-
-  //#region Top Panel ViewMode
-  const topDivContentViewMode = document.createElement("div");
-  topDivContentViewMode.style.display = "flex";
-  topDivContentViewMode.style.borderBottom = "2px solid black";
-  topDivContentViewMode.style.boxSizing = "border-box";
-  topDivContentViewMode.style.alignItems = "center";
-  topDivContentViewMode.style.height = TopPanelHeight;
-  topDivContentViewMode.style.width = "100%";
-  topDivContentViewMode.style.backgroundImage =
-    "url('https://i.imgur.com/22H94gG.jpeg')";
-  topDivContentViewMode.style.backgroundSize = "cover";
-  topDivContentViewMode.style.backgroundPosition = "center";
-
-  const topDivLeftGroup = document.createElement("div");
-  topDivLeftGroup.style.display = "flex";
-  topDivLeftGroup.style.flexDirection = "row";
-  topDivLeftGroup.style.gap = "30px";
-  topDivLeftGroup.style.justifyContent = "flex-start";
-  topDivLeftGroup.style.alignItems = "center";
-  topDivLeftGroup.style.width = "80%";
-  topDivLeftGroup.style.height = "100%";
-  topDivLeftGroup.style.marginLeft = "2%";
-  topDivLeftGroup.style.boxSizing = "border-box";
-
-  const decksCombobox = document.createElement("select");
-  decksCombobox.style.width = "20%";
-  decksCombobox.style.height = "80%";
-  decksCombobox.style.alignContent = "center";
-  decksCombobox.style.textAlign = "center";
-  decksCombobox.style.border = "0.5px solid black";
-  decksCombobox.style.fontSize = TopPanelTextSize;
-
-  const editButton = createButton(
-    "Edit",
-    null,
-    () => {
-      console.log("Centered button clicked!");
-    },
-    "auto",
-    "80%",
-    "10%",
-    "10%",
-    "0%",
-    "center"
-  );
-
-  const exportButton = createButton(
-    "Export",
-    null,
-    () => {
-      console.log("Centered button clicked!");
-    },
-    "auto",
-    "80%",
-    "10%",
-    "10%",
-    "0%",
-    "center"
-  );
-
-  const importButton = createButton(
-    "Import",
-    null,
-    () => {
-      console.log("Centered button clicked!");
-    },
-    "auto",
-    "80%",
-    "10%",
-    "10%",
-    "0%",
-    "center"
-  );
-
-  const settingsButton = createButton(
-    "Settings",
-    null,
-    () => {
-      console.log("Centered button clicked!");
-    },
-    "auto",
-    "80%",
-    "10%",
-    "10%",
-    "0%",
-    "center"
-  );
-
-  const exitButtonWithImage = createButton(
-    null,
-    MoonCEBCExitIconPath,
-    () => {
-      if (isVisibleMainWindow == true) {
-        mainWindow.style.display = "none";
-      } else {
-        mainWindow.style.display = "block";
-        LoadPlayerData();
-      }
-      isVisibleMainWindow = !isVisibleMainWindow;
-    },
-    "20%",
-    "80%",
-    "5%",
-    "5%",
-    "5%",
-    "flex-end"
-  );
-
-  topDivLeftGroup.appendChild(decksCombobox);
-  topDivLeftGroup.appendChild(editButton);
-  topDivLeftGroup.appendChild(exportButton);
-  topDivLeftGroup.appendChild(importButton);
-  topDivLeftGroup.appendChild(settingsButton);
-  //
-  topDivContentViewMode.appendChild(topDivLeftGroup);
-  topDivContentViewMode.appendChild(exitButtonWithImage);
-  //
-  mainWindow.appendChild(topDivContentViewMode);
-  //#endregion
-
-  //#region Bottom Panel
-  const bottomPanel = document.createElement("div");
-  bottomPanel.style.display = "flex";
-  bottomPanel.style.flexDirection = "row";
-  bottomPanel.style.justifyContent = "center";
-  bottomPanel.style.alignItems = "center";
-  bottomPanel.style.width = "100%";
-  bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
-  mainWindow.appendChild(bottomPanel);
-
-  const cardsCollectionPanel = document.createElement("div");
-  cardsCollectionPanel.style.display = "grid";
-  cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
-  cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
-  cardsCollectionPanel.style.gridAutoRows = "1fr";
-  cardsCollectionPanel.style.height = "100%";
-  cardsCollectionPanel.style.width = "77%";
-  cardsCollectionPanel.style.overflow = "hidden";
-  bottomPanel.appendChild(cardsCollectionPanel);
-
-  const cardInfoPanel = document.createElement("div");
-  cardInfoPanel.style.height = "100%";
-  cardInfoPanel.style.width = "23%";
-  cardInfoPanel.style.boxSizing = "border-box";
-  cardInfoPanel.style.margin = "2%";
-  cardInfoPanel.style.position = "relative";
-  cardInfoPanel.style.justifyContent = "center";
-  cardInfoPanel.style.alignItems = "center";
-  cardInfoPanel.style.display = "inline-block";
-
-  bottomPanel.appendChild(cardInfoPanel);
-
-  for (let i = 0; i < 30; i++) {
-    const cardCell = document.createElement("div");
-    cardCell.style.boxSizing = "border-box";
-    cardCell.style.margin = "2%";
-    cardCell.style.position = "relative";
-    cardCell.style.justifyContent = "center";
-    cardCell.style.alignItems = "center";
-    cardCell.style.display = "inline-block";
-    CardCells.push(cardCell);
-    cardsCollectionPanel.appendChild(cardCell);
-  }
-
-  //#endregion
-
-  //#endregion
-
-  //////////////////START//////////////////
-  AddonLoad();
-
-  function AddonLoad() {
-    console.log(`${MoonCEBCAddonName} Start Load`);
-    MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
-    console.log(`${MoonCEBCAddonName} Load Complete`);
-  }
-
-  function UpdateStatusShowButton() {
-    //check if in room selected ClubCard game
-    const isClubCardsGame = ChatRoomGame == "ClubCard";
-    //check where the player is
-    const isInChatRoom = CurrentScreen == "ChatRoom";
-
-    const isShowButton = isInChatRoom && isClubCardsGame;
-
-    if (isShowButton && showButton.style.display !== "block")
-      showButton.style.display = "block";
-    else if (!isShowButton && showButton.style.display !== "none")
-      showButton.style.display = "none";
-  }
-
-  function LoadPlayerData() {
-    if (Player.Game.ClubCard === undefined) return;
-
-    let playerData = Player.Game.ClubCard;
-
-    decksCombobox.innerHTML = "";
-
-    if (playerData.DeckName && playerData.DeckName.length > 0) {
-      playerData.DeckName.forEach((name, index) => {
-        if (name != null && name != "") {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = name;
-          decksCombobox.appendChild(option);
-        }
-      });
-
-      UpdateSelecteDeck(playerData);
-
-      decksCombobox.addEventListener("change", function () {
-        UpdateSelecteDeck(playerData);
-      });
-    } else {
-      console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
-    }
-  }
-  /**
-   * Updated  the text by mask, for InnerHTML
-   * @param {String} text -Normal Card Text
-   * @returns {String} -  Updated for InnerHTML Card Text
-   */
-  function formatTextForInnerHTML(text) {
-    const fameRegex = /[+-]?\d*\s*fame/gi;
-    const moneyRegex = /[+-]?\d*\s*money/gi;
-
-    const formattedText = text
-      .replace(
-        fameRegex,
-        (match) => `<span style='color: ${fameTextColor};'>${match}</span>`
-      )
-      .replace(
-        moneyRegex,
-        (match) => `<span style='color: ${moneyTextColor};'>${match}</span>`
-      );
-
-    return formattedText;
-  }
-
-  /**
-   * updates data cells depending on the selected deck
-   * @param {GameClubCardParameters} playerData - index selected deck
-   * @returns {void} - Nothing
-   */
-  function UpdateSelecteDeck(playerData) {
-    let selectedIndex = decksCombobox.value;
-    let encodedDeck = playerData.Deck[selectedIndex];
-    let decodedDeck = decodeStringDeckToID(encodedDeck);
-    let deckData = [];
-
-    for (let id of decodedDeck) {
-      let cardData = ClubCardList.find((card) => card.ID === id);
-      if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
-
-      const cardText = MoonCEBCTextContent.get("Text " + cardData.Name).replace(
-        /<F>/g,
-        ""
-      );
-
-      formatTextForInnerHTML;
-      cardData.Text = formatTextForInnerHTML(cardText);
-
-      deckData.push(cardData);
-    }
-
-    let events = deckData.filter((card) => card.Type === "Event");
-    let normalCards = deckData.filter((card) => card.Type !== "Event");
-
-    events.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
-    normalCards.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
-
-    normalCards.sort((a, b) => {
-      const levelComparison =
-        (a.RequiredLevel === null ? 1 : a.RequiredLevel) -
-        (b.RequiredLevel === null ? 1 : b.RequiredLevel);
-
-      if (levelComparison === 0) {
-        return a.ID - b.ID;
-      }
-
-      return levelComparison;
-    });
-
-    MoonCEBCCurrentDeck = [...normalCards, ...events];
-
-    for (let i = 0; i < MoonCEBCCurrentDeck.length; i++) {
-      if (i < CardCells.length) {
-        CardCells[i].innerHTML = "";
-        DrawCard(MoonCEBCCurrentDeck[i], CardCells[i]);
-      }
-    }
-  }
-
   /**
    * function to draw a card
    * @param {ClubCard} Card - ClubCard from BC.
@@ -945,17 +639,18 @@ import(
     cardButton.style.justifyContent = "center";
     cardButton.style.alignItems = "center";
     cardButton.style.userSelect = "none";
-    //cardButton.style.backgroundColor = "transparent";
-    //cardButton.style.background = "yellow";
 
     cardButton.addEventListener("click", () => {
-      alert(`Card - ${Card.Name}`);
-      cardButton.style.width = `${cardButton.clientHeight / 2}px`;
+      const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
+      const isInfoPanel = isCurrentCardInfoCell;
+      if (!isInfoPanel && isEditMode) {
+        ClickCardButton(Card);
+      }
     });
     cardButton.addEventListener("mouseover", () => {
-      if (isCurrentCardInfoCell == false) {
-        cardButton.style.border = "1.5px solid red";
+      const isInfoPanel = isCurrentCardInfoCell;
 
+      if (!isInfoPanel) {
         if (MoonCEBCMouseOverCard != Card) {
           MoonCEBCMouseOverCard = Card;
           cardInfoPanel.innerHTML = "";
@@ -970,9 +665,6 @@ import(
           );
         }
       }
-    });
-    cardButton.addEventListener("mouseout", () => {
-      cardButton.style.border = "1.5px solid black";
     });
 
     const imgFrame = document.createElement("img");
@@ -1121,7 +813,628 @@ import(
     cardCell.appendChild(cardButton);
   }
 
-  //#region encode/decode functions
+  //#endregion
+
+  //#region showButton
+  const showButton = document.createElement("button");
+  showButton.style.backgroundImage =
+    "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
+  showButton.style.backgroundSize = "cover";
+  showButton.style.backgroundPosition = "center";
+  showButton.style.position = "absolute";
+  showButton.style.width = "2.23%";
+  showButton.style.height = "5%";
+  showButton.style.bottom = "0px";
+  showButton.style.left = "1.5%";
+  showButton.style.transform = "translateX(calc(50% - 45%))";
+  showButton.style.padding = "1px 2px";
+  showButton.style.display = "none";
+  showButton.addEventListener("click", function () {
+    if (isVisibleMainWindow == true) {
+      mainWindow.style.display = "none";
+    } else {
+      mainWindow.style.display = "block";
+      LoadPlayerData();
+    }
+    isVisibleMainWindow = !isVisibleMainWindow;
+  });
+  document.body.appendChild(showButton);
+
+  //#endregion
+
+  //#region mainWindow
+  const mainWindow = document.createElement("div");
+  mainWindow.style.position = "fixed";
+  mainWindow.style.top = "50%";
+  mainWindow.style.left = "50%";
+  mainWindow.style.transform = "translate(-50%, -50%)";
+  mainWindow.style.width = "100%";
+  mainWindow.style.height = "100%";
+  mainWindow.style.border = "3px solid black";
+  mainWindow.style.boxSizing = "border-box";
+  mainWindow.style.display = "none";
+  mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
+  mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
+  mainWindow.style.backgroundSize = "cover";
+  mainWindow.style.backgroundPosition = "center";
+  document.body.appendChild(mainWindow);
+
+  //#endregion
+
+  //#region Top Panel
+  const topSettingsPanel = document.createElement("div");
+  topSettingsPanel.style.display = "flex";
+  topSettingsPanel.style.borderBottom = "2px solid black";
+  topSettingsPanel.style.boxSizing = "border-box";
+  topSettingsPanel.style.alignItems = "center";
+  topSettingsPanel.style.height = TopPanelHeight;
+  topSettingsPanel.style.width = "100%";
+  topSettingsPanel.style.backgroundImage =
+    "url('https://i.imgur.com/22H94gG.jpeg')";
+  topSettingsPanel.style.backgroundSize = "cover";
+  topSettingsPanel.style.backgroundPosition = "center";
+
+  //#region topSettingsLeftViewPanel
+  const topSettingsLeftViewPanel = document.createElement("div");
+  topSettingsLeftViewPanel.style.display = "flex";
+  topSettingsLeftViewPanel.style.flexDirection = "row";
+  topSettingsLeftViewPanel.style.gap = "30px";
+  topSettingsLeftViewPanel.style.justifyContent = "flex-start";
+  topSettingsLeftViewPanel.style.alignItems = "center";
+  topSettingsLeftViewPanel.style.width = "80%";
+  topSettingsLeftViewPanel.style.height = "100%";
+  //topSettingsLeftViewPanel.style.marginLeft = "2%";
+  topSettingsLeftViewPanel.style.boxSizing = "border-box";
+  topSettingsLeftViewPanel.style.background = "red";
+
+  const decksCombobox = document.createElement("select");
+  decksCombobox.style.marginLeft = "2%";
+  decksCombobox.style.width = "20%";
+  decksCombobox.style.height = "80%";
+  decksCombobox.style.alignContent = "center";
+  decksCombobox.style.textAlign = "center";
+  decksCombobox.style.fontSize = TopPanelTextSize;
+  decksCombobox.addEventListener("change", function () {
+    MooonCEBCPlayerData = Player.Game.ClubCard;
+    GetDeckData(MooonCEBCPlayerData);
+  });
+
+  const editButton = createButton(
+    "Edit",
+    null,
+    () => {
+      SetEditMode();
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const exportButton = createButton(
+    "Export",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const importButton = createButton(
+    "Import",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  topSettingsLeftViewPanel.appendChild(decksCombobox);
+  topSettingsLeftViewPanel.appendChild(editButton);
+  topSettingsLeftViewPanel.appendChild(exportButton);
+  topSettingsLeftViewPanel.appendChild(importButton);
+  //#endregion
+
+  //#region topSettingsLeftEditPanel
+  const topSettingsLeftEditPanel = document.createElement("div");
+  topSettingsLeftEditPanel.style.display = "none";
+  topSettingsLeftEditPanel.style.justifyContent = "flex-start";
+  topSettingsLeftEditPanel.style.alignItems = "center";
+  topSettingsLeftEditPanel.style.width = "80%";
+  topSettingsLeftEditPanel.style.height = "100%";
+  topSettingsLeftEditPanel.style.boxSizing = "border-box";
+  topSettingsLeftEditPanel.style.background = "yellow";
+
+  const deckNameInput = document.createElement("input");
+  deckNameInput.style.marginLeft = "2%";
+  deckNameInput.style.width = "20%";
+  deckNameInput.style.height = "80%";
+  deckNameInput.style.alignContent = "center";
+  deckNameInput.style.textAlign = "center";
+  deckNameInput.style.fontSize = TopPanelTextSize;
+
+  const clearButton = createButton(
+    "Clear",
+    null,
+    () => {
+      topSettingsLeftViewPanel.style.display = "none";
+      topSettingsLeftEditPanel.style.display = "flex";
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const defaultButton = createButton(
+    "Default",
+    null,
+    () => {
+      topSettingsLeftViewPanel.style.display = "none";
+      topSettingsLeftEditPanel.style.display = "flex";
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const groupCombobox = document.createElement("select");
+  groupCombobox.style.width = "20%";
+  groupCombobox.style.height = "80%";
+  groupCombobox.style.alignContent = "center";
+  groupCombobox.style.textAlign = "center";
+  groupCombobox.style.fontSize = TopPanelTextSize;
+  groupCombobox.addEventListener("change", function () {
+    MoonCEBCCurrentGroup = groupCombobox.value;
+    UpdateCardsListSetNewGroup();
+  });
+
+  function populateGroupCombobox() {
+    Object.values(CardTypes).forEach((type) => {
+      const option = document.createElement("option");
+      option.value = type.value;
+      option.text = type.text;
+      groupCombobox.appendChild(option);
+    });
+  }
+  populateGroupCombobox();
+
+  const leftCardsListButtonWithImage = createButton(
+    null,
+    "Icons/Prev.png",
+    () => {},
+    "5%",
+    "90%",
+    "0",
+    "0",
+    "0",
+    "center"
+  );
+
+  const rightCardsListButtonWithImage = createButton(
+    null,
+    "Icons/Next.png",
+    () => {},
+    "5%",
+    "90%",
+    "0",
+    "0",
+    "0",
+    "center"
+  );
+  const saveDeckButtonWithImage = createButton(
+    null,
+    "Icons/Accept.png",
+    () => {
+      SetViewMode(true);
+    },
+    "5%",
+    "90%",
+    "0",
+    "0",
+    "0",
+    "center"
+  );
+  const cancelDeckButtonWithImage = createButton(
+    null,
+    "Icons/Cancel.png",
+    () => {
+      SetViewMode(false);
+    },
+    "5%",
+    "90%",
+    "0",
+    "0",
+    "0",
+    "center"
+  );
+
+  topSettingsLeftEditPanel.appendChild(deckNameInput);
+  topSettingsLeftEditPanel.appendChild(clearButton);
+  topSettingsLeftEditPanel.appendChild(defaultButton);
+  topSettingsLeftEditPanel.appendChild(groupCombobox);
+  topSettingsLeftEditPanel.appendChild(leftCardsListButtonWithImage);
+  topSettingsLeftEditPanel.appendChild(rightCardsListButtonWithImage);
+  topSettingsLeftEditPanel.appendChild(saveDeckButtonWithImage);
+  topSettingsLeftEditPanel.appendChild(cancelDeckButtonWithImage);
+  //#endregion
+
+  //#region topSettingsRightPanel
+
+  const topSettingsRightPanel = document.createElement("div");
+  topSettingsRightPanel.style.display = "flex";
+  topSettingsRightPanel.style.flexDirection = "row";
+  topSettingsRightPanel.style.gap = "30px";
+  topSettingsRightPanel.style.justifyContent = "flex-end";
+  topSettingsRightPanel.style.alignItems = "center";
+  topSettingsRightPanel.style.width = "auto";
+  topSettingsRightPanel.style.height = "100%";
+  topSettingsRightPanel.style.marginLeft = "2%";
+  topSettingsRightPanel.style.boxSizing = "border-box";
+  topSettingsRightPanel.style.background = "green";
+
+  const settingsButton = createButton(
+    "Settings",
+    null,
+    () => {
+      console.log("Centered button clicked!");
+    },
+    "auto",
+    "80%",
+    "10%",
+    "10%",
+    "0%",
+    "center"
+  );
+
+  const exitButtonWithImage = createButton(
+    null,
+    MoonCEBCExitIconPath,
+    () => {
+      if (isVisibleMainWindow == true) {
+        mainWindow.style.display = "none";
+      } else {
+        mainWindow.style.display = "block";
+        LoadPlayerData();
+      }
+      isVisibleMainWindow = !isVisibleMainWindow;
+    },
+    "30%",
+    "90%",
+    "5%",
+    "5%",
+    "5%",
+    "center"
+  );
+
+  topSettingsRightPanel.appendChild(settingsButton);
+  topSettingsRightPanel.appendChild(exitButtonWithImage);
+
+  //#endregion
+
+  topSettingsPanel.appendChild(topSettingsLeftViewPanel);
+  topSettingsPanel.appendChild(topSettingsLeftEditPanel);
+  topSettingsPanel.appendChild(topSettingsRightPanel);
+  //
+  mainWindow.appendChild(topSettingsPanel);
+  //#endregion
+
+  //#region Bottom Panel
+  const bottomPanel = document.createElement("div");
+  bottomPanel.style.display = "flex";
+  bottomPanel.style.flexDirection = "row";
+  bottomPanel.style.justifyContent = "space-between";
+
+  bottomPanel.style.alignItems = "center";
+  bottomPanel.style.width = "100%";
+  bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
+  mainWindow.appendChild(bottomPanel);
+
+  const cardsCollectionPanel = document.createElement("div");
+  cardsCollectionPanel.style.display = "grid";
+  cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
+  cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
+  cardsCollectionPanel.style.gridAutoRows = "1fr";
+  cardsCollectionPanel.style.height = "100%";
+
+  cardsCollectionPanel.style.width = "80%";
+  cardsCollectionPanel.style.maxWidth = "80%";
+
+  cardsCollectionPanel.style.overflow = "hidden";
+  bottomPanel.appendChild(cardsCollectionPanel);
+
+  const cardInfoPanel = document.createElement("div");
+  cardInfoPanel.style.height = "100%";
+  cardInfoPanel.style.width = "auto";
+
+  cardInfoPanel.style.maxWidth = "100%";
+  cardInfoPanel.style.maxHeight = "100%";
+
+  cardInfoPanel.style.boxSizing = "border-box";
+  cardInfoPanel.style.paddingBottom = "1%";
+  cardInfoPanel.style.paddingTop = "1%";
+  //cardInfoPanel.style.margin = "2%";
+  cardInfoPanel.style.position = "relative";
+  cardInfoPanel.style.justifyContent = "center";
+  cardInfoPanel.style.alignItems = "center";
+  cardInfoPanel.style.display = "inline-block";
+
+  bottomPanel.appendChild(cardInfoPanel);
+
+  for (let i = 0; i < 30; i++) {
+    const cardCell = document.createElement("div");
+    cardCell.style.boxSizing = "border-box";
+    cardCell.style.margin = "2%";
+    cardCell.style.position = "relative";
+    cardCell.style.justifyContent = "center";
+    cardCell.style.alignItems = "center";
+    cardCell.style.display = "inline-block";
+    CardCells.push(cardCell);
+    cardsCollectionPanel.appendChild(cardCell);
+  }
+
+  //#endregion
+
+  //#endregion
+
+  //////////////////START//////////////////
+  AddonLoad();
+
+  function AddonLoad() {
+    console.log(`${MoonCEBCAddonName} Start Load`);
+    MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
+    console.log(`${MoonCEBCAddonName} Load Complete`);
+  }
+
+  function UpdateStatusShowButton() {
+    //check if in room selected ClubCard game
+    const isClubCardsGame = ChatRoomGame == "ClubCard";
+    //check where the player is
+    const isInChatRoom = CurrentScreen == "ChatRoom";
+
+    const isShowButton = isInChatRoom && isClubCardsGame;
+
+    if (isShowButton && showButton.style.display !== "block")
+      showButton.style.display = "block";
+    else if (!isShowButton && showButton.style.display !== "none")
+      showButton.style.display = "none";
+  }
+
+  function LoadPlayerData() {
+    if (Player.Game.ClubCard === undefined) return;
+
+    MooonCEBCPlayerData = Player.Game.ClubCard;
+
+    decksCombobox.innerHTML = "";
+
+    if (
+      MooonCEBCPlayerData.DeckName &&
+      MooonCEBCPlayerData.DeckName.length > 0
+    ) {
+      MooonCEBCPlayerData.DeckName.forEach((name, index) => {
+        if (name != null && name != "") {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = name;
+          decksCombobox.appendChild(option);
+        }
+      });
+
+      GetDeckData(MooonCEBCPlayerData);
+    } else {
+      console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
+    }
+  }
+
+  /**
+   * Get data selected deck and update cards cells
+   * @param {GameClubCardParameters} playerData - index selected deck
+   * @returns {void} - Nothing
+   */
+  function GetDeckData(playerData) {
+    let selectedIndex = decksCombobox.value;
+    let encodedDeck = playerData.Deck[selectedIndex];
+    let decodedDeck = decodeStringDeckToID(encodedDeck);
+    let deckData = [];
+
+    for (let id of decodedDeck) {
+      let cardData = ClubCardList.find((card) => card.ID === id);
+      if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
+
+      deckData.push(cardData);
+    }
+
+    MoonCEBCCurrentDeck = SortCardsList(deckData);
+    MoonCEBCCurrent30Cards = SortCardsList(deckData);
+
+    UpdateCardsCells(MoonCEBCCurrent30Cards);
+  }
+  /**
+   * updates cells with an array of 30 cards
+   * @param {ClubCard[]} cardsArray
+   */
+  function UpdateCardsCells(cardsArray) {
+    for (let i = 0; i < 30; i++) {
+      CardCells[i].innerHTML = "";
+      if (i < cardsArray.length) {
+        const cardText = MoonCEBCTextContent.get(
+          "Text " + cardsArray[i].Name
+        ).replace(/<F>/g, "");
+        cardsArray[i].Text = formatTextForInnerHTML(cardText);
+        DrawCard(cardsArray[i], CardCells[i]);
+      }
+    }
+  }
+
+  function SetEditMode() {
+    topSettingsLeftViewPanel.style.display = "none";
+    topSettingsLeftEditPanel.style.display = "flex";
+    deckNameInput.value =
+      decksCombobox.options[decksCombobox.selectedIndex].text;
+    MoonCEBCPageMode = WindowStatus.EDIT;
+
+    //MoonCEBCCurrentDeck = [...MoonCEBCCurrent30Cards];
+
+    UpdateCardsListSetNewGroup();
+  }
+
+  function SetViewMode(isSave) {
+    topSettingsLeftViewPanel.style.display = "flex";
+    topSettingsLeftEditPanel.style.display = "none";
+    MoonCEBCPageMode = WindowStatus.VIEW;
+    if (isSave) {
+      //save edit deck and update cards panel
+    } else {
+      UpdateCardsCells(MoonCEBCCurrentDeck);
+    }
+  }
+  /**
+   * handles the card click event for Edit mode
+   * @param {*} card card data
+   */
+  function ClickCardButton(card) {}
+
+  function ClearCurrentDeck() {}
+
+  function SetCurrentDeckDefault() {}
+
+  function PrevButtonClick() {}
+
+  function NextButtonClick() {}
+
+  function UpdateCardsListSetNewGroup() {
+    let cardGroupList = [];
+    switch (MoonCEBCCurrentGroup) {
+      case CardTypes.ALL_CARDS.value:
+        cardGroupList = [...ClubCardList];
+        break;
+      case CardTypes.EVENTS_CARDS.value:
+        cardGroupList = ClubCardList.filter((card) => card.Type == "Event");
+        break;
+      case CardTypes.UNGROUPED.value:
+        cardGroupList = ClubCardList.filter(
+          (card) => card.Group == undefined && card.Type != "Event"
+        );
+        break;
+      case CardTypes.REWARD_CARDS.value:
+        cardGroupList = ClubCardList.filter((card) => card.Reward != undefined);
+        break;
+      default:
+        cardGroupList = ClubCardList.filter(
+          (card) => card.Group && card.Group.includes(MoonCEBCCurrentGroup)
+        );
+        break;
+    }
+
+    const sortedCards = SortCardsList(cardGroupList);
+    MoonCEBCBuilderCurrentGroupsList = [...sortedCards];
+    MoonCEBCCurrentCardsListPage = 0;
+    MoonCEBCCurrent30Cards = Get30CardsGroup();
+    UpdateCardsCells(MoonCEBCCurrent30Cards);
+  }
+
+  function Get30CardsGroup() {
+    const cardsPerPage = 30;
+    const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
+    const countTakePossibleCards =
+      MoonCEBCBuilderCurrentGroupsList.length - countSkipCards;
+
+    if (countTakePossibleCards >= cardsPerPage) {
+      return MoonCEBCBuilderCurrentGroupsList.slice(
+        countSkipCards,
+        cardsPerPage
+      );
+    }
+    if (countTakePossibleCards < 30 && countTakePossibleCards > 0) {
+      return MoonCEBCBuilderCurrentGroupsList.slice(
+        countSkipCards,
+        countTakePossibleCards
+      );
+    } else {
+      return null;
+    }
+  }
+  /**
+   * sorting by card level and secondarily by ID.
+   * @param {ClubCard[]} cardsArray
+   * @returns sorted array
+   */
+  function SortCardsList(cardsArray) {
+    let events = cardsArray.filter((card) => card.Type === "Event");
+    let normalCards = cardsArray.filter((card) => card.Type !== "Event");
+
+    events.forEach((card) => {
+      if (card.RequiredLevel == null) {
+        card.RequiredLevel = 1;
+      }
+    });
+
+    normalCards.forEach((card) => {
+      if (card.RequiredLevel == null) {
+        card.RequiredLevel = 1;
+      }
+    });
+
+    events.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
+    normalCards.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
+
+    normalCards.sort((a, b) => {
+      const levelComparison =
+        (a.RequiredLevel === null ? 1 : a.RequiredLevel) -
+        (b.RequiredLevel === null ? 1 : b.RequiredLevel);
+
+      if (levelComparison === 0) {
+        return a.ID - b.ID;
+      }
+
+      return levelComparison;
+    });
+
+    const sortedCards = [...normalCards, ...events];
+
+    return sortedCards;
+  }
+
+  //#region parser functions
+
+  /**
+   * Updated  the text by mask, for InnerHTML
+   * @param {String} text -Normal Card Text
+   * @returns {String} -  Updated for InnerHTML Card Text
+   */
+  function formatTextForInnerHTML(text) {
+    const fameRegex = /[+-]?\d*\s*fame/gi;
+    const moneyRegex = /[+-]?\d*\s*money/gi;
+
+    const formattedText = text
+      .replace(
+        fameRegex,
+        (match) => `<span style='color: ${fameTextColor};'>${match}</span>`
+      )
+      .replace(
+        moneyRegex,
+        (match) => `<span style='color: ${moneyTextColor};'>${match}</span>`
+      );
+
+    return formattedText;
+  }
 
   /**
    * Encodes an array of numerical IDs into a string where each ID is represented by a corresponding character.
