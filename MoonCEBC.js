@@ -382,20 +382,20 @@ var bcModSdk = (function () {
   "use strict";
 
   //#region Const
-  const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-  const ClubCardPlayBoardBackgroundPath =
+  const MoonCEBCCardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+  const MoonCEBCBoardBackgroundPath =
     "url('Backgrounds/ClubCardPlayBoard1.jpg')";
-  const BCExitIconPath = "Icons/Exit.png";
-  let CardTextContent = null;
-  const AddonName = "Moon Cards Editor BC";
+  const MoonCEBCExitIconPath = "Icons/Exit.png";
+  let MoonCEBCTextContent = null;
+  const MoonCEBCAddonName = "Moon Cards Editor BC";
+  let MoonCEBCMouseOverCard = [];
+  let MoonCEBCCurrentDeck = [];
+  let MoonCEBCBuilderList = [];
+  const MoonCEBCBuilderDeckSize = 30;
+  let MoonCEBCPageMode = "ViewDeck"; // ViewDeck,EditDeck,Settings
   let isVisibleMainWindow = false;
-  const cells = [];
+  const CardCells = [];
   const w = window;
-  var ClubCardMouseOverCard = [];
-  var ClubCardCurrentDeck = [];
-  var ClubCardBuilderList = [];
-  var ClubCardBuilderDeckSize = 30;
-  const PageMode = "ViewDeck"; // ViewDeck,EditDeck,Settings
 
   //#region Size and color customization
 
@@ -405,10 +405,15 @@ var bcModSdk = (function () {
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
   const moneyTextColor = "#006400";
-  const cardNameFontSize = "0.75em"; //"0.75vw";
+  const cardNameFontSize = "0.75vw";
   const cardGroupFontSize = "0.70vw";
   const cardTextFontSize = "0.63vw";
   const cardValueFontSize = "0.70vw";
+
+  const bigCardNameFontSize = "2.25vw";
+  const bigCardGroupFontSize = "2.10vw";
+  const bigCardTextFontSize = "1.89vw";
+  const bigCardValueFontSize = "2.10vw";
   //#endregion
 
   //#endregion
@@ -482,7 +487,7 @@ var bcModSdk = (function () {
   mainWindow.style.boxSizing = "border-box";
   mainWindow.style.display = "none";
   mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
-  mainWindow.style.backgroundImage = ClubCardPlayBoardBackgroundPath;
+  mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
   mainWindow.style.backgroundSize = "cover";
   mainWindow.style.backgroundPosition = "center";
   document.body.appendChild(mainWindow);
@@ -567,9 +572,10 @@ var bcModSdk = (function () {
    * @param {string} iconSrc - The source path of the icon image.
    * @param {string|number} textContent - The text content to display in the board.
    * @param {string} textColor - The color of the text.
+   * @param {string} textFontSize - The text font size
    * @returns {HTMLElement} The created board element.
    */
-  function createBoard(iconSrc, textContent, textColor) {
+  function createBoard(iconSrc, textContent, textColor, textFontSize) {
     const board = document.createElement("div");
     board.style.paddingTop = "15%";
     board.style.width = "auto";
@@ -583,7 +589,7 @@ var bcModSdk = (function () {
     textElement.textContent = textContent;
     textElement.style.textAlign = "center";
     textElement.style.color = textColor;
-    textElement.style.fontSize = cardValueFontSize;
+    textElement.style.fontSize = textFontSize;
     textElement.style.fontWeight = "bold";
     textElement.style.position = "absolute";
     textElement.style.width = "100%";
@@ -699,7 +705,7 @@ var bcModSdk = (function () {
 
   const exitButtonWithImage = createButton(
     null,
-    BCExitIconPath,
+    MoonCEBCExitIconPath,
     () => {
       if (isVisibleMainWindow == true) {
         mainWindow.style.display = "none";
@@ -732,6 +738,9 @@ var bcModSdk = (function () {
   //#region Bottom Panel
   const bottomPanel = document.createElement("div");
   bottomPanel.style.display = "flex";
+  bottomPanel.style.flexDirection = "row";
+  bottomPanel.style.justifyContent = "center";
+  bottomPanel.style.alignItems = "center";
   bottomPanel.style.width = "100%";
   bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
   mainWindow.appendChild(bottomPanel);
@@ -740,41 +749,33 @@ var bcModSdk = (function () {
   cardsCollectionPanel.style.display = "grid";
   cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
   cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
+  cardsCollectionPanel.style.gridAutoRows = "1fr";
   cardsCollectionPanel.style.height = "100%";
   cardsCollectionPanel.style.width = "77%";
   cardsCollectionPanel.style.overflow = "hidden";
-  cardsCollectionPanel.style.gridAutoRows = "1fr";
-  cardsCollectionPanel.style.border = "2px solid black";
-  cardsCollectionPanel.style.background = "blue";
   bottomPanel.appendChild(cardsCollectionPanel);
 
   const cardInfoPanel = document.createElement("div");
   cardInfoPanel.style.height = "100%";
   cardInfoPanel.style.width = "23%";
-  cardInfoPanel.style.background = "green";
-  cardInfoPanel.style.display = "flex";
-  cardInfoPanel.style.alignItems = "center";
+  cardInfoPanel.style.boxSizing = "border-box";
+  cardInfoPanel.style.margin = "2%";
+  cardInfoPanel.style.position = "relative";
   cardInfoPanel.style.justifyContent = "center";
+  cardInfoPanel.style.alignItems = "center";
+  cardInfoPanel.style.display = "inline-block";
+
   bottomPanel.appendChild(cardInfoPanel);
 
   for (let i = 0; i < 30; i++) {
     const cardCell = document.createElement("div");
     cardCell.style.boxSizing = "border-box";
-    cardCell.style.paddingLeft = "2px";
-    cardCell.style.paddingRight = "2px";
-    //TODO need more test with margin. smartphone ???
-    cardCell.style.margin = "1%";
-    cardCell.style.marginLeft = "5%";
-    cardCell.style.marginRight = "5%";
+    cardCell.style.margin = "2%";
     cardCell.style.position = "relative";
     cardCell.style.justifyContent = "center";
     cardCell.style.alignItems = "center";
     cardCell.style.display = "inline-block";
-    cardCell.addEventListener("onclick", () => {
-      console.log("Click");
-    });
-    //cardCell.style.background = "blue";
-    cells.push(cardCell);
+    CardCells.push(cardCell);
     cardsCollectionPanel.appendChild(cardCell);
   }
 
@@ -786,9 +787,9 @@ var bcModSdk = (function () {
   AddonLoad();
 
   function AddonLoad() {
-    console.log(`${AddonName} Start Load`);
-    CardTextContent = new TextCache(CardTextPath); //Load Cards data from BC Server
-    console.log(`${AddonName} Load Complete`);
+    console.log(`${MoonCEBCAddonName} Start Load`);
+    MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
+    console.log(`${MoonCEBCAddonName} Load Complete`);
   }
 
   function UpdateStatusShowButton() {
@@ -828,7 +829,7 @@ var bcModSdk = (function () {
         UpdateSelecteDeck(playerData);
       });
     } else {
-      console.log(`${AddonName} DeckName is empty or undefined`);
+      console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
   }
   /**
@@ -868,7 +869,7 @@ var bcModSdk = (function () {
       let cardData = ClubCardList.find((card) => card.ID === id);
       if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
 
-      const cardText = CardTextContent.get("Text " + cardData.Name).replace(
+      const cardText = MoonCEBCTextContent.get("Text " + cardData.Name).replace(
         /<F>/g,
         ""
       );
@@ -897,12 +898,12 @@ var bcModSdk = (function () {
       return levelComparison;
     });
 
-    ClubCardCurrentDeck = [...normalCards, ...events];
+    MoonCEBCCurrentDeck = [...normalCards, ...events];
 
-    for (let i = 0; i < ClubCardCurrentDeck.length; i++) {
-      if (i < cells.length) {
-        cells[i].innerHTML = "";
-        DrawCard(ClubCardCurrentDeck[i], cells[i]);
+    for (let i = 0; i < MoonCEBCCurrentDeck.length; i++) {
+      if (i < CardCells.length) {
+        CardCells[i].innerHTML = "";
+        DrawCard(MoonCEBCCurrentDeck[i], CardCells[i]);
       }
     }
   }
@@ -911,10 +912,22 @@ var bcModSdk = (function () {
    * function to draw a card
    * @param {ClubCard} Card - ClubCard from BC.
    * @param {HTMLDivElement} cardCell fill for card data
+   * @param {String} cardNameSize text size for card Name
+   * @param {String} cardGroupSize text size for card Group
+   * @param {String} cardTextSize text size for card Text (description)
+   * @param {String} cardValueSize text size for card Value
    * @param {boolean} isCurrentCardInfoCell property for separating logical cards from the array and for one enlarged card
    * @returns {void} - Nothing
    */
-  function DrawCard(Card, cardCell, isCurrentCardInfoCell = false) {
+  function DrawCard(
+    Card,
+    cardCell,
+    cardNameSize = cardNameFontSize,
+    cardGroupSize = cardGroupFontSize,
+    cardTextSize = cardTextFontSize,
+    cardValueSize = cardValueFontSize,
+    isCurrentCardInfoCell = false
+  ) {
     let Level =
       Card.RequiredLevel == null || Card.RequiredLevel <= 1
         ? 1
@@ -923,49 +936,44 @@ var bcModSdk = (function () {
 
     //#region Background
 
-    //const backgroundContainer = document.createElement("div");
-    const backgroundContainer = document.createElement("button");
-    backgroundContainer.style.position = "relative";
-    backgroundContainer.style.overflow = "hidden";
-    backgroundContainer.style.margin = "0 auto";
-    //
-    backgroundContainer.style.paddingBottom = "1.5px";
-    backgroundContainer.style.paddingTop = "1.5px";
-    backgroundContainer.style.border = "1.5px solid black";
-    backgroundContainer.style.backgroundColor = "lightblue";
-    backgroundContainer.style.borderRadius = "5px";
-    //
-    backgroundContainer.style.height = "100%";
-    backgroundContainer.style.width = "auto";
+    const cardButton = document.createElement("button");
+    cardButton.style.position = "relative";
+    cardButton.style.borderRadius = "6px";
+    cardButton.style.height = "100%";
+    cardButton.style.aspectRatio = "1 / 2";
+    cardButton.style.display = "flex";
+    cardButton.style.justifyContent = "center";
+    cardButton.style.alignItems = "center";
+    cardButton.style.userSelect = "none";
+    //cardButton.style.backgroundColor = "transparent";
+    //cardButton.style.background = "yellow";
 
-    backgroundContainer.style.visibility = "hidden";
-    backgroundContainer.style.display = "inline - block";
-    backgroundContainer.style.justifyContent = "center";
-    backgroundContainer.style.userSelect = "none";
-
-    backgroundContainer.style.background = "yellow";
-
-    backgroundContainer.addEventListener("click", () => {
-      alert("Container clicked!");
+    cardButton.addEventListener("click", () => {
+      alert(`Card - ${Card.Name}`);
+      cardButton.style.width = `${cardButton.clientHeight / 2}px`;
     });
-    backgroundContainer.addEventListener("mouseover", () => {
+    cardButton.addEventListener("mouseover", () => {
       if (isCurrentCardInfoCell == false) {
-        backgroundContainer.style.border = "1.5px solid red";
+        cardButton.style.border = "1.5px solid red";
 
-        if (ClubCardMouseOverCard != Card) {
-          ClubCardMouseOverCard = Card;
+        if (MoonCEBCMouseOverCard != Card) {
+          MoonCEBCMouseOverCard = Card;
           cardInfoPanel.innerHTML = "";
-          DrawCard(ClubCardMouseOverCard, cardInfoPanel, true);
+          DrawCard(
+            MoonCEBCMouseOverCard,
+            cardInfoPanel,
+            bigCardNameFontSize,
+            bigCardGroupFontSize,
+            bigCardTextFontSize,
+            bigCardValueFontSize,
+            true
+          );
         }
-
-        //TODO You can mouse over one card and it will infinitely trigger mouseove.
-        //Is it possible to limit this?
       }
     });
-    backgroundContainer.addEventListener("mouseout", () => {
-      backgroundContainer.style.border = "1.5px solid black";
+    cardButton.addEventListener("mouseout", () => {
+      cardButton.style.border = "1.5px solid black";
     });
-    //backgroundContainer.style.backgroundColor = "transparent";
 
     const imgFrame = document.createElement("img");
     imgFrame.src =
@@ -974,24 +982,13 @@ var bcModSdk = (function () {
       (Card.Reward != null ? "Reward" : "") +
       Level.toString() +
       ".png";
+    imgFrame.style.width = "100%";
     imgFrame.style.height = "100%";
-    imgFrame.style.width = "auto";
     imgFrame.style.position = "absolute";
-    imgFrame.style.objectFit = "contain";
-    imgFrame.style.left = "50%";
-    imgFrame.style.top = "0";
-    imgFrame.style.transform = "translateX(-50%)";
     imgFrame.style.display = "block";
+    imgFrame.style.top = "0";
     imgFrame.style.pointerEvents = "none";
-    imgFrame.addEventListener("load", () => {
-      //TODO I really don't like this implementation.
-      //Sometimes it slows down and does not render files.
-      //And also it doesn't update when the browser window size changes.
-      const imgWidth = imgFrame.offsetWidth;
-      backgroundContainer.style.width = `${imgWidth}px`;
-      backgroundContainer.style.visibility = "visible";
-    });
-    backgroundContainer.appendChild(imgFrame);
+    cardButton.appendChild(imgFrame);
 
     const img = document.createElement("img");
     img.src =
@@ -1002,10 +999,11 @@ var bcModSdk = (function () {
     img.style.maxWidth = "100%";
     img.style.maxHeight = "100%";
     img.style.objectFit = "contain";
+    img.style.display = "block";
     img.style.left = "50%";
     img.style.transform = "translateX(-50%)";
     img.style.pointerEvents = "none";
-    backgroundContainer.appendChild(img);
+    cardButton.appendChild(img);
 
     //#endregion
 
@@ -1017,12 +1015,11 @@ var bcModSdk = (function () {
     cardNameTextElement.style.top = "1%";
     cardNameTextElement.style.left = "50%";
     cardNameTextElement.style.transform = "translateX(-50%)";
-    cardNameTextElement.style.fontSize = cardNameFontSize;
+    cardNameTextElement.style.fontSize = cardNameSize;
     cardNameTextElement.style.textAlign = "center";
     cardNameTextElement.style.fontWeight = "bold";
-    //cardNameTextElement.style.lineHeight = "0.8";
     cardNameTextElement.style.whiteSpace = "normal";
-    backgroundContainer.appendChild(cardNameTextElement);
+    cardButton.appendChild(cardNameTextElement);
 
     //#endregion
 
@@ -1040,7 +1037,7 @@ var bcModSdk = (function () {
     if (Card.Group && Card.Group.includes("Liability")) {
       const liabilityIcon = document.createElement("img");
       liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
-      liabilityIcon.style.maxWidth = "100%"; //iconSize;
+      liabilityIcon.style.maxWidth = "100%";
       liabilityIcon.style.maxHeight = "100%";
       liabilityIcon.style.objectFit = "contain";
       liabilityIcon.style.display = "block";
@@ -1051,7 +1048,8 @@ var bcModSdk = (function () {
       const levelBoard = createBoard(
         "Screens/MiniGame/ClubCard/Bubble/Level.png",
         Card.RequiredLevel,
-        requiredLevelTestColor
+        requiredLevelTestColor,
+        cardValueSize
       );
       valueCardPanel.appendChild(levelBoard);
     }
@@ -1060,7 +1058,8 @@ var bcModSdk = (function () {
       const fameBoard = createBoard(
         "Screens/MiniGame/ClubCard/Bubble/Fame.png",
         Card.FamePerTurn,
-        fameTextColor
+        fameTextColor,
+        cardValueSize
       );
       valueCardPanel.appendChild(fameBoard);
     }
@@ -1069,12 +1068,13 @@ var bcModSdk = (function () {
       const moneyBoard = createBoard(
         "Screens/MiniGame/ClubCard/Bubble/Money.png",
         Card.MoneyPerTurn,
-        moneyTextColor
+        moneyTextColor,
+        cardValueSize
       );
       valueCardPanel.appendChild(moneyBoard);
     }
 
-    backgroundContainer.appendChild(valueCardPanel);
+    cardButton.appendChild(valueCardPanel);
     //#endregion
 
     //#region Bottom Info Panel
@@ -1089,14 +1089,14 @@ var bcModSdk = (function () {
     bottomContainer.style.textAlign = "center";
     bottomContainer.style.left = "50%";
     bottomContainer.style.transform = "translateX(-50%)";
-    bottomContainer.style.borderRadius = "0 0 15 px 15px";
+    bottomContainer.style.borderRadius = "0 0 10px 10px";
     bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
 
     const cardGroupTextElement = document.createElement("div");
     cardGroupTextElement.textContent = `${
       Card.Group ? Card.Group.join(", ") : ""
     }`;
-    cardGroupTextElement.style.fontSize = cardGroupFontSize;
+    cardGroupTextElement.style.fontSize = cardGroupSize;
     cardGroupTextElement.style.textAlign = "center";
     cardGroupTextElement.style.fontWeight = "bold";
     cardGroupTextElement.style.lineHeight = "0.8";
@@ -1106,7 +1106,7 @@ var bcModSdk = (function () {
 
     const cardDescriptionTextElement = document.createElement("div");
     cardDescriptionTextElement.innerHTML = Card.Text;
-    cardDescriptionTextElement.style.fontSize = cardTextFontSize;
+    cardDescriptionTextElement.style.fontSize = cardTextSize;
     cardDescriptionTextElement.style.fontWeight = "bold";
     cardDescriptionTextElement.style.textAlign = "center";
     cardDescriptionTextElement.style.lineHeight = "1";
@@ -1115,10 +1115,10 @@ var bcModSdk = (function () {
     cardDescriptionTextElement.style.margin = "2%";
     bottomContainer.appendChild(cardDescriptionTextElement);
 
-    backgroundContainer.appendChild(bottomContainer);
+    cardButton.appendChild(bottomContainer);
     //#endregion
 
-    cardCell.appendChild(backgroundContainer);
+    cardCell.appendChild(cardButton);
   }
 
   //#region encode/decode functions
