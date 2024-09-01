@@ -1,4 +1,7 @@
 Backgrounds\SheetWhite.jpg
+BondageClub\Screens\MiniGame\ClubCardBuilder\Selected.png
+
+const cardButton = cardCell.firstChild;
 
 deckname max 20 
 ElementCreateInput("InputName", "text", "", "20");
