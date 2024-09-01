@@ -1085,12 +1085,11 @@ var bcModSdk = (function () {
   const topSettingsRightPanel = document.createElement("div");
   topSettingsRightPanel.style.display = "flex";
   topSettingsRightPanel.style.flexDirection = "row";
-  topSettingsRightPanel.style.gap = "30px";
+  //topSettingsRightPanel.style.gap = "30px";
   topSettingsRightPanel.style.justifyContent = "flex-end";
   topSettingsRightPanel.style.alignItems = "center";
-  topSettingsRightPanel.style.width = "auto";
+  topSettingsRightPanel.style.width = "20%";
   topSettingsRightPanel.style.height = "100%";
-  topSettingsRightPanel.style.marginLeft = "2%";
   topSettingsRightPanel.style.boxSizing = "border-box";
   topSettingsRightPanel.style.background = "green";
 
@@ -1125,7 +1124,7 @@ var bcModSdk = (function () {
     "5%",
     "5%",
     "5%",
-    "center"
+    "flex-end"
   );
 
   topSettingsRightPanel.appendChild(settingsButton);
@@ -1157,7 +1156,6 @@ var bcModSdk = (function () {
   cardsCollectionPanel.style.gridAutoRows = "1fr";
   cardsCollectionPanel.style.height = "100%";
   cardsCollectionPanel.style.width = "80%";
-  cardsCollectionPanel.style.maxWidth = "80%";
   cardsCollectionPanel.style.overflow = "hidden";
   bottomPanel.appendChild(cardsCollectionPanel);
 
@@ -1167,8 +1165,6 @@ var bcModSdk = (function () {
   cardInfoPanel.style.maxWidth = "100%";
   cardInfoPanel.style.maxHeight = "100%";
   cardInfoPanel.style.boxSizing = "border-box";
-  cardInfoPanel.style.paddingBottom = "1%";
-  cardInfoPanel.style.paddingTop = "1%";
   cardInfoPanel.style.position = "relative";
   cardInfoPanel.style.justifyContent = "center";
   cardInfoPanel.style.alignItems = "center";
