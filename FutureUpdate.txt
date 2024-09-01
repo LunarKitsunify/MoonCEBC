@@ -21,3 +21,4 @@ Ideas Moon Card Editor:
 fix 
 
 1. f11 mode  or limit the height of the card too much due to lack of space in width.
+2. fix player group name

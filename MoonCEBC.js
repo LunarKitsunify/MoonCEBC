@@ -685,9 +685,9 @@ var bcModSdk = (function () {
     const img = document.createElement("img");
     img.src =
       "Screens/MiniGame/ClubCard/" + Card.Type + "/" + Card.Name + ".png";
-    img.style.height = "82%";
+    img.style.height = "85%";
     img.style.position = "absolute";
-    img.style.top = "18%";
+    img.style.top = "15%";
     img.style.maxWidth = "100%";
     img.style.maxHeight = "100%";
     img.style.objectFit = "contain";
@@ -1019,7 +1019,9 @@ var bcModSdk = (function () {
   const leftCardsListButtonWithImage = createButton(
     null,
     "Icons/Prev.png",
-    () => {},
+    () => {
+      PrevButtonClick();
+    },
     "5%",
     "90%",
     "0",
@@ -1031,7 +1033,9 @@ var bcModSdk = (function () {
   const rightCardsListButtonWithImage = createButton(
     null,
     "Icons/Next.png",
-    () => {},
+    () => {
+      NextButtonClick();
+    },
     "5%",
     "90%",
     "0",
@@ -1141,7 +1145,6 @@ var bcModSdk = (function () {
   bottomPanel.style.display = "flex";
   bottomPanel.style.flexDirection = "row";
   bottomPanel.style.justifyContent = "space-between";
-
   bottomPanel.style.alignItems = "center";
   bottomPanel.style.width = "100%";
   bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
@@ -1153,29 +1156,23 @@ var bcModSdk = (function () {
   cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
   cardsCollectionPanel.style.gridAutoRows = "1fr";
   cardsCollectionPanel.style.height = "100%";
-
   cardsCollectionPanel.style.width = "80%";
   cardsCollectionPanel.style.maxWidth = "80%";
-
   cardsCollectionPanel.style.overflow = "hidden";
   bottomPanel.appendChild(cardsCollectionPanel);
 
   const cardInfoPanel = document.createElement("div");
   cardInfoPanel.style.height = "100%";
   cardInfoPanel.style.width = "auto";
-
   cardInfoPanel.style.maxWidth = "100%";
   cardInfoPanel.style.maxHeight = "100%";
-
   cardInfoPanel.style.boxSizing = "border-box";
   cardInfoPanel.style.paddingBottom = "1%";
   cardInfoPanel.style.paddingTop = "1%";
-  //cardInfoPanel.style.margin = "2%";
   cardInfoPanel.style.position = "relative";
   cardInfoPanel.style.justifyContent = "center";
   cardInfoPanel.style.alignItems = "center";
   cardInfoPanel.style.display = "inline-block";
-
   bottomPanel.appendChild(cardInfoPanel);
 
   for (let i = 0; i < 30; i++) {
@@ -1209,7 +1206,7 @@ var bcModSdk = (function () {
     //check where the player is
     const isInChatRoom = CurrentScreen == "ChatRoom";
 
-    const isShowButton = isInChatRoom && isClubCardsGame;
+    const isShowButton = isInChatRoom && true;
 
     if (isShowButton && showButton.style.display !== "block")
       showButton.style.display = "block";
@@ -1290,8 +1287,6 @@ var bcModSdk = (function () {
       decksCombobox.options[decksCombobox.selectedIndex].text;
     MoonCEBCPageMode = WindowStatus.EDIT;
 
-    //MoonCEBCCurrentDeck = [...MoonCEBCCurrent30Cards];
-
     UpdateCardsListSetNewGroup();
   }
 
@@ -1315,9 +1310,29 @@ var bcModSdk = (function () {
 
   function SetCurrentDeckDefault() {}
 
-  function PrevButtonClick() {}
+  function PrevButtonClick() {
+    if (MoonCEBCCurrentCardsListPage != 0) {
+      MoonCEBCCurrentCardsListPage -= 1;
+      let newCardsLlist = Get30CardsGroup();
+      if (newCardsLlist) {
+        MoonCEBCCurrent30Cards = [...newCardsLlist];
+        UpdateCardsCells(MoonCEBCCurrent30Cards);
+      } else {
+        MoonCEBCCurrentCardsListPage += 1;
+      }
+    }
+  }
 
-  function NextButtonClick() {}
+  function NextButtonClick() {
+    MoonCEBCCurrentCardsListPage += 1;
+    let newCardsLlist = Get30CardsGroup();
+    if (newCardsLlist) {
+      MoonCEBCCurrent30Cards = [...newCardsLlist];
+      UpdateCardsCells(MoonCEBCCurrent30Cards);
+    } else {
+      MoonCEBCCurrentCardsListPage -= 1;
+    }
+  }
 
   function UpdateCardsListSetNewGroup() {
     let cardGroupList = [];
@@ -1350,8 +1365,12 @@ var bcModSdk = (function () {
     UpdateCardsCells(MoonCEBCCurrent30Cards);
   }
 
+  /**
+   *
+   * @returns {ClubCard[]} cards page list
+   */
   function Get30CardsGroup() {
-    const cardsPerPage = 30;
+    const cardsPerPage = MoonCEBCBuilderDeckSize;
     const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
     const countTakePossibleCards =
       MoonCEBCBuilderCurrentGroupsList.length - countSkipCards;
@@ -1359,13 +1378,13 @@ var bcModSdk = (function () {
     if (countTakePossibleCards >= cardsPerPage) {
       return MoonCEBCBuilderCurrentGroupsList.slice(
         countSkipCards,
-        cardsPerPage
+        countSkipCards + cardsPerPage
       );
     }
-    if (countTakePossibleCards < 30 && countTakePossibleCards > 0) {
+    if (countTakePossibleCards < cardsPerPage && countTakePossibleCards > 0) {
       return MoonCEBCBuilderCurrentGroupsList.slice(
         countSkipCards,
-        countTakePossibleCards
+        countSkipCards + countTakePossibleCards
       );
     } else {
       return null;
