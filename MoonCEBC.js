@@ -372,12 +372,6 @@ var bcModSdk = (function () {
 
 //#endregion
 
-/*import(
-  `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js?v=${(
-    Date.now() / 10000
-  ).toFixed(0)}`
-);*/
-
 (function () {
   "use strict";
 
@@ -409,24 +403,71 @@ var bcModSdk = (function () {
     COLLEGE_TEACHER: { value: "CollegeTeacher", text: "College Teacher" },
   });
 
+  /**
+   * The size of the deck being built (number of cards)
+   * @type {number}
+   */
   const MoonCEBCBuilderDeckSize = 30;
   const MoonCEBCAddonName = "Moon Cards Editor BC";
   const MoonCEBCCardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
   const MoonCEBCBoardBackgroundPath =
     "url('Backgrounds/ClubCardPlayBoard1.jpg')";
   const MoonCEBCExitIconPath = "Icons/Exit.png";
+  /**
+   * variable for loading description for cards
+   */
   let MoonCEBCTextContent = null;
+  /**
+   * Tracking the card on which the mouse is hovering
+   * @type {ClubCard}
+   */
   let MoonCEBCMouseOverCard = [];
-  let MoonCEBCEditCurrentDeck = []; //variable for highlighting the selected cards in the current deck.
-  let MoonCEBCCurrentDeck = []; // variable to save data when switching to Edit mode and canceling.
+  /**
+   * Variable for saving data in the deck being changed
+   * @type {ClubCard[]}
+   */
+  let MoonCEBCEditCurrentDeck = [];
+  /**
+   * Saves the original deck data in case the changes are undone.
+   * @type {ClubCard[]}
+   */
+  let MoonCEBCCurrentDeck = [];
+  /**
+   * Variable for filling cells with cards in edit mode
+   * @type {ClubCard[]}
+   */
   let MoonCEBCCurrent30Cards = [];
+  /**
+   * Sorts from the list of all cards those that match the group conditions.
+   * @type {ClubCard[]}
+   */
   let MoonCEBCBuilderCurrentGroupsList = [];
+  /**
+   * Variable for tracking the current group in edit mode
+   * @type {string}
+   */
   let MoonCEBCCurrentGroup = "All Cards";
+  /**
+   * Variable for tracking the current page in edit mode
+   * @type {number}
+   */
   let MoonCEBCCurrentCardsListPage = 0;
+  /**
+   * Variable to track the mode of the addon. View decks or editor.
+   * @type {string}
+   */
   let MoonCEBCPageMode = WindowStatus.VIEW;
-  let MoonCEBCPlayerData = null;
+  /**
+   * variable for tracking the visibility of the addon window
+   * @type {boolean}
+   */
   let isVisibleMainWindow = false;
+  /**
+   * An array of 30 cells into which the bottom container is divided. To display 30 cards.
+   * @type {HTMLDivElement[]}
+   */
   const CardCells = [];
+
   const w = window;
 
   //#region Size and color customization
@@ -874,12 +915,8 @@ var bcModSdk = (function () {
   showButton.style.padding = "1px 2px";
   showButton.style.display = "none";
   showButton.addEventListener("click", function () {
-    if (isVisibleMainWindow == true) {
-      mainWindow.style.display = "none";
-    } else {
-      mainWindow.style.display = "block";
-      LoadPlayerData();
-    }
+    mainWindow.style.display = "block";
+    LoadPlayerData();
     isVisibleMainWindow = !isVisibleMainWindow;
   });
   document.body.appendChild(showButton);
@@ -935,8 +972,7 @@ var bcModSdk = (function () {
   decksCombobox.style.textAlign = "center";
   decksCombobox.style.fontSize = TopPanelTextSize;
   decksCombobox.addEventListener("change", function () {
-    MoonCEBCPlayerData = Player.Game.ClubCard;
-    GetDeckData(MoonCEBCPlayerData);
+    GetDeckData();
   });
 
   const editButton = createButton(
@@ -1197,12 +1233,9 @@ var bcModSdk = (function () {
     null,
     MoonCEBCExitIconPath,
     () => {
-      if (isVisibleMainWindow == true) {
-        mainWindow.style.display = "none";
-      } else {
-        mainWindow.style.display = "block";
-        LoadPlayerData();
-      }
+      topSettingsLeftViewPanel.style.display = "flex";
+      topSettingsLeftEditPanel.style.display = "none";
+      mainWindow.style.display = "none";
       isVisibleMainWindow = !isVisibleMainWindow;
     },
     "30%",
@@ -1300,12 +1333,12 @@ var bcModSdk = (function () {
   function LoadPlayerData() {
     if (Player.Game.ClubCard === undefined) return;
 
-    MoonCEBCPlayerData = Player.Game.ClubCard;
+    const playerData = Player.Game.ClubCard;
 
     decksCombobox.innerHTML = "";
 
-    if (MoonCEBCPlayerData.DeckName && MoonCEBCPlayerData.DeckName.length > 0) {
-      MoonCEBCPlayerData.DeckName.forEach((name, index) => {
+    if (playerData.DeckName && playerData.DeckName.length > 0) {
+      playerData.DeckName.forEach((name, index) => {
         if (name != null && name != "") {
           const option = document.createElement("option");
           option.value = index;
@@ -1314,7 +1347,7 @@ var bcModSdk = (function () {
         }
       });
 
-      GetDeckData(MoonCEBCPlayerData);
+      GetDeckData(playerData);
     } else {
       console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
@@ -1322,10 +1355,10 @@ var bcModSdk = (function () {
 
   /**
    * Get data selected deck and update cards cells
-   * @param {GameClubCardParameters} playerData - index selected deck
    * @returns {void} - Nothing
    */
   function GetDeckData(playerData) {
+    const playerData = Player.Game.ClubCard;
     let selectedIndex = decksCombobox.value;
     let encodedDeck = playerData.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
@@ -1610,9 +1643,9 @@ var bcModSdk = (function () {
   }
 
   /**
-   * Функция для декодирования строки обратно в массив числовых ID.
-   * @param {string} stringDeck - Закодированная строка для декодирования.
-   * @returns {number[]} - Массив числовых ID, декодированных из строки.
+   * Function to decode a string back into an array of numeric IDs.
+   * @param {string} stringDeck - The encoded string to decode.
+   * @returns {number[]} - An array of numeric IDs decoded from the string.
    */
   function decodeStringDeckToID(stringDeck) {
     let decodedNumbers = [];

@@ -1,16 +1,16 @@
 1.Add all reward cards command or button ???? not sure what will if you dont have reward card
 
+1. For viewers, the ability to disable loading into the game if desired.
+2. Replacing the background of the table and cards with custom ones. 
+3. Output summary statistics with values for the deck.
+4. deck win rate analyzer. I haven't quite figured out what it will look like yet. But I want to.
 
+5.Size-color customization
 
-2.Size customization
-3.customization of the card background and cover.
-4.prohibit transferring yourself to the game if you are not a player and you have enabled this function. 
-5.Make it possible to save info from the user and hide the button or not, 
+6. Make it possible to save info from the user and hide the button or not, 
 depending on the current game in the room and the player's choice.
-6.make deck import/export
-7.deck winrate - count game and win rate/ maybe top cards opponent when lose
-8.deck stats - current income money and fame
 
+7. Information on all reward cards.
 
 
 Ideas Moon Card Editor:
@@ -22,8 +22,10 @@ Ideas Moon Card Editor:
 
 
 
-fix 
+hot fix 
 
-1. f11 mode  or limit the height of the card too much due to lack of space in width.
+1. make a formula to calculate the height and width of the cards. 
+Because I can't align it to any one thing. Screens come in many different flavors.
+
 2. fix player group name
 3. tooltip for button on top panel
