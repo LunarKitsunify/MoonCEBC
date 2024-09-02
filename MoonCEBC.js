@@ -497,6 +497,7 @@ var bcModSdk = (function () {
    * @param {string} paddingTop - The top padding of the button.
    * @param {string} paddingBottom - The bottom padding of the button.
    * @param {string} marginRight - The right margin of the button.
+   * @param {string} marginLeft - The left margin of the button.
    * @param {string} justifyContent - The alignment of the exitDiv content.
    * @returns {HTMLDivElement} The created button element.
    */
@@ -650,6 +651,20 @@ var bcModSdk = (function () {
       const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
       const isInfoPanel = isCurrentCardInfoCell;
       if (!isInfoPanel && isEditMode) {
+        if (MoonCEBCEditCurrentDeck.includes(Card)) {
+          const indexToRemove = MoonCEBCEditCurrentDeck.findIndex(
+            (removedCard) => removedCard.ID === Card.ID
+          );
+          MoonCEBCEditCurrentDeck.splice(indexToRemove, 1);
+          imgSelected.style.display = "none";
+          cardButton.style.border = "none";
+          UpdateDeckCardsCounter();
+        } else {
+          MoonCEBCEditCurrentDeck.push(Card);
+          imgSelected.style.display = "block";
+          cardButton.style.border = "3px solid #40E0D0";
+          UpdateDeckCardsCounter();
+        }
         ClickCardButton(Card);
       }
     });
@@ -906,19 +921,15 @@ var bcModSdk = (function () {
   //#region topSettingsLeftViewPanel
   const topSettingsLeftViewPanel = document.createElement("div");
   topSettingsLeftViewPanel.style.display = "flex";
-  topSettingsLeftViewPanel.style.flexDirection = "row";
-  topSettingsLeftViewPanel.style.gap = "30px";
   topSettingsLeftViewPanel.style.justifyContent = "flex-start";
   topSettingsLeftViewPanel.style.alignItems = "center";
-  topSettingsLeftViewPanel.style.width = "80%";
+  topSettingsLeftViewPanel.style.width = "88%";
   topSettingsLeftViewPanel.style.height = "100%";
-  //topSettingsLeftViewPanel.style.marginLeft = "2%";
   topSettingsLeftViewPanel.style.boxSizing = "border-box";
-  topSettingsLeftViewPanel.style.background = "red";
 
   const decksCombobox = document.createElement("select");
   decksCombobox.style.marginLeft = "2%";
-  decksCombobox.style.width = "20%";
+  decksCombobox.style.width = "33%";
   decksCombobox.style.height = "80%";
   decksCombobox.style.alignContent = "center";
   decksCombobox.style.textAlign = "center";
@@ -929,17 +940,17 @@ var bcModSdk = (function () {
   });
 
   const editButton = createButton(
-    "Edit",
+    "Edit Deck",
     null,
     () => {
       SetEditMode();
     },
-    "auto",
+    "20%",
     "80%",
     "10%",
     "10%",
     "0",
-    "0",
+    "2%",
     "center"
   );
 
@@ -975,8 +986,8 @@ var bcModSdk = (function () {
 
   topSettingsLeftViewPanel.appendChild(decksCombobox);
   topSettingsLeftViewPanel.appendChild(editButton);
-  topSettingsLeftViewPanel.appendChild(exportButton);
-  topSettingsLeftViewPanel.appendChild(importButton);
+  //topSettingsLeftViewPanel.appendChild(exportButton);
+  //topSettingsLeftViewPanel.appendChild(importButton);
   //#endregion
 
   //#region topSettingsLeftEditPanel
@@ -984,23 +995,35 @@ var bcModSdk = (function () {
   topSettingsLeftEditPanel.style.display = "none";
   topSettingsLeftEditPanel.style.justifyContent = "flex-start";
   topSettingsLeftEditPanel.style.alignItems = "center";
-  topSettingsLeftEditPanel.style.width = "80%";
+  topSettingsLeftEditPanel.style.width = "88%";
   topSettingsLeftEditPanel.style.height = "100%";
   topSettingsLeftEditPanel.style.boxSizing = "border-box";
 
+  //#region deckNameImput
+
   const deckNameInput = document.createElement("input");
   deckNameInput.style.marginLeft = "2%";
-  deckNameInput.style.width = "20%";
+  deckNameInput.style.width = "30%";
   deckNameInput.style.height = "80%";
   deckNameInput.style.alignContent = "center";
   deckNameInput.style.textAlign = "center";
   deckNameInput.style.fontSize = TopPanelTextSize;
+  deckNameInput.addEventListener("input", (event) => {
+    if (deckNameInput.value.length > 30) deckNameInput.style.color = "red";
+    else deckNameInput.style.color = "black";
+  });
+
+  //#endregion
+
+  //#region groupCombobox
 
   const groupCombobox = document.createElement("select");
   groupCombobox.style.marginLeft = "2%";
+  groupCombobox.style.marginRight = "2%";
   groupCombobox.style.width = "20%";
   groupCombobox.style.height = "80%";
   groupCombobox.style.alignContent = "center";
+
   groupCombobox.style.textAlign = "center";
   groupCombobox.style.fontSize = TopPanelTextSize;
   groupCombobox.addEventListener("change", function () {
@@ -1018,25 +1041,30 @@ var bcModSdk = (function () {
   }
   populateGroupCombobox();
 
-  const groupButton = document.createElement("div");
-  groupButton.style.width = "30%";
-  groupButton.style.height = "90%";
-  groupButton.style.marginLeft = "5%";
-  groupButton.style.alignContent = "center";
-  groupButton.style.textAlign = "center";
-  groupButton.style.display = "flex";
-  groupButton.style.flexDirection = "row";
+  //#endregion
+
+  //#region groupButtons
+  const groupButtons = document.createElement("div");
+  groupButtons.style.width = "20%";
+  groupButtons.style.height = "100%";
+  groupButtons.style.textAlign = "center";
+  groupButtons.style.alignItems = "center";
+  groupButtons.style.display = "flex";
+  groupButtons.style.flexDirection = "row";
+  groupButtons.style.boxSizing = "border-box";
 
   const clearButton = createButton(
     null,
     "Icons/Trash.png",
-    () => {},
-    "18%",
+    () => {
+      ClearCurrentDeck();
+    },
+    "20%",
     "90%",
-    "10%",
-    "10%",
+    "5%",
+    "5%",
+    "0",
     "1%",
-    "2%",
     "center"
   );
 
@@ -1044,11 +1072,11 @@ var bcModSdk = (function () {
     "Default",
     "Icons/Small/Undo.png",
     () => {},
-    "17%",
+    "16%",
     "90%",
     "10%",
     "10%",
-    "1%",
+    "0",
     "0",
     "center"
   );
@@ -1059,13 +1087,13 @@ var bcModSdk = (function () {
     () => {
       PrevButtonClick();
     },
-    "17%",
+    "20%",
     "90%",
+    "5%",
+    "5%",
+    "3%",
     "0",
-    "0",
-    "1%",
-    "1%",
-    "center"
+    "flex-end"
   );
 
   const rightCardsListButtonWithImage = createButton(
@@ -1074,13 +1102,13 @@ var bcModSdk = (function () {
     () => {
       NextButtonClick();
     },
-    "17%",
+    "20%",
     "90%",
+    "5%",
+    "5%",
     "0",
-    "0",
-    "1%",
-    "0",
-    "center"
+    "3%",
+    "flex-start"
   );
   const saveDeckButtonWithImage = createButton(
     null,
@@ -1088,12 +1116,12 @@ var bcModSdk = (function () {
     () => {
       SetViewMode(true);
     },
-    "17%",
+    "20%",
     "90%",
+    "5%",
+    "5%",
     "0",
     "0",
-    "1%",
-    "1%",
     "center"
   );
   const cancelDeckButtonWithImage = createButton(
@@ -1102,36 +1130,40 @@ var bcModSdk = (function () {
     () => {
       SetViewMode(false);
     },
-    "18%",
+    "20%",
     "90%",
-    "0",
-    "0",
-    "2%",
+    "5%",
+    "5%",
+    "1%",
     "0",
     "center"
   );
 
+  //#endregion
+
+  //#region deckCardsCounter
   const deckCardsCounter = document.createElement("div");
-  deckCardsCounter.style.width = "30%";
+  deckCardsCounter.style.width = "25%";
   deckCardsCounter.style.alignContent = "center";
   deckCardsCounter.style.textAlign = "center";
-  deckCardsCounter.textContent = "Test Test";
   deckCardsCounter.style.pointerEvents = "none";
   deckCardsCounter.style.userSelect = "none";
   deckCardsCounter.style.fontSize = TopPanelTextSize;
   deckCardsCounter.style.color = "white";
 
+  //#endregion
+
   topSettingsLeftEditPanel.appendChild(deckNameInput);
   topSettingsLeftEditPanel.appendChild(groupCombobox);
 
-  groupButton.appendChild(clearButton);
-  groupButton.appendChild(defaultButton);
-  groupButton.appendChild(leftCardsListButtonWithImage);
-  groupButton.appendChild(rightCardsListButtonWithImage);
-  groupButton.appendChild(saveDeckButtonWithImage);
-  groupButton.appendChild(cancelDeckButtonWithImage);
+  groupButtons.appendChild(clearButton);
+  //groupButton.appendChild(defaultButton);
+  groupButtons.appendChild(leftCardsListButtonWithImage);
+  groupButtons.appendChild(rightCardsListButtonWithImage);
+  groupButtons.appendChild(saveDeckButtonWithImage);
+  groupButtons.appendChild(cancelDeckButtonWithImage);
 
-  topSettingsLeftEditPanel.appendChild(groupButton);
+  topSettingsLeftEditPanel.appendChild(groupButtons);
   topSettingsLeftEditPanel.appendChild(deckCardsCounter);
   //#endregion
 
@@ -1140,10 +1172,9 @@ var bcModSdk = (function () {
   const topSettingsRightPanel = document.createElement("div");
   topSettingsRightPanel.style.display = "flex";
   topSettingsRightPanel.style.flexDirection = "row";
-  //topSettingsRightPanel.style.gap = "30px";
   topSettingsRightPanel.style.justifyContent = "flex-end";
   topSettingsRightPanel.style.alignItems = "center";
-  topSettingsRightPanel.style.width = "20%";
+  topSettingsRightPanel.style.width = "12%";
   topSettingsRightPanel.style.height = "100%";
   topSettingsRightPanel.style.boxSizing = "border-box";
 
@@ -1321,7 +1352,7 @@ var bcModSdk = (function () {
   function UpdateCardsCells(cardsArray) {
     for (let i = 0; i < 30; i++) {
       CardCells[i].innerHTML = "";
-      if (i < cardsArray.length) {
+      if (cardsArray && i < cardsArray.length) {
         const cardText = MoonCEBCTextContent.get(
           "Text " + cardsArray[i].Name
         ).replace(/<F>/g, "");
@@ -1331,24 +1362,59 @@ var bcModSdk = (function () {
     }
   }
 
+  function UpdateDeckCardsCounter() {
+    const countCards = MoonCEBCEditCurrentDeck.length;
+    deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
+
+    if (countCards > 30) deckCardsCounter.style.color = "red";
+    else deckCardsCounter.style.color = "white";
+  }
+
+  function SaveNewDeck() {
+    const newDeckName = deckNameInput.value; //TODO check 20 characters ?? or no
+    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const encodeIDDeck = encodeIDDeckToString(cardIDs);
+    const selectedIndex = decksCombobox.selectedIndex;
+
+    Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+    Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
+
+    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
+  }
+
   function SetEditMode() {
     topSettingsLeftViewPanel.style.display = "none";
     topSettingsLeftEditPanel.style.display = "flex";
     deckNameInput.value =
       decksCombobox.options[decksCombobox.selectedIndex].text;
-    MoonCEBCPageMode = WindowStatus.EDIT;
-    UpdateCardsListSetNewGroup();
 
-    //get isSelected for deck cards
+    groupCombobox.selectedIndex = 0;
+
+    MoonCEBCPageMode = WindowStatus.EDIT;
+    MoonCEBCEditCurrentDeck = [...MoonCEBCCurrentDeck];
+    UpdateCardsListSetNewGroup();
+    UpdateDeckCardsCounter();
   }
 
   function SetViewMode(isSave) {
-    topSettingsLeftViewPanel.style.display = "flex";
-    topSettingsLeftEditPanel.style.display = "none";
-    MoonCEBCPageMode = WindowStatus.VIEW;
     if (isSave) {
-      //save edit deck and update cards panel
+      if (
+        MoonCEBCEditCurrentDeck.length == 30 &&
+        deckNameInput.value != "" &&
+        deckNameInput.value != null &&
+        deckNameInput.value.length < 31
+      ) {
+        topSettingsLeftViewPanel.style.display = "flex";
+        topSettingsLeftEditPanel.style.display = "none";
+        SaveNewDeck(); //TODO Need send new data on server
+        MoonCEBCPageMode = WindowStatus.VIEW;
+        UpdateCardsCells(MoonCEBCEditCurrentDeck);
+        LoadPlayerData();
+      }
     } else {
+      topSettingsLeftViewPanel.style.display = "flex";
+      topSettingsLeftEditPanel.style.display = "none";
+      MoonCEBCPageMode = WindowStatus.VIEW;
       UpdateCardsCells(MoonCEBCCurrentDeck);
     }
   }
@@ -1358,7 +1424,13 @@ var bcModSdk = (function () {
    */
   function ClickCardButton(card) {}
 
-  function ClearCurrentDeck() {}
+  function ClearCurrentDeck() {
+    MoonCEBCEditCurrentDeck = [];
+
+    UpdateCardsCells(MoonCEBCCurrent30Cards);
+
+    UpdateDeckCardsCounter();
+  }
 
   function SetCurrentDeckDefault() {}
 
@@ -1388,6 +1460,11 @@ var bcModSdk = (function () {
 
   function UpdateCardsListSetNewGroup() {
     let cardGroupList = [];
+    const rewardPlayerCards = decodeStringDeckToID(Player.Game.ClubCard.Reward);
+    const allRewardCards = ClubCardList.filter(
+      (card) => card.Reward != undefined
+    );
+
     switch (MoonCEBCCurrentGroup) {
       case CardTypes.ALL_CARDS.value:
         cardGroupList = [...ClubCardList];
@@ -1401,7 +1478,7 @@ var bcModSdk = (function () {
         );
         break;
       case CardTypes.REWARD_CARDS.value:
-        cardGroupList = ClubCardList.filter((card) => card.Reward != undefined);
+        cardGroupList = allRewardCards;
         break;
       default:
         cardGroupList = ClubCardList.filter(
@@ -1409,6 +1486,18 @@ var bcModSdk = (function () {
         );
         break;
     }
+
+    cardGroupList = cardGroupList.filter((card) => {
+      const isRewardCard = allRewardCards.some(
+        (rewardCard) => rewardCard.ID === card.ID
+      );
+
+      if (isRewardCard) {
+        return rewardPlayerCards.includes(card.ID);
+      }
+
+      return true;
+    });
 
     const sortedCards = SortCardsList(cardGroupList);
     MoonCEBCBuilderCurrentGroupsList = [...sortedCards];

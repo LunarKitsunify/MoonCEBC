@@ -1,11 +1,15 @@
-1.Add all reward cards command or button
+1.Add all reward cards command or button ???? not sure what will if you dont have reward card
+
+
+
 2.Size customization
 3.customization of the card background and cover.
 4.prohibit transferring yourself to the game if you are not a player and you have enabled this function. 
 5.Make it possible to save info from the user and hide the button or not, 
 depending on the current game in the room and the player's choice.
 6.make deck import/export
-7.deck stats - count game and win rate/ maybe top cards opponent when lose
+7.deck winrate - count game and win rate/ maybe top cards opponent when lose
+8.deck stats - current income money and fame
 
 
 
@@ -22,3 +26,4 @@ fix
 
 1. f11 mode  or limit the height of the card too much due to lack of space in width.
 2. fix player group name
+3. tooltip for button on top panel
