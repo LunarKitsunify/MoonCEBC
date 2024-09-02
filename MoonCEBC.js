@@ -402,7 +402,6 @@ var bcModSdk = (function () {
     COLLEGE_STUDENT: { value: "CollegeStudent", text: "College Student" },
     COLLEGE_TEACHER: { value: "CollegeTeacher", text: "College Teacher" },
   });
-
   /**
    * The size of the deck being built (number of cards)
    * @type {number}
@@ -462,6 +461,7 @@ var bcModSdk = (function () {
    * @type {boolean}
    */
   let isVisibleMainWindow = false;
+  let MoonCEBCPlayerData = null;
   /**
    * An array of 30 cells into which the bottom container is divided. To display 30 cards.
    * @type {HTMLDivElement[]}
@@ -972,7 +972,8 @@ var bcModSdk = (function () {
   decksCombobox.style.textAlign = "center";
   decksCombobox.style.fontSize = TopPanelTextSize;
   decksCombobox.addEventListener("change", function () {
-    GetDeckData();
+    MoonCEBCPlayerData = Player.Game.ClubCard;
+    GetDeckData(MoonCEBCPlayerData);
   });
 
   const editButton = createButton(
@@ -1333,12 +1334,12 @@ var bcModSdk = (function () {
   function LoadPlayerData() {
     if (Player.Game.ClubCard === undefined) return;
 
-    const playerData = Player.Game.ClubCard;
+    MoonCEBCPlayerData = Player.Game.ClubCard;
 
     decksCombobox.innerHTML = "";
 
-    if (playerData.DeckName && playerData.DeckName.length > 0) {
-      playerData.DeckName.forEach((name, index) => {
+    if (MoonCEBCPlayerData.DeckName && MoonCEBCPlayerData.DeckName.length > 0) {
+      MoonCEBCPlayerData.DeckName.forEach((name, index) => {
         if (name != null && name != "") {
           const option = document.createElement("option");
           option.value = index;
@@ -1347,7 +1348,7 @@ var bcModSdk = (function () {
         }
       });
 
-      GetDeckData(playerData);
+      GetDeckData(MoonCEBCPlayerData);
     } else {
       console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
@@ -1355,10 +1356,10 @@ var bcModSdk = (function () {
 
   /**
    * Get data selected deck and update cards cells
+   * @param {GameClubCardParameters} playerData - index selected deck
    * @returns {void} - Nothing
    */
   function GetDeckData(playerData) {
-    const playerData = Player.Game.ClubCard;
     let selectedIndex = decksCombobox.value;
     let encodedDeck = playerData.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
