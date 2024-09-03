@@ -422,7 +422,7 @@ var bcModSdk = (function () {
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
    */
-  const MoonCEBCClubCardList = [];
+  let MoonCEBCClubCardList = [];
   /**
    * Tracking the card on which the mouse is hovering
    * @type {ClubCard}
