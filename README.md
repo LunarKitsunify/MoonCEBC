@@ -5,11 +5,10 @@
 <h3>
   Features:
 
-- View and edit card decks in online room
+- View and edit card decks in online room.
 - The character limit for the deck name has been increased from 20 to 30.
 </h3>
 
-  
 <summary><h2>Installation</h2></summary>
 
 ### FUSAM
@@ -29,4 +28,3 @@ javascript: (() => {
     .then((r) => eval(r));
 })();
 ```
-
