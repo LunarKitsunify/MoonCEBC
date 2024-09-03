@@ -383,6 +383,7 @@ var bcModSdk = (function () {
   });
   const CardTypes = Object.freeze({
     ALL_CARDS: { value: "All Cards", text: "All Cards" },
+    SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
     EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
     UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
@@ -412,6 +413,7 @@ var bcModSdk = (function () {
   const MoonCEBCBoardBackgroundPath =
     "url('Backgrounds/ClubCardPlayBoard1.jpg')";
   const MoonCEBCExitIconPath = "Icons/Exit.png";
+  const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
   /**
    * variable for loading description for cards
    */
@@ -461,7 +463,6 @@ var bcModSdk = (function () {
    * @type {boolean}
    */
   let isVisibleMainWindow = false;
-  let MoonCEBCPlayerData = null;
   /**
    * An array of 30 cells into which the bottom container is divided. To display 30 cards.
    * @type {HTMLDivElement[]}
@@ -517,6 +518,9 @@ var bcModSdk = (function () {
   modApi.hookFunction("MainRun", 0, (args, next) => {
     //TODO Hook ChatRoomRun and do it with a DrawButton?
     //This should minimize the load on the server instead of constantly running in MainRun
+    //At the moment I'm doing it via MainRun because from ChatRoomRun ,
+    //I won't be able to track the moment of leaving the room. Or I'll have to do a lot of twisting for that.
+    //That is, the button should be shown or hidden when conditions are met.
     next(args);
     UpdateStatusShowButton();
   });
@@ -537,8 +541,8 @@ var bcModSdk = (function () {
    * @param {string} height - Height from parent space
    * @param {string} paddingTop - The top padding of the button.
    * @param {string} paddingBottom - The bottom padding of the button.
-   * @param {string} marginRight - The right margin of the button.
    * @param {string} marginLeft - The left margin of the button.
+   * @param {string} marginRight - The right margin of the button.
    * @param {string} justifyContent - The alignment of the exitDiv content.
    * @returns {HTMLDivElement} The created button element.
    */
@@ -550,40 +554,40 @@ var bcModSdk = (function () {
     height,
     paddingTop,
     paddingBottom,
-    marginRight,
     marginLeft,
+    marginRight,
     justifyContent
   ) {
-    const exitDiv = document.createElement("div");
-    exitDiv.style.width = width;
-    exitDiv.style.height = height;
-    exitDiv.style.display = "flex";
-    exitDiv.style.alignItems = "center";
-    exitDiv.style.justifyContent = justifyContent;
-    exitDiv.style.userSelect = "none";
+    const mainDivButton = document.createElement("div");
+    mainDivButton.style.width = width;
+    mainDivButton.style.height = height;
+    mainDivButton.style.display = "flex";
+    mainDivButton.style.alignItems = "center";
+    mainDivButton.style.justifyContent = justifyContent;
+    mainDivButton.style.userSelect = "none";
 
-    const exitButton = document.createElement("button");
-    exitButton.style.paddingTop = paddingTop;
-    exitButton.style.paddingBottom = paddingBottom;
-    exitButton.style.marginRight = marginRight;
-    exitButton.style.marginLeft = marginLeft;
-    exitButton.style.height = "100%";
-    exitButton.style.padding = "0";
-    exitButton.style.display = "flex";
-    exitButton.style.alignItems = "center";
-    exitButton.style.justifyContent = "center";
+    const button = document.createElement("button");
+    button.style.paddingTop = paddingTop;
+    button.style.paddingBottom = paddingBottom;
+    button.style.marginRight = marginRight;
+    button.style.marginLeft = marginLeft;
+    button.style.height = "100%";
+    button.style.padding = "0";
+    button.style.display = "flex";
+    button.style.alignItems = "center";
+    button.style.justifyContent = "center";
 
     // Check for image path
     if (imageSrc) {
-      const exitButtonImg = document.createElement("img");
-      exitButtonImg.src = imageSrc;
-      exitButtonImg.style.maxWidth = "90%";
-      exitButtonImg.style.maxHeight = "90%";
-      exitButtonImg.style.objectFit = "contain";
-      exitButtonImg.style.display = "block";
-      exitButtonImg.style.pointerEvents = "none";
-      exitButtonImg.style.userSelect = "none";
-      exitButton.appendChild(exitButtonImg);
+      const buttonImg = document.createElement("img");
+      buttonImg.src = imageSrc;
+      buttonImg.style.maxWidth = "90%";
+      buttonImg.style.maxHeight = "90%";
+      buttonImg.style.objectFit = "contain";
+      buttonImg.style.display = "block";
+      buttonImg.style.pointerEvents = "none";
+      buttonImg.style.userSelect = "none";
+      button.appendChild(buttonImg);
     } else {
       // If no image is provided, create a text element
       const buttonText = document.createElement("span");
@@ -593,15 +597,15 @@ var bcModSdk = (function () {
       buttonText.style.fontSize = TopPanelTextSize;
       buttonText.style.pointerEvents = "none";
       buttonText.style.userSelect = "none";
-      exitButton.appendChild(buttonText);
+      button.appendChild(buttonText);
     }
 
-    exitDiv.appendChild(exitButton);
+    mainDivButton.appendChild(button);
 
     // Add click event handler
-    exitButton.addEventListener("click", onClick);
+    button.addEventListener("click", onClick);
 
-    return exitDiv; // Return the created element
+    return mainDivButton; // Return the created element
   }
 
   /**
@@ -706,7 +710,6 @@ var bcModSdk = (function () {
           cardButton.style.border = "3px solid #40E0D0";
           UpdateDeckCardsCounter();
         }
-        ClickCardButton(Card);
       }
     });
     cardButton.addEventListener("mouseover", () => {
@@ -950,8 +953,7 @@ var bcModSdk = (function () {
   topSettingsPanel.style.alignItems = "center";
   topSettingsPanel.style.height = TopPanelHeight;
   topSettingsPanel.style.width = "100%";
-  topSettingsPanel.style.backgroundImage =
-    "url('https://i.imgur.com/22H94gG.jpeg')";
+  topSettingsPanel.style.backgroundImage = MoonCEBCTopPanelBackground;
   topSettingsPanel.style.backgroundSize = "cover";
   topSettingsPanel.style.backgroundPosition = "center";
 
@@ -972,8 +974,7 @@ var bcModSdk = (function () {
   decksCombobox.style.textAlign = "center";
   decksCombobox.style.fontSize = TopPanelTextSize;
   decksCombobox.addEventListener("change", function () {
-    MoonCEBCPlayerData = Player.Game.ClubCard;
-    GetDeckData(MoonCEBCPlayerData);
+    GetDeckData();
   });
 
   const editButton = createButton(
@@ -986,8 +987,8 @@ var bcModSdk = (function () {
     "80%",
     "10%",
     "10%",
-    "0",
     "2%",
+    "0",
     "center"
   );
 
@@ -1100,8 +1101,8 @@ var bcModSdk = (function () {
     "90%",
     "5%",
     "5%",
-    "0",
     "1%",
+    "0",
     "center"
   );
 
@@ -1128,8 +1129,8 @@ var bcModSdk = (function () {
     "90%",
     "5%",
     "5%",
-    "3%",
     "0",
+    "3%",
     "flex-end"
   );
 
@@ -1143,8 +1144,8 @@ var bcModSdk = (function () {
     "90%",
     "5%",
     "5%",
-    "0",
     "3%",
+    "0",
     "flex-start"
   );
   const saveDeckButtonWithImage = createButton(
@@ -1243,12 +1244,12 @@ var bcModSdk = (function () {
     "90%",
     "5%",
     "5%",
-    "5%",
     "0",
+    "5%",
     "flex-end"
   );
 
-  topSettingsRightPanel.appendChild(settingsButton);
+  //topSettingsRightPanel.appendChild(settingsButton);
   topSettingsRightPanel.appendChild(exitButtonWithImage);
 
   //#endregion
@@ -1311,12 +1312,18 @@ var bcModSdk = (function () {
   //////////////////START//////////////////
   AddonLoad();
 
+  /**
+   * Loads and stores card data.  Text_ClubCard.csv
+   * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
+   */
   function AddonLoad() {
     console.log(`${MoonCEBCAddonName} Start Load`);
     MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
-
+  /**
+   * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
+   */
   function UpdateStatusShowButton() {
     //check if in room selected ClubCard game
     const isClubCardsGame = ChatRoomGame == "ClubCard";
@@ -1330,16 +1337,19 @@ var bcModSdk = (function () {
     else if (!isShowButton && showButton.style.display !== "none")
       showButton.style.display = "none";
   }
-
+  /**
+   * Checks the player's data and fills the drop-down list with the player's decks.
+   * Also updates the card boxes for the first option.
+   */
   function LoadPlayerData() {
     if (Player.Game.ClubCard === undefined) return;
 
-    MoonCEBCPlayerData = Player.Game.ClubCard;
+    const playerDecksData = Player.Game.ClubCard.DeckName;
 
     decksCombobox.innerHTML = "";
 
-    if (MoonCEBCPlayerData.DeckName && MoonCEBCPlayerData.DeckName.length > 0) {
-      MoonCEBCPlayerData.DeckName.forEach((name, index) => {
+    if (playerDecksData && playerDecksData.length > 0) {
+      playerDecksData.forEach((name, index) => {
         if (name != null && name != "") {
           const option = document.createElement("option");
           option.value = index;
@@ -1348,7 +1358,7 @@ var bcModSdk = (function () {
         }
       });
 
-      GetDeckData(MoonCEBCPlayerData);
+      GetDeckData();
     } else {
       console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
@@ -1356,12 +1366,11 @@ var bcModSdk = (function () {
 
   /**
    * Get data selected deck and update cards cells
-   * @param {GameClubCardParameters} playerData - index selected deck
    * @returns {void} - Nothing
    */
-  function GetDeckData(playerData) {
+  function GetDeckData() {
     let selectedIndex = decksCombobox.value;
-    let encodedDeck = playerData.Deck[selectedIndex];
+    const encodedDeck = Player.Game.ClubCard.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
     let deckData = [];
 
@@ -1396,6 +1405,9 @@ var bcModSdk = (function () {
     }
   }
 
+  /**
+   * Track and update the current card count when editing a deck
+   */
   function UpdateDeckCardsCounter() {
     const countCards = MoonCEBCEditCurrentDeck.length;
     deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
@@ -1404,8 +1416,11 @@ var bcModSdk = (function () {
     else deckCardsCounter.style.color = "white";
   }
 
+  /**
+   * Save new Deck  :)
+   */
   function SaveNewDeck() {
-    const newDeckName = deckNameInput.value; //TODO check 20 characters ?? or no
+    const newDeckName = deckNameInput.value;
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = decksCombobox.selectedIndex;
@@ -1415,7 +1430,9 @@ var bcModSdk = (function () {
 
     ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
   }
-
+  /**
+   * The function changes the top panel and updates the data to enter edit mode.
+   */
   function SetEditMode() {
     topSettingsLeftViewPanel.style.display = "none";
     topSettingsLeftEditPanel.style.display = "flex";
@@ -1430,6 +1447,10 @@ var bcModSdk = (function () {
     UpdateDeckCardsCounter();
   }
 
+  /**
+   * The function changes the top panel and, depending on isSave, undoes or saves changes to the deck.
+   * @param {boolean} isSave Switch to check whether the deck will be saved or not
+   */
   function SetViewMode(isSave) {
     if (isSave) {
       if (
@@ -1453,11 +1474,8 @@ var bcModSdk = (function () {
     }
   }
   /**
-   * handles the card click event for Edit mode
-   * @param {*} card card data
+   * Clear Current deck in edit mode
    */
-  function ClickCardButton(card) {}
-
   function ClearCurrentDeck() {
     MoonCEBCEditCurrentDeck = [];
 
@@ -1465,9 +1483,14 @@ var bcModSdk = (function () {
 
     UpdateDeckCardsCounter();
   }
-
+  /**
+   * TODO Maybe I'll add a couple of my decks as a default deck?
+   */
   function SetCurrentDeckDefault() {}
 
+  /**
+   * Function for switching cards pages in edit mode
+   */
   function PrevButtonClick() {
     if (MoonCEBCCurrentCardsListPage != 0) {
       MoonCEBCCurrentCardsListPage -= 1;
@@ -1481,6 +1504,9 @@ var bcModSdk = (function () {
     }
   }
 
+  /**
+   * Function for switching cards pages in edit mode
+   */
   function NextButtonClick() {
     MoonCEBCCurrentCardsListPage += 1;
     let newCardsLlist = Get30CardsGroup();
@@ -1492,6 +1518,13 @@ var bcModSdk = (function () {
     }
   }
 
+  /**
+   * Function for sorting from the general list of cards,
+   * the selected group of cards by the current value from the drop-down list.
+   * Also checks to see if the player has any reward cards.
+   * TODO Should be redone in the future and not block the output of reward cards.
+   * But block access to adding them to the deck. And give a hint how to get a card.
+   */
   function UpdateCardsListSetNewGroup() {
     let cardGroupList = [];
     const rewardPlayerCards = decodeStringDeckToID(Player.Game.ClubCard.Reward);
@@ -1502,6 +1535,9 @@ var bcModSdk = (function () {
     switch (MoonCEBCCurrentGroup) {
       case CardTypes.ALL_CARDS.value:
         cardGroupList = [...ClubCardList];
+        break;
+      case CardTypes.SELECTED_CARDS.value:
+        cardGroupList = [...MoonCEBCEditCurrentDeck];
         break;
       case CardTypes.EVENTS_CARDS.value:
         cardGroupList = ClubCardList.filter((card) => card.Type == "Event");
@@ -1541,7 +1577,7 @@ var bcModSdk = (function () {
   }
 
   /**
-   *
+   * Function to get the current 30 cards from a sorted array with cards.
    * @returns {ClubCard[]} cards page list
    */
   function Get30CardsGroup() {
