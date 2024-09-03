@@ -419,6 +419,11 @@ var bcModSdk = (function () {
    */
   let MoonCEBCTextContent = null;
   /**
+   * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
+   * @type {ClubCard[]}
+   */
+  const MoonCEBCClubCardList = [];
+  /**
    * Tracking the card on which the mouse is hovering
    * @type {ClubCard}
    */
@@ -1319,6 +1324,7 @@ var bcModSdk = (function () {
   function AddonLoad() {
     console.log(`${MoonCEBCAddonName} Start Load`);
     MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
+    MoonCEBCClubCardList = [...ClubCardList];
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
   /**
@@ -1375,7 +1381,7 @@ var bcModSdk = (function () {
     let deckData = [];
 
     for (let id of decodedDeck) {
-      let cardData = ClubCardList.find((card) => card.ID === id);
+      let cardData = MoonCEBCClubCardList.find((card) => card.ID === id);
       if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
 
       deckData.push(cardData);
@@ -1528,22 +1534,24 @@ var bcModSdk = (function () {
   function UpdateCardsListSetNewGroup() {
     let cardGroupList = [];
     const rewardPlayerCards = decodeStringDeckToID(Player.Game.ClubCard.Reward);
-    const allRewardCards = ClubCardList.filter(
+    const allRewardCards = MoonCEBCClubCardList.filter(
       (card) => card.Reward != undefined
     );
 
     switch (MoonCEBCCurrentGroup) {
       case CardTypes.ALL_CARDS.value:
-        cardGroupList = [...ClubCardList];
+        cardGroupList = [...MoonCEBCClubCardList];
         break;
       case CardTypes.SELECTED_CARDS.value:
         cardGroupList = [...MoonCEBCEditCurrentDeck];
         break;
       case CardTypes.EVENTS_CARDS.value:
-        cardGroupList = ClubCardList.filter((card) => card.Type == "Event");
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) => card.Type == "Event"
+        );
         break;
       case CardTypes.UNGROUPED.value:
-        cardGroupList = ClubCardList.filter(
+        cardGroupList = MoonCEBCClubCardList.filter(
           (card) => card.Group == undefined && card.Type != "Event"
         );
         break;
@@ -1551,7 +1559,7 @@ var bcModSdk = (function () {
         cardGroupList = allRewardCards;
         break;
       default:
-        cardGroupList = ClubCardList.filter(
+        cardGroupList = MoonCEBCClubCardList.filter(
           (card) => card.Group && card.Group.includes(MoonCEBCCurrentGroup)
         );
         break;
