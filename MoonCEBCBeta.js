@@ -476,9 +476,15 @@ var bcModSdk = (function () {
 
   const w = window;
 
+  window.addEventListener("resize", function () {
+    UpdateCardHeightWidth();
+  });
+
+  let MoonCEBCCardHeight = 0;
+  let MoonCEBCCardWidth = 0;
   //#region Size and color customization
 
-  const TopPanelHeight = "6%";
+  const TopPanelHeight = "7%";
   const TopPanelTextSize = "1.5vw";
 
   const requiredLevelTestColor = "#FF5733";
@@ -927,6 +933,7 @@ var bcModSdk = (function () {
     MoonCEBCPageMode = WindowStatus.VIEW;
     LoadPlayerData();
     isVisibleMainWindow = !isVisibleMainWindow;
+    UpdateCardHeightWidth();
   });
   document.body.appendChild(showButton);
 
@@ -1531,6 +1538,37 @@ var bcModSdk = (function () {
     }
   }
 
+  function UpdateCardHeightWidth() {
+    let screenWidth = cardsCollectionPanel.offsetWidth;
+    let screenHeight = cardsCollectionPanel.offsetHeight;
+    const reservedSpace = 10;
+
+    if (screenWidth == 0 || screenHeight == 0) return;
+
+    screenHeight -= reservedSpace;
+    screenWidth -= reservedSpace;
+
+    let cardHeight = screenHeight / 3;
+    let cardWidth = cardHeight / 2;
+
+    let maxCardWidth = screenWidth / 10;
+
+    while (cardWidth > maxCardWidth) {
+      cardWidth -= 1;
+      cardHeight = cardWidth * 2;
+    }
+
+    MoonCEBCCardHeight = cardHeight;
+    MoonCEBCCardWidth = cardWidth;
+
+    for (let i = 0; i < 30; i++) {
+      const childButton = CardCells[i].querySelector("button");
+      if (childButton) {
+        childButton.style.height = `${MoonCEBCCardHeight}px`;
+        childButton.style.width = `${MoonCEBCCardWidth}px`;
+      }
+    }
+  }
   /**
    * Function for sorting from the general list of cards,
    * the selected group of cards by the current value from the drop-down list.
