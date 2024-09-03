@@ -511,14 +511,14 @@ var bcModSdk = (function () {
   });
 
   /*modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
-    console.log("TestHook ClubCardLoad");
-    next();
-  });
-
-  modApi.hookFunction("ClubCardRenderCard", 0, (args, next) => {
-    console.log("TestHook ClubCardRenderCard");
-    next(args);
-  });*/
+      console.log("TestHook ClubCardLoad");
+      next();
+    });
+  
+    modApi.hookFunction("ClubCardRenderCard", 0, (args, next) => {
+      console.log("TestHook ClubCardRenderCard");
+      next(args);
+    });*/
 
   modApi.hookFunction("MainRun", 0, (args, next) => {
     //TODO Hook ChatRoomRun and do it with a DrawButton?
@@ -924,6 +924,7 @@ var bcModSdk = (function () {
   showButton.style.display = "none";
   showButton.addEventListener("click", function () {
     mainWindow.style.display = "block";
+    MoonCEBCPageMode = WindowStatus.VIEW;
     LoadPlayerData();
     isVisibleMainWindow = !isVisibleMainWindow;
   });
@@ -1242,6 +1243,7 @@ var bcModSdk = (function () {
     () => {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
+      MoonCEBCPageMode = WindowStatus.VIEW;
       mainWindow.style.display = "none";
       isVisibleMainWindow = !isVisibleMainWindow;
     },

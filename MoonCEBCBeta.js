@@ -924,6 +924,7 @@ var bcModSdk = (function () {
   showButton.style.display = "none";
   showButton.addEventListener("click", function () {
     mainWindow.style.display = "block";
+    MoonCEBCPageMode = WindowStatus.VIEW;
     LoadPlayerData();
     isVisibleMainWindow = !isVisibleMainWindow;
   });
@@ -1242,6 +1243,7 @@ var bcModSdk = (function () {
     () => {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
+      MoonCEBCPageMode = WindowStatus.VIEW;
       mainWindow.style.display = "none";
       isVisibleMainWindow = !isVisibleMainWindow;
     },
