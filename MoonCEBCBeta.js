@@ -1324,7 +1324,12 @@ var bcModSdk = (function () {
   function AddonLoad() {
     console.log(`${MoonCEBCAddonName} Start Load`);
     MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
-    MoonCEBCClubCardList = [...ClubCardList];
+
+    for (let i = 0; i < ClubCardList.length; i++) {
+      let copiedCard = { ...ClubCardList[i] };
+      MoonCEBCClubCardList.push(copiedCard);
+    }
+
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
   /**
