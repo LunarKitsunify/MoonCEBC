@@ -9,7 +9,7 @@
 - The character limit for the deck name has been increased from 20 to 30.
 </h3>
 
-<summary><h2>Installation</h2></summary>
+<h2>Installation</h2>
 
 ### FUSAM
 
