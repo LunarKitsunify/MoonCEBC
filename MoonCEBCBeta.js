@@ -483,9 +483,6 @@ var bcModSdk = (function () {
   let MoonCEBCCardHeight = 0;
   let MoonCEBCCardWidth = 0;
 
-  let MoonCEBCCardInfoPanelHeight = 0;
-  let MoonCEBCCardInfoPanelWidth = 0;
-
   //#region Size and color customization
 
   const TopPanelHeight = "7%";
