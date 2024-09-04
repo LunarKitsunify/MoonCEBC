@@ -1538,6 +1538,9 @@ var bcModSdk = (function () {
     }
   }
 
+  /**
+   * Function to update the size of cards in 30 cells when the window size changes.
+   */
   function UpdateCardHeightWidth() {
     let screenWidth = cardsCollectionPanel.offsetWidth;
     let screenHeight = cardsCollectionPanel.offsetHeight;
