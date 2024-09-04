@@ -9,6 +9,8 @@
 - The character limit for the deck name has been increased from 20 to 30.
 </h3>
 
+![openAddonWindow](https://github.com/user-attachments/assets/8a0d5a90-3fde-477b-b1e1-ce09b2d1e8ec)
+
 <h2>Installation</h2>
 
 ### FUSAM
