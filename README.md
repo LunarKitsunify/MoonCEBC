@@ -2,6 +2,11 @@
   Moon Cards Editor BC
 </h2>
 
+Hello everyone. 
+You probably know how annoying it is when you have to go to a special room with NPCs to edit your deck. Or even worse, you can't get into the room with NPCs while tied up. 
+
+This addon is designed to solve both of those issues. And so maybe for other interesting things in the future.
+
 <h3>
   Features:
 
@@ -10,9 +15,9 @@
 </h3>
 
 <details>
-  <summary>Demonstration</summary>
+  <summary><h3>Demonstration</h3></summary>
   
-  1. ![openAddonWindow4](https://github.com/user-attachments/assets/2a12b656-c85c-40ac-8be3-68ac4b8043a8)
+ ![openAddonWindow4](https://github.com/user-attachments/assets/2a12b656-c85c-40ac-8be3-68ac4b8043a8)
   
 </details>
 
