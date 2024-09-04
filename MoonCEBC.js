@@ -483,6 +483,9 @@ var bcModSdk = (function () {
   let MoonCEBCCardHeight = 0;
   let MoonCEBCCardWidth = 0;
 
+  let MoonCEBCCardInfoPanelHeight = 0;
+  let MoonCEBCCardInfoPanelWidth = 0;
+
   //#region Size and color customization
 
   const TopPanelHeight = "7%";
@@ -697,12 +700,18 @@ var bcModSdk = (function () {
     const cardButton = document.createElement("button");
     cardButton.style.position = "relative";
     cardButton.style.borderRadius = "6px";
-    cardButton.style.height = "100%";
-    cardButton.style.aspectRatio = "1 / 2";
     cardButton.style.display = "flex";
     cardButton.style.justifyContent = "center";
     cardButton.style.alignItems = "center";
     cardButton.style.userSelect = "none";
+
+    if (isCurrentCardInfoCell) {
+      cardButton.style.height = "100%";
+      cardButton.style.aspectRatio = "1 / 2";
+    } else {
+      cardButton.style.height = `${MoonCEBCCardHeight}px`;
+      cardButton.style.width = `${MoonCEBCCardWidth}px`;
+    }
 
     cardButton.addEventListener("click", () => {
       const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
@@ -1545,6 +1554,7 @@ var bcModSdk = (function () {
   function UpdateCardHeightWidth() {
     let screenWidth = cardsCollectionPanel.offsetWidth;
     let screenHeight = cardsCollectionPanel.offsetHeight;
+
     const reservedSpace = 10;
 
     if (screenWidth == 0 || screenHeight == 0) return;
