@@ -1,9 +1,8 @@
 hot Update 
-1. make a formula to calculate the height and width of the cards. 
-Because I can't align it to any one thing. Screens come in many different flavors.
-2. fix player group name and maybe recolor all groups ?
-3. tooltip for button on top panel
-4. Settings Menu
+
+1. fix player group name and maybe recolor all groups ?
+2. tooltip for button on top panel
+3. Settings Menu
 
 Future Update
 1. For viewers, the ability to disable loading into the game if desired.
