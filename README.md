@@ -29,7 +29,7 @@ In a future update.
 
 ### Tampermonkey or ViolentMonkey
 
-https://github.com/LunarKitsunify/MoonCEBC/blob/main/MoonCEBCLoader.user.js
+[https://github.com/LunarKitsunify/MoonCEBC/blob/main/MoonCEBCLoader.user.js](https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js)
 
 ### Bookmark
 
