@@ -20,17 +20,17 @@ This addon is designed to solve both of those issues. And so maybe for other int
 
 <h2>Installation</h2>
 
-### FUSAM
+### 1. FUSAM
 
 In a future update.
 
-### [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [ViolentMonkey](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
+### 2. [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [ViolentMonkey](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 
 Install one of these extensions on your browser and click on the link.
 
 https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js
 
-### Bookmark
+### 3. Bookmark
 
 ```javascript
 javascript: (() => {
