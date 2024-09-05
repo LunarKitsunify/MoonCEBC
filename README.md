@@ -29,6 +29,8 @@ In a future update.
 
 ### Tampermonkey or ViolentMonkey
 
+Install one of these extensions on your browser and click on the link.
+
 https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js
 
 ### Bookmark
