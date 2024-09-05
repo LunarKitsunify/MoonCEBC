@@ -27,7 +27,7 @@ This addon is designed to solve both of those issues. And so maybe for other int
 
 In a future update.
 
-### Tampermonkey or ViolentMonkey
+### [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [ViolentMonkey](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 
 Install one of these extensions on your browser and click on the link.
 
