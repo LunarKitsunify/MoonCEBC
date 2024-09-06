@@ -22,7 +22,7 @@ This addon is designed to solve both of those issues. And so maybe for other int
 
 ### 1. FUSAM
 
-In a future update.
+The addon is available through the FUSAM Addon Manager.
 
 ### 2. [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [ViolentMonkey](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 
