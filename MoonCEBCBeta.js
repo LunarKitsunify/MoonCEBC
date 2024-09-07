@@ -372,6 +372,8 @@ var bcModSdk = (function () {
 
 //#endregion
 
+import { card_Cover1 } from "./Resources/imageResources.js";
+
 (function () {
   "use strict";
 
