@@ -521,7 +521,7 @@ var bcModSdk = (function () {
 
   modApi.hookFunction("DrawImageResize", 0, (args, next) => {
     if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
-      const newImage = "https://i.imgur.com/vEdNId8.jpeg";
+      const newImage = "https://i.imgur.com/rGuMjPS.jpeg";
 
       args[0] = newImage;
     }
