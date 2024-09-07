@@ -15,6 +15,8 @@
 // @run-at document-end
 // ==/UserScript==
 
+import { card_Cover1 } from "./Resources.js";
+
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
   "use strict";
@@ -923,8 +925,8 @@ var bcModSdk = (function () {
 
   //#region showButton
   const showButton = document.createElement("button");
-  showButton.style.backgroundImage =
-    "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
+  //showButton.style.backgroundImage = "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
+  showButton.style.backgroundImage = `url(${card_Cover1})`;
   showButton.style.backgroundSize = "cover";
   showButton.style.backgroundPosition = "center";
   showButton.style.position = "absolute";
