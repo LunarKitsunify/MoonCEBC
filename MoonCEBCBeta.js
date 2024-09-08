@@ -519,10 +519,14 @@ var bcModSdk = (function () {
     repository: "https://github.com/LunarKitsunify/RoomCardDecksEditorBC",
   });
 
-  modApi.hookFunction("DrawImageResize", 0, (args, next) => {
+  modApi.hookFunction("DrawImageEx", 0, (args, next) => {
     if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
       const newImage = "https://i.imgur.com/rGuMjPS.jpeg";
+      args[0] = newImage;
+    }
 
+    if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
+      const newImage = "https://i.imgur.com/sagZ9Xp.png";
       args[0] = newImage;
     }
     next(args);
