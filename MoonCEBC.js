@@ -1552,7 +1552,7 @@ var bcModSdk = (function () {
     let screenWidth = cardsCollectionPanel.offsetWidth;
     let screenHeight = cardsCollectionPanel.offsetHeight;
 
-    const reservedSpace = 10;
+    const reservedSpace = 15;
 
     if (screenWidth == 0 || screenHeight == 0) return;
 
