@@ -567,26 +567,20 @@ var bcModSdk = (function () {
    * @param {function} onClick - The event handler function for the button click.
    * @param {string} width - Width from parent space
    * @param {string} height - Height from parent space
-   * @param {string} paddingTop - The top padding of the button.
-   * @param {string} paddingBottom - The bottom padding of the button.
    * @param {string} marginLeft - The left margin of the button.
    * @param {string} marginRight - The right margin of the button.
-   * @param {string} justifyContent - The alignment of the exitDiv content.
    * @param {string} tooltip - The tooltip text to display.
    * @param {string} tooltipPosition - The position of the tooltip: "top", "right", "bottom", or "left".
    * @returns {HTMLButtonElement} The created button element.
    */
-  function newCreateButton(
+  function createButton(
     content,
     imageSrc,
     onClick,
     width,
     height,
-    paddingTop,
-    paddingBottom,
     marginLeft,
     marginRight,
-    justifyContent,
     tooltip = null,
     tooltipPosition = "right"
   ) {
@@ -600,14 +594,12 @@ var bcModSdk = (function () {
       {
         button: {
           style: {
-            paddingTop: paddingTop,
-            paddingBottom: paddingBottom,
             marginLeft: marginLeft,
             marginRight: marginRight,
             display: "flex",
             height: height,
             width: width,
-            justifyContent: justifyContent,
+            justifyContent: "center",
             alignItems: "center",
             textAlign: "center",
             userSelect: "none",
@@ -623,83 +615,6 @@ var bcModSdk = (function () {
       }
     );
     return button;
-  }
-
-  /**
-   * Creates a button with an optional image or text.
-   *
-   * @param {string} content - The text for the button (if the button is text-based). If null, the button will have an image.
-   * @param {string} imageSrc - The path to the image. If null, the button will have text.
-   * @param {function} onClick - The event handler function for the button click.
-   * @param {string} width - Width from parent space
-   * @param {string} height - Height from parent space
-   * @param {string} paddingTop - The top padding of the button.
-   * @param {string} paddingBottom - The bottom padding of the button.
-   * @param {string} marginLeft - The left margin of the button.
-   * @param {string} marginRight - The right margin of the button.
-   * @param {string} justifyContent - The alignment of the exitDiv content.
-   * @returns {HTMLDivElement} The created button element.
-   */
-  function createButton(
-    content,
-    imageSrc,
-    onClick,
-    width,
-    height,
-    paddingTop,
-    paddingBottom,
-    marginLeft,
-    marginRight,
-    justifyContent
-  ) {
-    const mainDivButton = document.createElement("div");
-    mainDivButton.style.width = width;
-    mainDivButton.style.height = height;
-    mainDivButton.style.display = "flex";
-    mainDivButton.style.alignItems = "center";
-    mainDivButton.style.justifyContent = justifyContent;
-    mainDivButton.style.userSelect = "none";
-
-    const button = document.createElement("button");
-    button.style.paddingTop = paddingTop;
-    button.style.paddingBottom = paddingBottom;
-    button.style.marginRight = marginRight;
-    button.style.marginLeft = marginLeft;
-    button.style.height = "100%";
-    button.style.padding = "0";
-    button.style.display = "flex";
-    button.style.alignItems = "center";
-    button.style.justifyContent = "center";
-
-    // Check for image path
-    if (imageSrc) {
-      const buttonImg = document.createElement("img");
-      buttonImg.src = imageSrc;
-      buttonImg.style.maxWidth = "90%";
-      buttonImg.style.maxHeight = "90%";
-      buttonImg.style.objectFit = "contain";
-      buttonImg.style.display = "block";
-      buttonImg.style.pointerEvents = "none";
-      buttonImg.style.userSelect = "none";
-      button.appendChild(buttonImg);
-    } else {
-      // If no image is provided, create a text element
-      const buttonText = document.createElement("span");
-      buttonText.textContent = content;
-      buttonText.style.marginLeft = "1vw";
-      buttonText.style.marginRight = "1vw";
-      buttonText.style.fontSize = TopPanelTextSize;
-      buttonText.style.pointerEvents = "none";
-      buttonText.style.userSelect = "none";
-      button.appendChild(buttonText);
-    }
-
-    mainDivButton.appendChild(button);
-
-    // Add click event handler
-    button.addEventListener("click", onClick);
-
-    return mainDivButton; // Return the created element
   }
 
   /**
@@ -1080,39 +995,31 @@ var bcModSdk = (function () {
     GetDeckData();
   });
 
-  const editButton = newCreateButton(
+  const editButton = createButton(
     "Edit Deck",
     null,
     SetEditMode,
     "18%",
     "80%",
-    "10%",
-    "10%",
     "5%",
     "5%",
-    "center",
     "Open edit menu",
     "right"
   );
 
-  const exportButton = newCreateButton(
+  const exportButton = createButton(
     "Export",
     null,
-    () => {
-      console.log("Centered button clicked!");
-    },
+    null,
     "auto",
     "80%",
-    "10%",
-    "10%",
     "0",
     "0",
-    "center",
     "Export Deck",
     "right"
   );
 
-  const importButton = newCreateButton(
+  const importButton = createButton(
     "Import",
     null,
     () => {
@@ -1120,11 +1027,8 @@ var bcModSdk = (function () {
     },
     "auto",
     "80%",
-    "10%",
-    "10%",
     "0",
     "0",
-    "center",
     "Import Deck",
     "right"
   );
@@ -1198,94 +1102,72 @@ var bcModSdk = (function () {
   groupButtons.style.boxSizing = "border-box";
   groupButtons.style.gap = "2%";
 
-  const clearButton = newCreateButton(
+  const clearButton = createButton(
     null,
     "Icons/Trash.png",
     ClearCurrentDeck,
     "20%",
     "80%",
-    "5%",
-    "5%",
-    "1%",
     "0",
-    "center",
+    "0",
     "Clear all cards",
     "left"
   );
 
-  const defaultButton = newCreateButton(
+  const defaultButton = createButton(
     "Default",
     "Icons/Small/Undo.png",
     () => {},
     "16%",
     "80%",
-    "10%",
-    "10%",
     "0",
     "0",
-    "center",
     "Select default deck",
     "left"
   );
 
-  const leftCardsListButtonWithImage = newCreateButton(
+  const leftCardsListButtonWithImage = createButton(
     null,
     "Icons/Prev.png",
     PrevButtonClick,
     "20%",
     "80%",
-    "5%",
-    "5%",
     "0",
-    "3%",
-    "flex-end",
+    "0",
     "Previous page of cards",
     "left"
   );
 
-  const rightCardsListButtonWithImage = newCreateButton(
+  const rightCardsListButtonWithImage = createButton(
     null,
     "Icons/Next.png",
     NextButtonClick,
     "20%",
     "80%",
-    "5%",
-    "5%",
-    "3%",
     "0",
-    "flex-start",
+    "0",
     "Next page of cards",
     "left"
   );
-  const saveDeckButtonWithImage = newCreateButton(
+  const saveDeckButtonWithImage = createButton(
     null,
     "Icons/Accept.png",
-    () => {
-      SetViewMode(true);
-    },
+    () => SetViewMode(true),
     "20%",
     "80%",
-    "5%",
-    "5%",
     "0",
     "0",
-    "center",
     "Save deck",
     "left"
   );
-  const cancelDeckButtonWithImage = newCreateButton(
+  const cancelDeckButtonWithImage = createButton(
     null,
     "Icons/Cancel.png",
-    () => {
-      SetViewMode(false);
-    },
+    () => SetViewMode(false),
     "20%",
     "80%",
-    "5%",
-    "5%",
-    "1%",
     "0",
-    "center",
+    "0",
     "Cancel all changes",
     "left"
   );
@@ -1329,12 +1211,10 @@ var bcModSdk = (function () {
   topSettingsRightPanel.style.height = "100%";
   topSettingsRightPanel.style.boxSizing = "border-box";
 
-  const settingsButton = newCreateButton(
+  const settingsButton = createButton(
     "Settings",
     null,
-    () => {
-      console.log("Centered button clicked!");
-    },
+    null,
     "auto",
     "80%",
     "10%",
@@ -1346,7 +1226,7 @@ var bcModSdk = (function () {
     "left"
   );
 
-  const exitButtonWithImage = newCreateButton(
+  const exitButtonWithImage = createButton(
     null,
     MoonCEBCExitIconPath,
     () => {
@@ -1358,11 +1238,8 @@ var bcModSdk = (function () {
     },
     "30%",
     "80%",
-    "5%",
-    "5%",
     "0",
     "5%",
-    "flex-end",
     "Exit Addon",
     "left"
   );
