@@ -1562,6 +1562,7 @@ var bcModSdk = (function () {
   function SetEditMode() {
     topSettingsLeftViewPanel.style.display = "none";
     topSettingsLeftEditPanel.style.display = "flex";
+    deckNameInput.style.color = "black";
     deckNameInput.value =
       decksCombobox.options[decksCombobox.selectedIndex].text;
 
