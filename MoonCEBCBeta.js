@@ -499,6 +499,7 @@ var bcModSdk = (function () {
   const TopPanelHeight = "7%";
   const TopPanelTextSize = "1.5vw";
   const DeckNamePanelWidth = "20%";
+  const TopLeftPanelGap = "1%";
 
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
@@ -1037,7 +1038,7 @@ var bcModSdk = (function () {
   mainWindow.style.height = "100%";
   mainWindow.style.border = "3px solid black";
   mainWindow.style.boxSizing = "border-box";
-  //mainWindow.style.display = "none";
+  mainWindow.style.display = "none";
   mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
   mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
   mainWindow.style.backgroundSize = "cover";
@@ -1066,7 +1067,7 @@ var bcModSdk = (function () {
   topSettingsLeftViewPanel.style.width = "88%";
   topSettingsLeftViewPanel.style.height = "100%";
   topSettingsLeftViewPanel.style.boxSizing = "border-box";
-  topSettingsLeftViewPanel.style.gap = "1%";
+  topSettingsLeftViewPanel.style.gap = TopLeftPanelGap;
 
   const decksCombobox = document.createElement("select");
   decksCombobox.style.marginLeft = "2%";
@@ -1083,7 +1084,7 @@ var bcModSdk = (function () {
     "Edit Deck",
     null,
     SetEditMode,
-    "20%",
+    "18%",
     "80%",
     "10%",
     "10%",
@@ -1142,6 +1143,7 @@ var bcModSdk = (function () {
   topSettingsLeftEditPanel.style.width = "88%";
   topSettingsLeftEditPanel.style.height = "100%";
   topSettingsLeftEditPanel.style.boxSizing = "border-box";
+  topSettingsLeftEditPanel.style.gap = TopLeftPanelGap;
 
   //#region deckNameImput
 
@@ -1162,9 +1164,7 @@ var bcModSdk = (function () {
   //#region groupCombobox
 
   const groupCombobox = document.createElement("select");
-  groupCombobox.style.marginLeft = "2%";
-  groupCombobox.style.marginRight = "2%";
-  groupCombobox.style.width = "20%";
+  groupCombobox.style.width = "18%";
   groupCombobox.style.height = "80%";
   groupCombobox.style.alignContent = "center";
 
