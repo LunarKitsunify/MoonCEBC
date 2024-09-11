@@ -1456,16 +1456,15 @@ var bcModSdk = (function () {
    * @param {boolean} isSave Switch to check whether the deck will be saved or not
    */
   function SetViewMode(isSave) {
+    isDeckNameValidation =
+      deckNameInput.value != "" &&
+      deckNameInput.value != null &&
+      deckNameInput.value.length < 31;
     if (isSave) {
-      if (
-        MoonCEBCEditCurrentDeck.length == 30 &&
-        deckNameInput.value != "" &&
-        deckNameInput.value != null &&
-        deckNameInput.value.length < 31
-      ) {
+      if (MoonCEBCEditCurrentDeck.length == 30 && isDeckNameValidation) {
         topSettingsLeftViewPanel.style.display = "flex";
         topSettingsLeftEditPanel.style.display = "none";
-        SaveNewDeck(); //TODO Need send new data on server
+        SaveNewDeck();
         MoonCEBCPageMode = WindowStatus.VIEW;
         UpdateCardsCells(MoonCEBCEditCurrentDeck);
         LoadPlayerData();
