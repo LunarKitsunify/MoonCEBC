@@ -15,7 +15,7 @@
 // @run-at document-end
 // ==/UserScript==
 
-//import { card_Cover1 } from "./Resources/imageResources.js";
+//import { card_Cover1 } from "./src/images.js";
 
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
@@ -485,10 +485,20 @@ var bcModSdk = (function () {
   let MoonCEBCCardHeight = 0;
   let MoonCEBCCardWidth = 0;
 
+  const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
+  const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
+
+  function UpdateServerPlayerData() {
+    Player.Game.ClubCard.CardCoverBackground = CardGameCardCoverBackground;
+    Player.Game.ClubCard.BoardBackground = CardGameBoardBackground;
+    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
+  }
+
   //#region Size and color customization
 
   const TopPanelHeight = "7%";
   const TopPanelTextSize = "1.5vw";
+  const DeckNamePanelWidth = "20%";
 
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
@@ -521,12 +531,12 @@ var bcModSdk = (function () {
 
   modApi.hookFunction("DrawImageEx", 0, (args, next) => {
     if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
-      const newImage = "https://i.imgur.com/rGuMjPS.jpeg";
+      const newImage = CardGameCardCoverBackground;
       args[0] = newImage;
     }
 
     if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
-      const newImage = "https://i.imgur.com/sagZ9Xp.png";
+      const newImage = CardGameBoardBackground;
       args[0] = newImage;
     }
     next(args);
@@ -547,6 +557,72 @@ var bcModSdk = (function () {
   //#region UI
 
   //#region Create UI Object func
+
+  /**
+   * Creates a button with an optional image or text.
+   *
+   * @param {string} content - The text for the button (if the button is text-based). If null, the button will have an image.
+   * @param {string} imageSrc - The path to the image. If null, the button will have text.
+   * @param {function} onClick - The event handler function for the button click.
+   * @param {string} width - Width from parent space
+   * @param {string} height - Height from parent space
+   * @param {string} paddingTop - The top padding of the button.
+   * @param {string} paddingBottom - The bottom padding of the button.
+   * @param {string} marginLeft - The left margin of the button.
+   * @param {string} marginRight - The right margin of the button.
+   * @param {string} justifyContent - The alignment of the exitDiv content.
+   * @param {string} tooltip - The tooltip text to display.
+   * @param {string} tooltipPosition - The position of the tooltip: "top", "right", "bottom", or "left".
+   * @returns {HTMLButtonElement} The created button element.
+   */
+  function newCreateButton(
+    content,
+    imageSrc,
+    onClick,
+    width,
+    height,
+    paddingTop,
+    paddingBottom,
+    marginLeft,
+    marginRight,
+    justifyContent,
+    tooltip = null,
+    tooltipPosition = "right"
+  ) {
+    const button = ElementButton.Create(
+      "ToolTipButton",
+      onClick,
+      {
+        tooltip: tooltip,
+        tooltipPosition: tooltipPosition,
+      },
+      {
+        button: {
+          style: {
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            marginLeft: marginLeft,
+            marginRight: marginRight,
+            display: "flex",
+            height: height,
+            width: width,
+            justifyContent: justifyContent,
+            alignItems: "center",
+            textAlign: "center",
+            userSelect: "none",
+          },
+
+          innerHTML: content
+            ? `<span style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; font-size: ${TopPanelTextSize};">${content}</span>`
+            : `<img src="${imageSrc}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`,
+        },
+        tooltip: {
+          style: {},
+        },
+      }
+    );
+    return button;
+  }
 
   /**
    * Creates a button with an optional image or text.
@@ -961,7 +1037,7 @@ var bcModSdk = (function () {
   mainWindow.style.height = "100%";
   mainWindow.style.border = "3px solid black";
   mainWindow.style.boxSizing = "border-box";
-  mainWindow.style.display = "none";
+  //mainWindow.style.display = "none";
   mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
   mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
   mainWindow.style.backgroundSize = "cover";
@@ -990,10 +1066,11 @@ var bcModSdk = (function () {
   topSettingsLeftViewPanel.style.width = "88%";
   topSettingsLeftViewPanel.style.height = "100%";
   topSettingsLeftViewPanel.style.boxSizing = "border-box";
+  topSettingsLeftViewPanel.style.gap = "1%";
 
   const decksCombobox = document.createElement("select");
   decksCombobox.style.marginLeft = "2%";
-  decksCombobox.style.width = "33%";
+  decksCombobox.style.width = DeckNamePanelWidth;
   decksCombobox.style.height = "80%";
   decksCombobox.style.alignContent = "center";
   decksCombobox.style.textAlign = "center";
@@ -1002,22 +1079,22 @@ var bcModSdk = (function () {
     GetDeckData();
   });
 
-  const editButton = createButton(
+  const editButton = newCreateButton(
     "Edit Deck",
     null,
-    () => {
-      SetEditMode();
-    },
+    SetEditMode,
     "20%",
     "80%",
     "10%",
     "10%",
-    "2%",
-    "0",
-    "center"
+    "5%",
+    "5%",
+    "center",
+    "Open edit menu",
+    "right"
   );
 
-  const exportButton = createButton(
+  const exportButton = newCreateButton(
     "Export",
     null,
     () => {
@@ -1029,10 +1106,12 @@ var bcModSdk = (function () {
     "10%",
     "0",
     "0",
-    "center"
+    "center",
+    "Export Deck",
+    "right"
   );
 
-  const importButton = createButton(
+  const importButton = newCreateButton(
     "Import",
     null,
     () => {
@@ -1044,7 +1123,9 @@ var bcModSdk = (function () {
     "10%",
     "0",
     "0",
-    "center"
+    "center",
+    "Import Deck",
+    "right"
   );
 
   topSettingsLeftViewPanel.appendChild(decksCombobox);
@@ -1066,7 +1147,7 @@ var bcModSdk = (function () {
 
   const deckNameInput = document.createElement("input");
   deckNameInput.style.marginLeft = "2%";
-  deckNameInput.style.width = "30%";
+  deckNameInput.style.width = DeckNamePanelWidth;
   deckNameInput.style.height = "80%";
   deckNameInput.style.alignContent = "center";
   deckNameInput.style.textAlign = "center";
@@ -1115,91 +1196,98 @@ var bcModSdk = (function () {
   groupButtons.style.display = "flex";
   groupButtons.style.flexDirection = "row";
   groupButtons.style.boxSizing = "border-box";
+  groupButtons.style.gap = "2%";
 
-  const clearButton = createButton(
+  const clearButton = newCreateButton(
     null,
     "Icons/Trash.png",
-    () => {
-      ClearCurrentDeck();
-    },
+    ClearCurrentDeck,
     "20%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "1%",
     "0",
-    "center"
+    "center",
+    "Clear all cards",
+    "left"
   );
 
-  const defaultButton = createButton(
+  const defaultButton = newCreateButton(
     "Default",
     "Icons/Small/Undo.png",
     () => {},
     "16%",
-    "90%",
+    "80%",
     "10%",
     "10%",
     "0",
     "0",
-    "center"
+    "center",
+    "Select default deck",
+    "left"
   );
 
-  const leftCardsListButtonWithImage = createButton(
+  const leftCardsListButtonWithImage = newCreateButton(
     null,
     "Icons/Prev.png",
-    () => {
-      PrevButtonClick();
-    },
+    PrevButtonClick,
     "20%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "0",
     "3%",
-    "flex-end"
+    "flex-end",
+    "Previous page of cards",
+    "left"
   );
 
-  const rightCardsListButtonWithImage = createButton(
+  const rightCardsListButtonWithImage = newCreateButton(
     null,
     "Icons/Next.png",
-    () => {
-      NextButtonClick();
-    },
+    NextButtonClick,
     "20%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "3%",
     "0",
-    "flex-start"
+    "flex-start",
+    "Next page of cards",
+    "left"
   );
-  const saveDeckButtonWithImage = createButton(
+  const saveDeckButtonWithImage = newCreateButton(
     null,
     "Icons/Accept.png",
     () => {
       SetViewMode(true);
     },
     "20%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "0",
     "0",
-    "center"
+    "center",
+    "Save deck",
+    "left"
   );
-  const cancelDeckButtonWithImage = createButton(
+  const cancelDeckButtonWithImage = newCreateButton(
     null,
     "Icons/Cancel.png",
     () => {
       SetViewMode(false);
     },
     "20%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "1%",
     "0",
-    "center"
+    "center",
+    "Cancel all changes",
+    "left"
   );
 
   //#endregion
@@ -1241,7 +1329,7 @@ var bcModSdk = (function () {
   topSettingsRightPanel.style.height = "100%";
   topSettingsRightPanel.style.boxSizing = "border-box";
 
-  const settingsButton = createButton(
+  const settingsButton = newCreateButton(
     "Settings",
     null,
     () => {
@@ -1253,10 +1341,12 @@ var bcModSdk = (function () {
     "10%",
     "0",
     "0",
-    "center"
+    "center",
+    "Open Settings Menu",
+    "left"
   );
 
-  const exitButtonWithImage = createButton(
+  const exitButtonWithImage = newCreateButton(
     null,
     MoonCEBCExitIconPath,
     () => {
@@ -1267,12 +1357,14 @@ var bcModSdk = (function () {
       isVisibleMainWindow = !isVisibleMainWindow;
     },
     "30%",
-    "90%",
+    "80%",
     "5%",
     "5%",
     "0",
     "5%",
-    "flex-end"
+    "flex-end",
+    "Exit Addon",
+    "left"
   );
 
   //topSettingsRightPanel.appendChild(settingsButton);
@@ -1350,6 +1442,8 @@ var bcModSdk = (function () {
       let copiedCard = { ...ClubCardList[i] };
       MoonCEBCClubCardList.push(copiedCard);
     }
+
+    //new card ?
 
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
