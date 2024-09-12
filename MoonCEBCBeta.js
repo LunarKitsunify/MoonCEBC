@@ -517,6 +517,11 @@ var bcModSdk = (function () {
     (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
+
+  //Themed Addon Integration
+  //let MoonCEBCAccentColor = Player.Themed.ColorsModule.accentColor;
+  //let MoonCEBCPrimaryColor = Player.Themed.ColorsModule.primaryColor;
+  //let MoonCEBCtextColor = Player.Themed.ColorsModule.textColor;
   //#endregion
 
   //#endregion
@@ -536,10 +541,10 @@ var bcModSdk = (function () {
       args[0] = newImage;
     }
 
-    if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
+    /*if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
       const newImage = CardGameBoardBackground;
       args[0] = newImage;
-    }
+    }*/
     next(args);
   });
 
@@ -1149,6 +1154,7 @@ var bcModSdk = (function () {
     "Next page of cards",
     "left"
   );
+
   const saveDeckButtonWithImage = createButton(
     null,
     "Icons/Accept.png",
@@ -1160,6 +1166,7 @@ var bcModSdk = (function () {
     "Save deck",
     "left"
   );
+
   const cancelDeckButtonWithImage = createButton(
     null,
     "Icons/Cancel.png",
