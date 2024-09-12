@@ -1456,7 +1456,7 @@ var bcModSdk = (function () {
    * @param {boolean} isSave Switch to check whether the deck will be saved or not
    */
   function SetViewMode(isSave) {
-    isDeckNameValidation =
+    const isDeckNameValidation =
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length < 31;
