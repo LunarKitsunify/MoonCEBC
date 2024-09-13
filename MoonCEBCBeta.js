@@ -542,7 +542,7 @@ var bcModSdk = (function () {
     name: "MoonCEBC",
     fullName: "Moon Cards Editor BC",
     version: "1.1.0",
-    repository: "https://github.com/LunarKitsunify/RoomCardDecksEditorBC",
+    repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
 
   /*modApi.hookFunction("DrawImageEx", 0, (args, next) => {
