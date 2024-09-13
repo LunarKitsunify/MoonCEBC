@@ -1213,7 +1213,7 @@ var bcModSdk = (function () {
 
   //#region deckCardsCounter
   const deckCardsCounter = document.createElement("div");
-  deckCardsCounter.style.width = "25%";
+  deckCardsCounter.style.width = "15%";
   deckCardsCounter.style.alignContent = "center";
   deckCardsCounter.style.textAlign = "center";
   deckCardsCounter.style.pointerEvents = "none";
