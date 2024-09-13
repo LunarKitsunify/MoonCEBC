@@ -415,6 +415,7 @@ var bcModSdk = (function () {
   const MoonCEBCBoardBackgroundPath =
     "url('Backgrounds/ClubCardPlayBoard1.jpg')";
   const MoonCEBCExitIconPath = "Icons/Exit.png";
+  const MoonCEBCSettingsIconPath = "Icons/General.png";
   const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
   /**
    * variable for loading description for cards
@@ -450,6 +451,12 @@ var bcModSdk = (function () {
    * @type {ClubCard[]}
    */
   let MoonCEBCBuilderCurrentGroupsList = [];
+
+  /**
+   *array to sift out of the MoonCEBCBuilderCurrentGroupsList of cards matching the condition.
+   * @type {ClubCard[]}
+   */
+  let MoonCEBCBuilderSeacrhGroupList = [];
   /**
    * Variable for tracking the current group in edit mode
    * @type {string}
@@ -497,9 +504,12 @@ var bcModSdk = (function () {
   //#region Size and color customization
 
   const TopPanelHeight = "7%";
-  const TopPanelTextSize = "1.5vw";
+  const TopPanelTextSize = "1.2vw";
   const DeckNamePanelWidth = "20%";
   const TopLeftPanelGap = "1%";
+  const TopPanelSidePadding = "0.5%";
+  const TopLeftPanelWidth = "92%";
+  const TopRightPanelWidth = `calc(100% - ${TopLeftPanelWidth})`;
 
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
@@ -937,13 +947,7 @@ var bcModSdk = (function () {
   showButton.style.transform = "translateX(calc(50% - 45%))";
   showButton.style.padding = "1px 2px";
   showButton.style.display = "none";
-  showButton.addEventListener("click", function () {
-    mainWindow.style.display = "block";
-    MoonCEBCPageMode = WindowStatus.VIEW;
-    LoadPlayerData();
-    isVisibleMainWindow = !isVisibleMainWindow;
-    UpdateCardHeightWidth();
-  });
+  showButton.addEventListener("click", OpenExitAddonWindow);
   document.body.appendChild(showButton);
 
   //#endregion
@@ -984,13 +988,13 @@ var bcModSdk = (function () {
   topSettingsLeftViewPanel.style.display = "flex";
   topSettingsLeftViewPanel.style.justifyContent = "flex-start";
   topSettingsLeftViewPanel.style.alignItems = "center";
-  topSettingsLeftViewPanel.style.width = "88%";
+  topSettingsLeftViewPanel.style.width = TopLeftPanelWidth;
   topSettingsLeftViewPanel.style.height = "100%";
   topSettingsLeftViewPanel.style.boxSizing = "border-box";
   topSettingsLeftViewPanel.style.gap = TopLeftPanelGap;
+  topSettingsLeftViewPanel.style.paddingLeft = TopPanelSidePadding;
 
   const decksCombobox = document.createElement("select");
-  decksCombobox.style.marginLeft = "2%";
   decksCombobox.style.width = DeckNamePanelWidth;
   decksCombobox.style.height = "80%";
   decksCombobox.style.alignContent = "center";
@@ -1004,7 +1008,7 @@ var bcModSdk = (function () {
     "Edit Deck",
     null,
     SetEditMode,
-    "18%",
+    "15%",
     "80%",
     "5%",
     "5%",
@@ -1049,20 +1053,22 @@ var bcModSdk = (function () {
   topSettingsLeftEditPanel.style.display = "none";
   topSettingsLeftEditPanel.style.justifyContent = "flex-start";
   topSettingsLeftEditPanel.style.alignItems = "center";
-  topSettingsLeftEditPanel.style.width = "88%";
+  topSettingsLeftEditPanel.style.width = TopLeftPanelWidth;
   topSettingsLeftEditPanel.style.height = "100%";
   topSettingsLeftEditPanel.style.boxSizing = "border-box";
   topSettingsLeftEditPanel.style.gap = TopLeftPanelGap;
+  topSettingsLeftEditPanel.style.paddingLeft = TopPanelSidePadding;
+  topSettingsLeftEditPanel.style.paddingRight = TopPanelSidePadding;
 
   //#region deckNameImput
 
   const deckNameInput = document.createElement("input");
-  deckNameInput.style.marginLeft = "2%";
   deckNameInput.style.width = DeckNamePanelWidth;
   deckNameInput.style.height = "80%";
   deckNameInput.style.alignContent = "center";
   deckNameInput.style.textAlign = "center";
   deckNameInput.style.fontSize = TopPanelTextSize;
+  deckNameInput.placeholder = "Deck Name";
   deckNameInput.addEventListener("input", (event) => {
     if (deckNameInput.value.length > 30) deckNameInput.style.color = "red";
     else deckNameInput.style.color = "black";
@@ -1073,7 +1079,7 @@ var bcModSdk = (function () {
   //#region groupCombobox
 
   const groupCombobox = document.createElement("select");
-  groupCombobox.style.width = "18%";
+  groupCombobox.style.width = "15%";
   groupCombobox.style.height = "80%";
   groupCombobox.style.alignContent = "center";
 
@@ -1093,6 +1099,30 @@ var bcModSdk = (function () {
     });
   }
   populateGroupCombobox();
+
+  //#endregion
+
+  //#region Search Card Input
+
+  const searchCardInput = document.createElement("input");
+  searchCardInput.style.width = "10%";
+  searchCardInput.style.height = "80%";
+  searchCardInput.style.alignContent = "center";
+  searchCardInput.style.textAlign = "center";
+  searchCardInput.style.fontSize = TopPanelTextSize;
+  searchCardInput.placeholder = "Search Card";
+  searchCardInput.addEventListener("input", (event) => {
+    const newValue = event.target.value;
+    if (newValue == "" || newValue == undefined)
+      MoonCEBCBuilderSeacrhGroupList = [];
+    else
+      MoonCEBCBuilderSeacrhGroupList = MoonCEBCBuilderCurrentGroupsList.filter(
+        (card) => card.Name.toLowerCase().includes(newValue.toLowerCase())
+      );
+
+    MoonCEBCCurrent30Cards = Get30CardsGroup();
+    UpdateCardsCells(MoonCEBCCurrent30Cards);
+  });
 
   //#endregion
 
@@ -1122,7 +1152,7 @@ var bcModSdk = (function () {
   const defaultButton = createButton(
     "Default",
     "Icons/Small/Undo.png",
-    () => {},
+    null,
     "16%",
     "80%",
     "0",
@@ -1193,9 +1223,6 @@ var bcModSdk = (function () {
 
   //#endregion
 
-  topSettingsLeftEditPanel.appendChild(deckNameInput);
-  topSettingsLeftEditPanel.appendChild(groupCombobox);
-
   groupButtons.appendChild(clearButton);
   //groupButton.appendChild(defaultButton);
   groupButtons.appendChild(leftCardsListButtonWithImage);
@@ -1203,6 +1230,9 @@ var bcModSdk = (function () {
   groupButtons.appendChild(saveDeckButtonWithImage);
   groupButtons.appendChild(cancelDeckButtonWithImage);
 
+  topSettingsLeftEditPanel.appendChild(deckNameInput);
+  topSettingsLeftEditPanel.appendChild(groupCombobox);
+  topSettingsLeftEditPanel.appendChild(searchCardInput);
   topSettingsLeftEditPanel.appendChild(groupButtons);
   topSettingsLeftEditPanel.appendChild(deckCardsCounter);
   //#endregion
@@ -1214,36 +1244,30 @@ var bcModSdk = (function () {
   topSettingsRightPanel.style.flexDirection = "row";
   topSettingsRightPanel.style.justifyContent = "flex-end";
   topSettingsRightPanel.style.alignItems = "center";
-  topSettingsRightPanel.style.width = "12%";
+  topSettingsRightPanel.style.width = TopRightPanelWidth;
   topSettingsRightPanel.style.height = "100%";
   topSettingsRightPanel.style.boxSizing = "border-box";
+  topSettingsRightPanel.style.paddingRight = TopPanelSidePadding;
+  topSettingsRightPanel.style.paddingLeft = TopPanelSidePadding;
+  topSettingsRightPanel.style.gap = TopLeftPanelGap;
 
   const settingsButton = createButton(
-    "Settings",
     null,
+    MoonCEBCSettingsIconPath,
     null,
-    "auto",
+    "50%",
     "80%",
-    "10%",
-    "10%",
     "0",
     "0",
-    "center",
-    "Open Settings Menu",
+    "Dont Work",
     "left"
   );
 
   const exitButtonWithImage = createButton(
     null,
     MoonCEBCExitIconPath,
-    () => {
-      topSettingsLeftViewPanel.style.display = "flex";
-      topSettingsLeftEditPanel.style.display = "none";
-      MoonCEBCPageMode = WindowStatus.VIEW;
-      mainWindow.style.display = "none";
-      isVisibleMainWindow = !isVisibleMainWindow;
-    },
-    "30%",
+    OpenExitAddonWindow,
+    "50%",
     "80%",
     "0",
     "5%",
@@ -1251,7 +1275,7 @@ var bcModSdk = (function () {
     "left"
   );
 
-  //topSettingsRightPanel.appendChild(settingsButton);
+  topSettingsRightPanel.appendChild(settingsButton);
   topSettingsRightPanel.appendChild(exitButtonWithImage);
 
   //#endregion
@@ -1426,20 +1450,10 @@ var bcModSdk = (function () {
     else deckCardsCounter.style.color = "white";
   }
 
-  /**
-   * Save new Deck  :)
-   */
-  function SaveNewDeck() {
-    const newDeckName = deckNameInput.value;
-    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
-    const encodeIDDeck = encodeIDDeckToString(cardIDs);
-    const selectedIndex = decksCombobox.selectedIndex;
+  //#region Top Panel Button Logic
 
-    Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
-    Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
+  //#region VIEW Left Top Panel
 
-    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
-  }
   /**
    * The function changes the top panel and updates the data to enter edit mode.
    */
@@ -1457,6 +1471,10 @@ var bcModSdk = (function () {
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
   }
+
+  //#endregion
+
+  //#region EDIT Left Top Panel
 
   /**
    * The function changes the top panel and, depending on isSave, undoes or saves changes to the deck.
@@ -1483,20 +1501,21 @@ var bcModSdk = (function () {
       UpdateCardsCells(MoonCEBCCurrentDeck);
     }
   }
+
   /**
-   * Clear Current deck in edit mode
+   * Save new Deck  :)
    */
-  function ClearCurrentDeck() {
-    MoonCEBCEditCurrentDeck = [];
+  function SaveNewDeck() {
+    const newDeckName = deckNameInput.value;
+    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const encodeIDDeck = encodeIDDeckToString(cardIDs);
+    const selectedIndex = decksCombobox.selectedIndex;
 
-    UpdateCardsCells(MoonCEBCCurrent30Cards);
+    Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+    Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
 
-    UpdateDeckCardsCounter();
+    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
   }
-  /**
-   * TODO Maybe I'll add a couple of my decks as a default deck?
-   */
-  function SetCurrentDeckDefault() {}
 
   /**
    * Function for switching cards pages in edit mode
@@ -1527,6 +1546,47 @@ var bcModSdk = (function () {
       MoonCEBCCurrentCardsListPage -= 1;
     }
   }
+
+  /**
+   * Clear Current deck in edit mode
+   */
+  function ClearCurrentDeck() {
+    MoonCEBCEditCurrentDeck = [];
+
+    UpdateCardsCells(MoonCEBCCurrent30Cards);
+
+    UpdateDeckCardsCounter();
+  }
+  /**
+   * TODO Maybe I'll add a couple of my decks as a default deck?
+   */
+  function SetCurrentDeckDefault() {}
+
+  //#endregion
+
+  //#region Right Top Panel
+
+  /**
+   * Function to open or close the addon window
+   */
+  function OpenExitAddonWindow() {
+    if (isVisibleMainWindow) {
+      topSettingsLeftViewPanel.style.display = "flex";
+      topSettingsLeftEditPanel.style.display = "none";
+      mainWindow.style.display = "none";
+    } else {
+      LoadPlayerData();
+      mainWindow.style.display = "block";
+      UpdateCardHeightWidth();
+    }
+
+    MoonCEBCPageMode = WindowStatus.VIEW;
+    isVisibleMainWindow = !isVisibleMainWindow;
+  }
+
+  //#endregion
+
+  //#endregion
 
   /**
    * Function to update the size of cards in 30 cells when the window size changes.
@@ -1630,17 +1690,19 @@ var bcModSdk = (function () {
   function Get30CardsGroup() {
     const cardsPerPage = MoonCEBCBuilderDeckSize;
     const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
-    const countTakePossibleCards =
-      MoonCEBCBuilderCurrentGroupsList.length - countSkipCards;
+
+    const cardsSources =
+      MoonCEBCBuilderSeacrhGroupList.length > 0
+        ? MoonCEBCBuilderSeacrhGroupList
+        : MoonCEBCBuilderCurrentGroupsList;
+
+    const countTakePossibleCards = cardsSources.length - countSkipCards;
 
     if (countTakePossibleCards >= cardsPerPage) {
-      return MoonCEBCBuilderCurrentGroupsList.slice(
-        countSkipCards,
-        countSkipCards + cardsPerPage
-      );
+      return cardsSources.slice(countSkipCards, countSkipCards + cardsPerPage);
     }
     if (countTakePossibleCards < cardsPerPage && countTakePossibleCards > 0) {
-      return MoonCEBCBuilderCurrentGroupsList.slice(
+      return cardsSources.slice(
         countSkipCards,
         countSkipCards + countTakePossibleCards
       );
