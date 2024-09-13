@@ -1573,6 +1573,8 @@ var bcModSdk = (function () {
     if (isVisibleMainWindow) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
+      searchCardInput.value = "";
+      MoonCEBCBuilderSeacrhGroupList = [];
       mainWindow.style.display = "none";
     } else {
       LoadPlayerData();
