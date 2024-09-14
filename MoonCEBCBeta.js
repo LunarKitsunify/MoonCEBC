@@ -405,17 +405,8 @@ var bcModSdk = (function () {
     COLLEGE_STUDENT: { value: "CollegeStudent", text: "College Student" },
     COLLEGE_TEACHER: { value: "CollegeTeacher", text: "College Teacher" },
   });
-  /**
-   * The size of the deck being built (number of cards)
-   * @type {number}
-   */
-  const MoonCEBCBuilderDeckSize = 30;
+
   const MoonCEBCAddonName = "Moon Cards Editor BC";
-  const MoonCEBCCardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-  const MoonCEBCBoardBackgroundPath =
-    "url('Backgrounds/ClubCardPlayBoard1.jpg')";
-  const MoonCEBCExitIconPath = "Icons/Exit.png";
-  const MoonCEBCSettingsIconPath = "Icons/General.png";
   const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
   /**
    * variable for loading description for cards
@@ -451,7 +442,6 @@ var bcModSdk = (function () {
    * @type {ClubCard[]}
    */
   let MoonCEBCBuilderCurrentGroupsList = [];
-
   /**
    *array to sift out of the MoonCEBCBuilderCurrentGroupsList of cards matching the condition.
    * @type {ClubCard[]}
@@ -461,7 +451,7 @@ var bcModSdk = (function () {
    * Variable for tracking the current group in edit mode
    * @type {string}
    */
-  let MoonCEBCCurrentGroup = "All Cards";
+  let MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
   /**
    * Variable for tracking the current page in edit mode
    * @type {number}
@@ -478,19 +468,29 @@ var bcModSdk = (function () {
    */
   let isVisibleMainWindow = false;
   /**
+   * variable to check if mainWindow is open
+   */
+  let isMainWindowLoaded = false;
+  /**
    * An array of 30 cells into which the bottom container is divided. To display 30 cards.
    * @type {HTMLDivElement[]}
    */
-  const CardCells = [];
-
-  const w = window;
+  let CardCells = [];
 
   window.addEventListener("resize", function () {
-    UpdateCardHeightWidth();
+    if (isMainWindowLoaded) UpdateCardHeightWidth();
   });
 
+  /**
+   * Variable for accessing  mainWindow = document.createElement("div");
+   */
+  let MainWindowPanel = null;
+
+  // variables to calculate the height and width of the cards.
   let MoonCEBCCardHeight = 0;
   let MoonCEBCCardWidth = 0;
+  let MoonCEBCBigCardHeight = 0;
+  let MoonCEBCBigCardWidth = 0;
 
   const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
@@ -528,10 +528,6 @@ var bcModSdk = (function () {
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
 
-  //Themed Addon Integration
-  //let MoonCEBCAccentColor = Player.Themed.ColorsModule.accentColor;
-  //let MoonCEBCPrimaryColor = Player.Themed.ColorsModule.primaryColor;
-  //let MoonCEBCtextColor = Player.Themed.ColorsModule.textColor;
   //#endregion
 
   //#endregion
@@ -600,7 +596,7 @@ var bcModSdk = (function () {
     tooltipPosition = "right"
   ) {
     const button = ElementButton.Create(
-      "ToolTipButton",
+      `ToolTipButton_${Math.random().toString(36).substring(2, 9)}`,
       onClick,
       {
         tooltip: tooltip,
@@ -629,6 +625,18 @@ var bcModSdk = (function () {
         },
       }
     );
+    if (Player.Themed) {
+      button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
+      button.style.borderColor = Player.Themed.ColorsModule.accentColor;
+      button.style.color = Player.Themed.ColorsModule.textColor;
+      button.addEventListener("mouseover", () => {
+        button.style.backgroundColor = Player.Themed.ColorsModule.accentColor;
+      });
+      button.addEventListener("mouseout", () => {
+        button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
+      });
+    }
+
     return button;
   }
 
@@ -708,6 +716,9 @@ var bcModSdk = (function () {
 
     const cardButton = document.createElement("button");
     cardButton.style.position = "relative";
+    cardButton.style.top = "50%";
+    cardButton.style.left = "50%";
+    cardButton.style.transform = "translate(-50%, -50%)";
     cardButton.style.borderRadius = "6px";
     cardButton.style.display = "flex";
     cardButton.style.justifyContent = "center";
@@ -715,8 +726,9 @@ var bcModSdk = (function () {
     cardButton.style.userSelect = "none";
 
     if (isCurrentCardInfoCell) {
-      cardButton.style.height = "100%";
-      cardButton.style.aspectRatio = "1 / 2";
+      cardButton.id = "BigCardId";
+      cardButton.style.height = `${MoonCEBCBigCardHeight}px`;
+      cardButton.style.width = `${MoonCEBCBigCardWidth}px`;
     } else {
       cardButton.style.height = `${MoonCEBCCardHeight}px`;
       cardButton.style.width = `${MoonCEBCCardWidth}px`;
@@ -748,7 +760,9 @@ var bcModSdk = (function () {
       if (!isInfoPanel) {
         if (MoonCEBCMouseOverCard != Card) {
           MoonCEBCMouseOverCard = Card;
-          cardInfoPanel.innerHTML = "";
+          const cardInfoPanel =
+            MainWindowPanel.querySelector("#CardInfoPanelId");
+          if (cardInfoPanel) cardInfoPanel.innerHTML = "";
           DrawCard(
             MoonCEBCMouseOverCard,
             cardInfoPanel,
@@ -952,386 +966,451 @@ var bcModSdk = (function () {
 
   //#endregion
 
-  //#region mainWindow
-  const mainWindow = document.createElement("div");
-  mainWindow.style.position = "fixed";
-  mainWindow.style.top = "50%";
-  mainWindow.style.left = "50%";
-  mainWindow.style.transform = "translate(-50%, -50%)";
-  mainWindow.style.width = "100%";
-  mainWindow.style.height = "100%";
-  mainWindow.style.border = "3px solid black";
-  mainWindow.style.boxSizing = "border-box";
-  mainWindow.style.display = "none";
-  mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
-  mainWindow.style.backgroundImage = MoonCEBCBoardBackgroundPath;
-  mainWindow.style.backgroundSize = "cover";
-  mainWindow.style.backgroundPosition = "center";
-  document.body.appendChild(mainWindow);
+  function LoadMainWindow() {
+    //#region mainWindow
+    const mainWindow = document.createElement("div");
+    //mainWindow.id = "MainWindowId";
+    mainWindow.style.position = "fixed";
+    mainWindow.style.top = "50%";
+    mainWindow.style.left = "50%";
+    mainWindow.style.transform = "translate(-50%, -50%)";
+    mainWindow.style.width = "100%";
+    mainWindow.style.height = "100%";
+    mainWindow.style.border = "3px solid black";
+    mainWindow.style.boxSizing = "border-box";
+    mainWindow.style.display = "block";
+    mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
+    mainWindow.style.backgroundImage =
+      "url('Backgrounds/ClubCardPlayBoard1.jpg')";
+    mainWindow.style.backgroundSize = "cover";
+    mainWindow.style.backgroundPosition = "center";
+    document.body.appendChild(mainWindow);
+    MainWindowPanel = mainWindow;
 
-  //#endregion
+    //#endregion
 
-  //#region Top Panel
-  const topSettingsPanel = document.createElement("div");
-  topSettingsPanel.style.display = "flex";
-  topSettingsPanel.style.borderBottom = "2px solid black";
-  topSettingsPanel.style.boxSizing = "border-box";
-  topSettingsPanel.style.alignItems = "center";
-  topSettingsPanel.style.height = TopPanelHeight;
-  topSettingsPanel.style.width = "100%";
-  topSettingsPanel.style.backgroundImage = MoonCEBCTopPanelBackground;
-  topSettingsPanel.style.backgroundSize = "cover";
-  topSettingsPanel.style.backgroundPosition = "center";
+    //#region Top Panel
+    const topSettingsPanel = document.createElement("div");
+    topSettingsPanel.style.display = "flex";
+    topSettingsPanel.style.borderBottom = "2px solid black";
+    topSettingsPanel.style.boxSizing = "border-box";
+    topSettingsPanel.style.alignItems = "center";
+    topSettingsPanel.style.height = TopPanelHeight;
+    topSettingsPanel.style.width = "100%";
+    topSettingsPanel.style.backgroundImage = MoonCEBCTopPanelBackground;
+    topSettingsPanel.style.backgroundSize = "cover";
+    topSettingsPanel.style.backgroundPosition = "center";
+    mainWindow.appendChild(topSettingsPanel);
 
-  //#region topSettingsLeftViewPanel
-  const topSettingsLeftViewPanel = document.createElement("div");
-  topSettingsLeftViewPanel.style.display = "flex";
-  topSettingsLeftViewPanel.style.justifyContent = "flex-start";
-  topSettingsLeftViewPanel.style.alignItems = "center";
-  topSettingsLeftViewPanel.style.width = TopLeftPanelWidth;
-  topSettingsLeftViewPanel.style.height = "100%";
-  topSettingsLeftViewPanel.style.boxSizing = "border-box";
-  topSettingsLeftViewPanel.style.gap = TopLeftPanelGap;
-  topSettingsLeftViewPanel.style.paddingLeft = TopPanelSidePadding;
+    //#region topSettingsLeftViewPanel
+    const topSettingsLeftViewPanel = document.createElement("div");
+    topSettingsLeftViewPanel.id = "TopSettingsLeftViewPanelId";
+    topSettingsLeftViewPanel.style.display = "flex";
+    topSettingsLeftViewPanel.style.justifyContent = "flex-start";
+    topSettingsLeftViewPanel.style.alignItems = "center";
+    topSettingsLeftViewPanel.style.width = TopLeftPanelWidth;
+    topSettingsLeftViewPanel.style.height = "100%";
+    topSettingsLeftViewPanel.style.boxSizing = "border-box";
+    topSettingsLeftViewPanel.style.gap = TopLeftPanelGap;
+    topSettingsLeftViewPanel.style.paddingLeft = TopPanelSidePadding;
+    topSettingsPanel.appendChild(topSettingsLeftViewPanel);
 
-  const decksCombobox = document.createElement("select");
-  decksCombobox.style.width = DeckNamePanelWidth;
-  decksCombobox.style.height = "80%";
-  decksCombobox.style.alignContent = "center";
-  decksCombobox.style.textAlign = "center";
-  decksCombobox.style.fontSize = TopPanelTextSize;
-  decksCombobox.addEventListener("change", function () {
-    GetDeckData();
-  });
-
-  const editButton = createButton(
-    "Edit Deck",
-    null,
-    SetEditMode,
-    "15%",
-    "80%",
-    "5%",
-    "5%",
-    "Open edit menu",
-    "right"
-  );
-
-  const exportButton = createButton(
-    "Export",
-    null,
-    null,
-    "auto",
-    "80%",
-    "0",
-    "0",
-    "Export Deck",
-    "right"
-  );
-
-  const importButton = createButton(
-    "Import",
-    null,
-    () => {
-      console.log("Centered button clicked!");
-    },
-    "auto",
-    "80%",
-    "0",
-    "0",
-    "Import Deck",
-    "right"
-  );
-
-  topSettingsLeftViewPanel.appendChild(decksCombobox);
-  topSettingsLeftViewPanel.appendChild(editButton);
-  //topSettingsLeftViewPanel.appendChild(exportButton);
-  //topSettingsLeftViewPanel.appendChild(importButton);
-  //#endregion
-
-  //#region topSettingsLeftEditPanel
-  const topSettingsLeftEditPanel = document.createElement("div");
-  topSettingsLeftEditPanel.style.display = "none";
-  topSettingsLeftEditPanel.style.justifyContent = "flex-start";
-  topSettingsLeftEditPanel.style.alignItems = "center";
-  topSettingsLeftEditPanel.style.width = TopLeftPanelWidth;
-  topSettingsLeftEditPanel.style.height = "100%";
-  topSettingsLeftEditPanel.style.boxSizing = "border-box";
-  topSettingsLeftEditPanel.style.gap = TopLeftPanelGap;
-  topSettingsLeftEditPanel.style.paddingLeft = TopPanelSidePadding;
-  topSettingsLeftEditPanel.style.paddingRight = TopPanelSidePadding;
-
-  //#region deckNameImput
-
-  const deckNameInput = document.createElement("input");
-  deckNameInput.style.width = DeckNamePanelWidth;
-  deckNameInput.style.height = "80%";
-  deckNameInput.style.alignContent = "center";
-  deckNameInput.style.textAlign = "center";
-  deckNameInput.style.fontSize = TopPanelTextSize;
-  deckNameInput.placeholder = "Deck Name";
-  deckNameInput.addEventListener("input", (event) => {
-    if (deckNameInput.value.length > 30) deckNameInput.style.color = "red";
-    else deckNameInput.style.color = "black";
-  });
-
-  //#endregion
-
-  //#region groupCombobox
-
-  const groupCombobox = document.createElement("select");
-  groupCombobox.style.width = "15%";
-  groupCombobox.style.height = "80%";
-  groupCombobox.style.alignContent = "center";
-
-  groupCombobox.style.textAlign = "center";
-  groupCombobox.style.fontSize = TopPanelTextSize;
-  groupCombobox.addEventListener("change", function () {
-    MoonCEBCCurrentGroup = groupCombobox.value;
-    UpdateCardsListSetNewGroup();
-  });
-
-  function populateGroupCombobox() {
-    Object.values(CardTypes).forEach((type) => {
-      const option = document.createElement("option");
-      option.value = type.value;
-      option.text = type.text;
-      groupCombobox.appendChild(option);
+    const playerDecksSelect = document.createElement("select");
+    playerDecksSelect.id = "PlayerDecksSelectId";
+    playerDecksSelect.style.width = DeckNamePanelWidth;
+    playerDecksSelect.style.height = "80%";
+    playerDecksSelect.style.alignContent = "center";
+    playerDecksSelect.style.textAlign = "center";
+    playerDecksSelect.style.fontSize = TopPanelTextSize;
+    playerDecksSelect.addEventListener("change", function () {
+      GetDeckData(playerDecksSelect);
     });
+
+    if (Player.Themed) {
+      playerDecksSelect.style.backgroundColor =
+        Player.Themed.ColorsModule.primaryColor;
+      playerDecksSelect.style.borderColor =
+        Player.Themed.ColorsModule.accentColor;
+      playerDecksSelect.style.color = Player.Themed.ColorsModule.textColor;
+      playerDecksSelect.addEventListener("mouseover", () => {
+        playerDecksSelect.style.backgroundColor =
+          Player.Themed.ColorsModule.accentColor;
+      });
+      playerDecksSelect.addEventListener("mouseout", () => {
+        playerDecksSelect.style.backgroundColor =
+          Player.Themed.ColorsModule.primaryColor;
+      });
+    }
+
+    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
+
+    const editButton = createButton(
+      "Edit Deck",
+      null,
+      SetEditMode,
+      "15%",
+      "80%",
+      "5%",
+      "5%",
+      "Open edit menu",
+      "right"
+    );
+    topSettingsLeftViewPanel.appendChild(editButton);
+
+    const exportButton = createButton(
+      "Export",
+      null,
+      null,
+      "auto",
+      "80%",
+      "0",
+      "0",
+      "Export Deck",
+      "right"
+    );
+
+    const importButton = createButton(
+      "Import",
+      null,
+      () => {
+        console.log("Centered button clicked!");
+      },
+      "auto",
+      "80%",
+      "0",
+      "0",
+      "Import Deck",
+      "right"
+    );
+
+    //topSettingsLeftViewPanel.appendChild(exportButton);
+    //topSettingsLeftViewPanel.appendChild(importButton);
+    //#endregion
+
+    //#region topSettingsLeftEditPanel
+    const topSettingsLeftEditPanel = document.createElement("div");
+    topSettingsLeftEditPanel.id = "TopSettingsLeftEditPanelId";
+    topSettingsLeftEditPanel.style.display = "none";
+    topSettingsLeftEditPanel.style.justifyContent = "flex-start";
+    topSettingsLeftEditPanel.style.alignItems = "center";
+    topSettingsLeftEditPanel.style.width = TopLeftPanelWidth;
+    topSettingsLeftEditPanel.style.height = "100%";
+    topSettingsLeftEditPanel.style.boxSizing = "border-box";
+    topSettingsLeftEditPanel.style.gap = TopLeftPanelGap;
+    topSettingsLeftEditPanel.style.paddingLeft = TopPanelSidePadding;
+    topSettingsLeftEditPanel.style.paddingRight = TopPanelSidePadding;
+    topSettingsPanel.appendChild(topSettingsLeftEditPanel);
+
+    //#region deckNameImput
+
+    const deckNameInput = document.createElement("input");
+    deckNameInput.id = "DeckNameInputId";
+    deckNameInput.style.width = DeckNamePanelWidth;
+    deckNameInput.style.height = "80%";
+    deckNameInput.style.alignContent = "center";
+    deckNameInput.style.textAlign = "center";
+    deckNameInput.style.fontSize = TopPanelTextSize;
+    deckNameInput.placeholder = "Deck Name";
+    if (Player.Themed) {
+      const userColor = Player.Themed.ColorsModule.textColor;
+      deckNameInput.style.color = userColor;
+      deckNameInput.addEventListener("input", (event) => {
+        if (deckNameInput.value.length > 30)
+          deckNameInput.style.color = getErrorColor(userColor);
+        else deckNameInput.style.color = userColor;
+      });
+    } else {
+      deckNameInput.addEventListener("input", (event) => {
+        if (deckNameInput.value.length > 30) deckNameInput.style.color = "red";
+        else deckNameInput.style.color = "black";
+      });
+    }
+
+    //#endregion
+
+    //#region groupCombobox
+
+    const groupSelect = document.createElement("select");
+    groupSelect.id = "GroupSelectId";
+    groupSelect.style.width = "15%";
+    groupSelect.style.height = "80%";
+    groupSelect.style.alignContent = "center";
+
+    groupSelect.style.textAlign = "center";
+    groupSelect.style.fontSize = TopPanelTextSize;
+    groupSelect.addEventListener("change", function () {
+      MoonCEBCCurrentGroup = groupSelect.value;
+      UpdateCardsListSetNewGroup();
+    });
+
+    if (Player.Themed) {
+      groupSelect.style.backgroundColor =
+        Player.Themed.ColorsModule.primaryColor;
+      groupSelect.style.borderColor = Player.Themed.ColorsModule.accentColor;
+      groupSelect.style.color = Player.Themed.ColorsModule.textColor;
+      groupSelect.addEventListener("mouseover", () => {
+        groupSelect.style.backgroundColor =
+          Player.Themed.ColorsModule.accentColor;
+      });
+      groupSelect.addEventListener("mouseout", () => {
+        groupSelect.style.backgroundColor =
+          Player.Themed.ColorsModule.primaryColor;
+      });
+    }
+
+    function populateGroupSelect() {
+      Object.values(CardTypes).forEach((type) => {
+        const option = document.createElement("option");
+        option.value = type.value;
+        option.text = type.text;
+        if (Player.Themed) {
+          option.style.backgroundColor =
+            Player.Themed.ColorsModule.primaryColor;
+          option.style.borderColor = Player.Themed.ColorsModule.accentColor;
+        }
+        groupSelect.appendChild(option);
+      });
+    }
+    populateGroupSelect();
+
+    //#endregion
+
+    //#region Search Card Input
+
+    const searchCardInput = document.createElement("input");
+    searchCardInput.id = "SearchCardInputId";
+    searchCardInput.style.width = "10%";
+    searchCardInput.style.height = "80%";
+    searchCardInput.style.alignContent = "center";
+    searchCardInput.style.textAlign = "center";
+    searchCardInput.style.fontSize = TopPanelTextSize;
+    searchCardInput.placeholder = "Search Card";
+    searchCardInput.addEventListener("input", (event) => {
+      const newValue = event.target.value;
+      if (newValue == "" || newValue == undefined)
+        MoonCEBCBuilderSeacrhGroupList = [];
+      else
+        MoonCEBCBuilderSeacrhGroupList =
+          MoonCEBCBuilderCurrentGroupsList.filter((card) =>
+            card.Name.toLowerCase().includes(newValue.toLowerCase())
+          );
+
+      MoonCEBCCurrent30Cards = Get30CardsGroup();
+      UpdateCardsCells(MoonCEBCCurrent30Cards);
+    });
+
+    //#endregion
+
+    //#region groupButtons
+    const groupButtons = document.createElement("div");
+    groupButtons.style.width = "20%";
+    groupButtons.style.height = "100%";
+    groupButtons.style.textAlign = "center";
+    groupButtons.style.alignItems = "center";
+    groupButtons.style.display = "flex";
+    groupButtons.style.flexDirection = "row";
+    groupButtons.style.boxSizing = "border-box";
+    groupButtons.style.gap = "2%";
+
+    const clearButton = createButton(
+      null,
+      "Icons/Trash.png",
+      ClearCurrentDeck,
+      "20%",
+      "80%",
+      "0",
+      "0",
+      "Clear all cards",
+      "left"
+    );
+
+    const defaultButton = createButton(
+      "Default",
+      "Icons/Small/Undo.png",
+      null,
+      "16%",
+      "80%",
+      "0",
+      "0",
+      "Select default deck",
+      "left"
+    );
+
+    const leftCardsListButtonWithImage = createButton(
+      null,
+      "Icons/Prev.png",
+      PrevButtonClick,
+      "20%",
+      "80%",
+      "0",
+      "0",
+      "Previous page of cards",
+      "left"
+    );
+
+    const rightCardsListButtonWithImage = createButton(
+      null,
+      "Icons/Next.png",
+      NextButtonClick,
+      "20%",
+      "80%",
+      "0",
+      "0",
+      "Next page of cards",
+      "left"
+    );
+
+    const saveDeckButtonWithImage = createButton(
+      null,
+      "Icons/Accept.png",
+      () => SetViewMode(true),
+      "20%",
+      "80%",
+      "0",
+      "0",
+      "Save deck",
+      "left"
+    );
+
+    const cancelDeckButtonWithImage = createButton(
+      null,
+      "Icons/Cancel.png",
+      () => SetViewMode(false),
+      "20%",
+      "80%",
+      "0",
+      "0",
+      "Cancel all changes",
+      "left"
+    );
+
+    //#endregion
+
+    //#region deckCardsCounter
+    const deckCardsCounter = document.createElement("div");
+    deckCardsCounter.id = "DeckCardsCounterId";
+    deckCardsCounter.style.width = "15%";
+    deckCardsCounter.style.alignContent = "center";
+    deckCardsCounter.style.textAlign = "center";
+    deckCardsCounter.style.pointerEvents = "none";
+    deckCardsCounter.style.userSelect = "none";
+    deckCardsCounter.style.fontSize = TopPanelTextSize;
+    deckCardsCounter.style.color = "white";
+
+    //#endregion
+
+    groupButtons.appendChild(clearButton);
+    //groupButton.appendChild(defaultButton);
+    groupButtons.appendChild(leftCardsListButtonWithImage);
+    groupButtons.appendChild(rightCardsListButtonWithImage);
+    groupButtons.appendChild(saveDeckButtonWithImage);
+    groupButtons.appendChild(cancelDeckButtonWithImage);
+
+    topSettingsLeftEditPanel.appendChild(deckNameInput);
+    topSettingsLeftEditPanel.appendChild(groupSelect);
+    topSettingsLeftEditPanel.appendChild(searchCardInput);
+    topSettingsLeftEditPanel.appendChild(groupButtons);
+    topSettingsLeftEditPanel.appendChild(deckCardsCounter);
+    //#endregion
+
+    //#region topSettingsRightPanel
+
+    const topSettingsRightPanel = document.createElement("div");
+    topSettingsRightPanel.style.display = "flex";
+    topSettingsRightPanel.style.flexDirection = "row";
+    topSettingsRightPanel.style.justifyContent = "flex-end";
+    topSettingsRightPanel.style.alignItems = "center";
+    topSettingsRightPanel.style.width = TopRightPanelWidth;
+    topSettingsRightPanel.style.height = "100%";
+    topSettingsRightPanel.style.boxSizing = "border-box";
+    topSettingsRightPanel.style.paddingRight = TopPanelSidePadding;
+    topSettingsRightPanel.style.paddingLeft = TopPanelSidePadding;
+    topSettingsRightPanel.style.gap = TopLeftPanelGap;
+    topSettingsPanel.appendChild(topSettingsRightPanel);
+
+    const settingsButton = createButton(
+      null,
+      "Icons/General.png",
+      null,
+      "50%",
+      "80%",
+      "0",
+      "0",
+      "Dont Work",
+      "left"
+    );
+
+    const exitButtonWithImage = createButton(
+      null,
+      "Icons/Exit.png",
+      OpenExitAddonWindow,
+      "50%",
+      "80%",
+      "0",
+      "5%",
+      "Exit Addon",
+      "left"
+    );
+
+    topSettingsRightPanel.appendChild(settingsButton);
+    topSettingsRightPanel.appendChild(exitButtonWithImage);
+
+    //#endregion
+
+    //#endregion
+
+    //#region Bottom Panel
+
+    const bottomPanel = document.createElement("div");
+    bottomPanel.style.display = "flex";
+    bottomPanel.style.flexDirection = "row";
+    bottomPanel.style.justifyContent = "space-between";
+    bottomPanel.style.alignItems = "center";
+    bottomPanel.style.width = "100%";
+    bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
+    mainWindow.appendChild(bottomPanel);
+
+    const cardsCollectionPanel = document.createElement("div");
+    cardsCollectionPanel.id = "CardsCollectionsId";
+    cardsCollectionPanel.style.display = "grid";
+    cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
+    cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
+    cardsCollectionPanel.style.gridAutoRows = "1fr";
+    cardsCollectionPanel.style.height = "100%";
+    cardsCollectionPanel.style.width = "80%";
+    cardsCollectionPanel.style.overflow = "hidden";
+    bottomPanel.appendChild(cardsCollectionPanel);
+
+    for (let i = 0; i < 30; i++) {
+      const cardCell = document.createElement("div");
+      cardCell.style.boxSizing = "border-box";
+      cardCell.style.margin = "2%";
+      cardCell.style.position = "relative";
+      cardCell.style.justifyContent = "center";
+      cardCell.style.alignItems = "center";
+      cardCell.style.display = "inline-block";
+      CardCells.push(cardCell);
+      cardsCollectionPanel.appendChild(cardCell);
+    }
+
+    const cardInfoPanel = document.createElement("div");
+    cardInfoPanel.id = "CardInfoPanelId";
+    cardInfoPanel.style.height = "100%";
+    cardInfoPanel.style.width = "20%";
+    cardInfoPanel.style.maxWidth = "100%";
+    cardInfoPanel.style.maxHeight = "100%";
+    cardInfoPanel.style.boxSizing = "border-box";
+    cardInfoPanel.style.position = "relative";
+    cardInfoPanel.style.justifyContent = "center";
+    cardInfoPanel.style.alignItems = "center";
+    cardInfoPanel.style.display = "inline-block";
+    bottomPanel.appendChild(cardInfoPanel);
+    //#endregion
+
+    UpdateCardHeightWidth();
+    //load decks data
+    LoadDecksComboboxData();
   }
-  populateGroupCombobox();
-
-  //#endregion
-
-  //#region Search Card Input
-
-  const searchCardInput = document.createElement("input");
-  searchCardInput.style.width = "10%";
-  searchCardInput.style.height = "80%";
-  searchCardInput.style.alignContent = "center";
-  searchCardInput.style.textAlign = "center";
-  searchCardInput.style.fontSize = TopPanelTextSize;
-  searchCardInput.placeholder = "Search Card";
-  searchCardInput.addEventListener("input", (event) => {
-    const newValue = event.target.value;
-    if (newValue == "" || newValue == undefined)
-      MoonCEBCBuilderSeacrhGroupList = [];
-    else
-      MoonCEBCBuilderSeacrhGroupList = MoonCEBCBuilderCurrentGroupsList.filter(
-        (card) => card.Name.toLowerCase().includes(newValue.toLowerCase())
-      );
-
-    MoonCEBCCurrent30Cards = Get30CardsGroup();
-    UpdateCardsCells(MoonCEBCCurrent30Cards);
-  });
-
-  //#endregion
-
-  //#region groupButtons
-  const groupButtons = document.createElement("div");
-  groupButtons.style.width = "20%";
-  groupButtons.style.height = "100%";
-  groupButtons.style.textAlign = "center";
-  groupButtons.style.alignItems = "center";
-  groupButtons.style.display = "flex";
-  groupButtons.style.flexDirection = "row";
-  groupButtons.style.boxSizing = "border-box";
-  groupButtons.style.gap = "2%";
-
-  const clearButton = createButton(
-    null,
-    "Icons/Trash.png",
-    ClearCurrentDeck,
-    "20%",
-    "80%",
-    "0",
-    "0",
-    "Clear all cards",
-    "left"
-  );
-
-  const defaultButton = createButton(
-    "Default",
-    "Icons/Small/Undo.png",
-    null,
-    "16%",
-    "80%",
-    "0",
-    "0",
-    "Select default deck",
-    "left"
-  );
-
-  const leftCardsListButtonWithImage = createButton(
-    null,
-    "Icons/Prev.png",
-    PrevButtonClick,
-    "20%",
-    "80%",
-    "0",
-    "0",
-    "Previous page of cards",
-    "left"
-  );
-
-  const rightCardsListButtonWithImage = createButton(
-    null,
-    "Icons/Next.png",
-    NextButtonClick,
-    "20%",
-    "80%",
-    "0",
-    "0",
-    "Next page of cards",
-    "left"
-  );
-
-  const saveDeckButtonWithImage = createButton(
-    null,
-    "Icons/Accept.png",
-    () => SetViewMode(true),
-    "20%",
-    "80%",
-    "0",
-    "0",
-    "Save deck",
-    "left"
-  );
-
-  const cancelDeckButtonWithImage = createButton(
-    null,
-    "Icons/Cancel.png",
-    () => SetViewMode(false),
-    "20%",
-    "80%",
-    "0",
-    "0",
-    "Cancel all changes",
-    "left"
-  );
-
-  //#endregion
-
-  //#region deckCardsCounter
-  const deckCardsCounter = document.createElement("div");
-  deckCardsCounter.style.width = "15%";
-  deckCardsCounter.style.alignContent = "center";
-  deckCardsCounter.style.textAlign = "center";
-  deckCardsCounter.style.pointerEvents = "none";
-  deckCardsCounter.style.userSelect = "none";
-  deckCardsCounter.style.fontSize = TopPanelTextSize;
-  deckCardsCounter.style.color = "white";
-
-  //#endregion
-
-  groupButtons.appendChild(clearButton);
-  //groupButton.appendChild(defaultButton);
-  groupButtons.appendChild(leftCardsListButtonWithImage);
-  groupButtons.appendChild(rightCardsListButtonWithImage);
-  groupButtons.appendChild(saveDeckButtonWithImage);
-  groupButtons.appendChild(cancelDeckButtonWithImage);
-
-  topSettingsLeftEditPanel.appendChild(deckNameInput);
-  topSettingsLeftEditPanel.appendChild(groupCombobox);
-  topSettingsLeftEditPanel.appendChild(searchCardInput);
-  topSettingsLeftEditPanel.appendChild(groupButtons);
-  topSettingsLeftEditPanel.appendChild(deckCardsCounter);
-  //#endregion
-
-  //#region topSettingsRightPanel
-
-  const topSettingsRightPanel = document.createElement("div");
-  topSettingsRightPanel.style.display = "flex";
-  topSettingsRightPanel.style.flexDirection = "row";
-  topSettingsRightPanel.style.justifyContent = "flex-end";
-  topSettingsRightPanel.style.alignItems = "center";
-  topSettingsRightPanel.style.width = TopRightPanelWidth;
-  topSettingsRightPanel.style.height = "100%";
-  topSettingsRightPanel.style.boxSizing = "border-box";
-  topSettingsRightPanel.style.paddingRight = TopPanelSidePadding;
-  topSettingsRightPanel.style.paddingLeft = TopPanelSidePadding;
-  topSettingsRightPanel.style.gap = TopLeftPanelGap;
-
-  const settingsButton = createButton(
-    null,
-    MoonCEBCSettingsIconPath,
-    null,
-    "50%",
-    "80%",
-    "0",
-    "0",
-    "Dont Work",
-    "left"
-  );
-
-  const exitButtonWithImage = createButton(
-    null,
-    MoonCEBCExitIconPath,
-    OpenExitAddonWindow,
-    "50%",
-    "80%",
-    "0",
-    "5%",
-    "Exit Addon",
-    "left"
-  );
-
-  topSettingsRightPanel.appendChild(settingsButton);
-  topSettingsRightPanel.appendChild(exitButtonWithImage);
-
-  //#endregion
-
-  topSettingsPanel.appendChild(topSettingsLeftViewPanel);
-  topSettingsPanel.appendChild(topSettingsLeftEditPanel);
-  topSettingsPanel.appendChild(topSettingsRightPanel);
-  //
-  mainWindow.appendChild(topSettingsPanel);
-  //#endregion
-
-  //#region Bottom Panel
-  const bottomPanel = document.createElement("div");
-  bottomPanel.style.display = "flex";
-  bottomPanel.style.flexDirection = "row";
-  bottomPanel.style.justifyContent = "space-between";
-  bottomPanel.style.alignItems = "center";
-  bottomPanel.style.width = "100%";
-  bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
-  mainWindow.appendChild(bottomPanel);
-
-  const cardsCollectionPanel = document.createElement("div");
-  cardsCollectionPanel.style.display = "grid";
-  cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
-  cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
-  cardsCollectionPanel.style.gridAutoRows = "1fr";
-  cardsCollectionPanel.style.height = "100%";
-  cardsCollectionPanel.style.width = "80%";
-  cardsCollectionPanel.style.overflow = "hidden";
-  bottomPanel.appendChild(cardsCollectionPanel);
-
-  const cardInfoPanel = document.createElement("div");
-  cardInfoPanel.style.height = "100%";
-  cardInfoPanel.style.width = "auto";
-  cardInfoPanel.style.maxWidth = "100%";
-  cardInfoPanel.style.maxHeight = "100%";
-  cardInfoPanel.style.boxSizing = "border-box";
-  cardInfoPanel.style.position = "relative";
-  cardInfoPanel.style.justifyContent = "center";
-  cardInfoPanel.style.alignItems = "center";
-  cardInfoPanel.style.display = "inline-block";
-  bottomPanel.appendChild(cardInfoPanel);
-
-  for (let i = 0; i < 30; i++) {
-    const cardCell = document.createElement("div");
-    cardCell.style.boxSizing = "border-box";
-    cardCell.style.margin = "2%";
-    cardCell.style.position = "relative";
-    cardCell.style.justifyContent = "center";
-    cardCell.style.alignItems = "center";
-    cardCell.style.display = "inline-block";
-    CardCells.push(cardCell);
-    cardsCollectionPanel.appendChild(cardCell);
-  }
-
-  //#endregion
 
   //#endregion
 
@@ -1344,7 +1423,8 @@ var bcModSdk = (function () {
    */
   function AddonLoad() {
     console.log(`${MoonCEBCAddonName} Start Load`);
-    MoonCEBCTextContent = new TextCache(MoonCEBCCardTextPath); //Load Cards data from BC Server
+    const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+    MoonCEBCTextContent = new TextCache(TextPath); //Load Cards data from BC Server
 
     for (let i = 0; i < ClubCardList.length; i++) {
       let copiedCard = { ...ClubCardList[i] };
@@ -1375,12 +1455,14 @@ var bcModSdk = (function () {
    * Checks the player's data and fills the drop-down list with the player's decks.
    * Also updates the card boxes for the first option.
    */
-  function LoadPlayerData() {
+  function LoadDecksComboboxData() {
     if (Player.Game.ClubCard === undefined) return;
+
+    const decksCombobox = MainWindowPanel.querySelector("#PlayerDecksSelectId");
 
     const playerDecksData = Player.Game.ClubCard.DeckName;
 
-    decksCombobox.innerHTML = "";
+    //decksCombobox.innerHTML = "";
 
     if (playerDecksData && playerDecksData.length > 0) {
       playerDecksData.forEach((name, index) => {
@@ -1388,11 +1470,16 @@ var bcModSdk = (function () {
           const option = document.createElement("option");
           option.value = index;
           option.textContent = name;
+          if (Player.Themed) {
+            option.style.backgroundColor =
+              Player.Themed.ColorsModule.primaryColor;
+            option.style.borderColor = Player.Themed.ColorsModule.accentColor;
+          }
           decksCombobox.appendChild(option);
         }
       });
 
-      GetDeckData();
+      GetDeckData(decksCombobox);
     } else {
       console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
@@ -1400,14 +1487,16 @@ var bcModSdk = (function () {
 
   /**
    * Get data selected deck and update cards cells
+   * @param {HTMLSelectElement} - Sources HTMLSelectElement
    * @returns {void} - Nothing
    */
-  function GetDeckData() {
+  function GetDeckData(decksCombobox) {
     let selectedIndex = decksCombobox.value;
     const encodedDeck = Player.Game.ClubCard.Deck[selectedIndex];
     let decodedDeck = decodeStringDeckToID(encodedDeck);
     let deckData = [];
 
+    //TODO very bad crutch with cardData.RequiredLevel = 1;
     for (let id of decodedDeck) {
       let cardData = MoonCEBCClubCardList.find((card) => card.ID === id);
       if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
@@ -1428,7 +1517,7 @@ var bcModSdk = (function () {
    */
   function UpdateCardsCells(cardsArray) {
     for (let i = 0; i < 30; i++) {
-      CardCells[i].innerHTML = "";
+      if (CardCells[i]) CardCells[i].innerHTML = "";
       if (cardsArray && i < cardsArray.length) {
         const cardText = MoonCEBCTextContent.get(
           "Text " + cardsArray[i].Name
@@ -1443,6 +1532,9 @@ var bcModSdk = (function () {
    * Track and update the current card count when editing a deck
    */
   function UpdateDeckCardsCounter() {
+    const deckCardsCounter = MainWindowPanel.querySelector(
+      "#DeckCardsCounterId"
+    );
     const countCards = MoonCEBCEditCurrentDeck.length;
     deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
 
@@ -1458,13 +1550,29 @@ var bcModSdk = (function () {
    * The function changes the top panel and updates the data to enter edit mode.
    */
   function SetEditMode() {
+    const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftViewPanelId"
+    );
+    const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftEditPanelId"
+    );
+    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const playerDecksSelect = MainWindowPanel.querySelector(
+      "#PlayerDecksSelectId"
+    );
+    const groupSelect = MainWindowPanel.querySelector("#GroupSelectId");
+
     topSettingsLeftViewPanel.style.display = "none";
     topSettingsLeftEditPanel.style.display = "flex";
-    deckNameInput.style.color = "black";
-    deckNameInput.value =
-      decksCombobox.options[decksCombobox.selectedIndex].text;
 
-    groupCombobox.selectedIndex = 0;
+    if (Player.Themed)
+      deckNameInput.style.color = Player.Themed.ColorsModule.textColor;
+    else deckNameInput.style.color = "black";
+
+    deckNameInput.value =
+      playerDecksSelect.options[playerDecksSelect.selectedIndex].text;
+
+    groupSelect.selectedIndex = 0;
 
     MoonCEBCPageMode = WindowStatus.EDIT;
     MoonCEBCEditCurrentDeck = [...MoonCEBCCurrentDeck];
@@ -1481,6 +1589,13 @@ var bcModSdk = (function () {
    * @param {boolean} isSave Switch to check whether the deck will be saved or not
    */
   function SetViewMode(isSave) {
+    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftViewPanelId"
+    );
+    const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftEditPanelId"
+    );
     const isDeckNameValidation =
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
@@ -1492,7 +1607,7 @@ var bcModSdk = (function () {
         SaveNewDeck();
         MoonCEBCPageMode = WindowStatus.VIEW;
         UpdateCardsCells(MoonCEBCEditCurrentDeck);
-        LoadPlayerData();
+        LoadDecksComboboxData();
       }
     } else {
       topSettingsLeftViewPanel.style.display = "flex";
@@ -1506,10 +1621,14 @@ var bcModSdk = (function () {
    * Save new Deck  :)
    */
   function SaveNewDeck() {
+    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const playerDecksSelect = MainWindowPanel.querySelector(
+      "#PlayerDecksSelectId"
+    );
     const newDeckName = deckNameInput.value;
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
-    const selectedIndex = decksCombobox.selectedIndex;
+    const selectedIndex = playerDecksSelect.selectedIndex;
 
     Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
@@ -1571,15 +1690,13 @@ var bcModSdk = (function () {
    */
   function OpenExitAddonWindow() {
     if (isVisibleMainWindow) {
-      topSettingsLeftViewPanel.style.display = "flex";
-      topSettingsLeftEditPanel.style.display = "none";
-      searchCardInput.value = "";
+      isMainWindowLoaded = false;
+      if (MainWindowPanel) MainWindowPanel.remove();
       MoonCEBCBuilderSeacrhGroupList = [];
-      mainWindow.style.display = "none";
+      CardCells = [];
     } else {
-      LoadPlayerData();
-      mainWindow.style.display = "block";
-      UpdateCardHeightWidth();
+      isMainWindowLoaded = true;
+      LoadMainWindow();
     }
 
     MoonCEBCPageMode = WindowStatus.VIEW;
@@ -1594,28 +1711,54 @@ var bcModSdk = (function () {
    * Function to update the size of cards in 30 cells when the window size changes.
    */
   function UpdateCardHeightWidth() {
-    let screenWidth = cardsCollectionPanel.offsetWidth;
-    let screenHeight = cardsCollectionPanel.offsetHeight;
+    const cardsCollectionPanel = MainWindowPanel.querySelector(
+      "#CardsCollectionsId"
+    );
+    const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
 
     const reservedSpace = 15;
 
-    if (screenWidth == 0 || screenHeight == 0) return;
+    let cardsCollectionPanelWidth =
+      cardsCollectionPanel.offsetWidth - reservedSpace;
+    let cardsCollectionPanelHeight =
+      cardsCollectionPanel.offsetHeight - reservedSpace;
 
-    screenHeight -= reservedSpace;
-    screenWidth -= reservedSpace;
+    let cardInfoPanelWidth = cardInfoPanel.offsetWidth;
+    let cardInfoPanelHeight = cardInfoPanel.offsetHeight;
 
-    let cardHeight = screenHeight / 3;
+    if (cardsCollectionPanelWidth == 0 || cardsCollectionPanelHeight == 0)
+      return;
+
+    let cardHeight = cardsCollectionPanelHeight / 3;
     let cardWidth = cardHeight / 2;
 
-    let maxCardWidth = screenWidth / 10;
+    let bigCardHeight = cardInfoPanelHeight;
+    let bigCardWidth = cardInfoPanelHeight / 2;
+
+    let maxCardWidth = cardsCollectionPanelWidth / 10;
+    let maxBigCardWidth = cardInfoPanelWidth;
 
     while (cardWidth > maxCardWidth) {
       cardWidth -= 1;
       cardHeight = cardWidth * 2;
     }
 
+    while (bigCardWidth > maxBigCardWidth) {
+      bigCardWidth -= 1;
+      bigCardHeight = bigCardWidth * 2;
+    }
+
     MoonCEBCCardHeight = cardHeight;
     MoonCEBCCardWidth = cardWidth;
+
+    MoonCEBCBigCardHeight = bigCardHeight;
+    MoonCEBCBigCardWidth = bigCardWidth;
+
+    const bigCard = MainWindowPanel.querySelector("#BigCardId");
+    if (bigCard) {
+      bigCard.style.height = `${MoonCEBCBigCardHeight}px`;
+      bigCard.style.width = `${MoonCEBCBigCardWidth}px`;
+    }
 
     for (let i = 0; i < 30; i++) {
       const childButton = CardCells[i].querySelector("button");
@@ -1690,11 +1833,12 @@ var bcModSdk = (function () {
    * @returns {ClubCard[]} cards page list
    */
   function Get30CardsGroup() {
-    const cardsPerPage = MoonCEBCBuilderDeckSize;
+    const cardsPerPage = 30;
     const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
+    const searchCardInput = MainWindowPanel.querySelector("#SearchCardInputId");
 
     const cardsSources =
-      MoonCEBCBuilderSeacrhGroupList.length > 0
+      searchCardInput.value.length > 0
         ? MoonCEBCBuilderSeacrhGroupList
         : MoonCEBCBuilderCurrentGroupsList;
 
@@ -1751,6 +1895,21 @@ var bcModSdk = (function () {
     const sortedCards = [...normalCards, ...events];
 
     return sortedCards;
+  }
+
+  function getErrorColor(userColorHex) {
+    let r = parseInt(userColorHex.slice(1, 3), 16);
+    let g = parseInt(userColorHex.slice(3, 5), 16);
+    let b = parseInt(userColorHex.slice(5, 7), 16);
+
+    r = Math.floor(r * 0.7);
+    g = Math.floor(g * 0.7);
+    b = Math.floor(b * 0.7);
+
+    const errorColorHex = `#${((1 << 24) + (r << 16) + (g << 8) + b)
+      .toString(16)
+      .slice(1)}`;
+    return errorColorHex;
   }
 
   //#region parser functions
