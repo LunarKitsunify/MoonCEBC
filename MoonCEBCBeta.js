@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Beta Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.1.0
+// @version 1.2.0
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -537,7 +537,7 @@ var bcModSdk = (function () {
   const modApi = bcModSdk.registerMod({
     name: "MoonCEBC",
     fullName: "Moon Cards Editor BC",
-    version: "1.1.0",
+    version: "1.2.0",
     repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
 
@@ -1431,8 +1431,6 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    //new card ?
-
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
   /**
@@ -1458,11 +1456,11 @@ var bcModSdk = (function () {
   function LoadDecksComboboxData() {
     if (Player.Game.ClubCard === undefined) return;
 
-    const decksCombobox = MainWindowPanel.querySelector("#PlayerDecksSelectId");
+    const playerDecksSelect = MainWindowPanel.querySelector(
+      "#PlayerDecksSelectId"
+    );
 
     const playerDecksData = Player.Game.ClubCard.DeckName;
-
-    //decksCombobox.innerHTML = "";
 
     if (playerDecksData && playerDecksData.length > 0) {
       playerDecksData.forEach((name, index) => {
@@ -1475,11 +1473,11 @@ var bcModSdk = (function () {
               Player.Themed.ColorsModule.primaryColor;
             option.style.borderColor = Player.Themed.ColorsModule.accentColor;
           }
-          decksCombobox.appendChild(option);
+          playerDecksSelect.appendChild(option);
         }
       });
 
-      GetDeckData(decksCombobox);
+      GetDeckData(playerDecksSelect);
     } else {
       console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
     }
