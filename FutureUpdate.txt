@@ -1,17 +1,22 @@
 hot Update 
 
-1. fix player group name and maybe recolor all groups ?
-2. tooltip for button on top panel
-3. Settings Menu
+1. maybe recolor all groups ?
+2. Settings Menu
 
 Future Update
 1. For viewers, the ability to disable loading into the game if desired.
-2. Replacing the background of the board and cards with custom ones. 
+2. Replacing the background of the board and cards with custom ones. - 
+    Half realized. Need to make a settings menu for uploading your own images. 
+
 3. Output summary statistics with values for the deck.
+
 4. deck win rate analyzer. I haven't quite figured out what it will look like yet. But I want to.
-5. Size-color customization
+
+5. Size-color customization   - need settings menu
+
 6. Make it possible to save info from the user and hide the button or not, 
-depending on the current game in the room and the player's choice.
+depending on the current game in the room and the player's choice. - need settings menu
+
 7. Display all reward cards but block access. Information on all reward cards.
 
 

@@ -1,0 +1,19 @@
+MoonCEBC
+
+Release 1.0.0
+1.Interface for viewing and editing player decks.
+
+Update 1.1.0
+1.Add tooltip for Buttons
+2.Added the ability to replace the card cover and the playing board background. For the moment, without possibility of user to set own images. So it is disabled for now.
+
+Update 1.2.0
+1. Add Seach Input
+2. Update render big card
+3. made it compatible with the theme addon.
+4. Changed the interface storage logic. Now all UI is deleted when closing mainWindow and created again when opening it.
+
+Next Update 
+1. In the card groups, added spaces between words.
+2. Add ID for online players cards
+3. Combined some of the groups 
