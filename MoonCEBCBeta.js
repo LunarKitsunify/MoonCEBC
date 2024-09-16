@@ -1464,6 +1464,7 @@ var bcModSdk = (function () {
       "#PlayerDecksSelectId"
     );
 
+    playerDecksSelect.innerHTML = "";
     const playerDecksData = Player.Game.ClubCard.DeckName;
 
     if (playerDecksData && playerDecksData.length > 0) {
@@ -1597,19 +1598,22 @@ var bcModSdk = (function () {
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length < 31;
+
+    topSettingsLeftViewPanel.style.display = "flex";
+    topSettingsLeftEditPanel.style.display = "none";
+    MoonCEBCPageMode = WindowStatus.VIEW;
+    MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
+    MoonCEBCBuilderSeacrhGroupList = [];
+    MoonCEBCBuilderCurrentGroupsList = [];
+    MoonCEBCCurrentCardsListPage = 0;
+
     if (isSave) {
       if (MoonCEBCEditCurrentDeck.length == 30 && isDeckNameValidation) {
-        topSettingsLeftViewPanel.style.display = "flex";
-        topSettingsLeftEditPanel.style.display = "none";
         SaveNewDeck();
-        MoonCEBCPageMode = WindowStatus.VIEW;
         UpdateCardsCells(MoonCEBCEditCurrentDeck);
         LoadDecksComboboxData();
       }
     } else {
-      topSettingsLeftViewPanel.style.display = "flex";
-      topSettingsLeftEditPanel.style.display = "none";
-      MoonCEBCPageMode = WindowStatus.VIEW;
       UpdateCardsCells(MoonCEBCCurrentDeck);
     }
   }
@@ -1689,7 +1693,13 @@ var bcModSdk = (function () {
     if (isVisibleMainWindow) {
       isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
+
+      MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
       MoonCEBCBuilderSeacrhGroupList = [];
+      MoonCEBCBuilderCurrentGroupsList = [];
+      MoonCEBCPageMode = WindowStatus.VIEW;
+      MoonCEBCCurrentCardsListPage = 0;
+
       CardCells = [];
     } else {
       isMainWindowLoaded = true;
