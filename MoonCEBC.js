@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.0
+// @version 1.2.1
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -391,19 +391,22 @@ var bcModSdk = (function () {
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
     LIABILITY: { value: "Liability", text: "Liability" },
     STAFF: { value: "Staff", text: "Staff" },
-    POLICE: { value: "Police", text: "Police" },
-    CRIMINAL: { value: "Criminal", text: "Criminal" },
+    POLICE_CRIMINAL: { value: "PoliceCriminal", text: "Police / Criminal" },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
     MAID: { value: "Maid", text: "Maid" },
-    ASYLUM_PATIENT: { value: "AsylumPatient", text: "Asylum Patient" },
-    ASYLUM_NURSE: { value: "AsylumNurse", text: "Asylum Nurse" },
-    DOMINANT: { value: "Dominant", text: "Dominant" },
-    MISTRESS: { value: "Mistress", text: "Mistress" },
-    ABDL_BABY: { value: "ABDLBaby", text: "ABDL Baby" },
-    ABDL_MOMMY: { value: "ABDLMommy", text: "ABDL Mommy" },
-    COLLEGE_STUDENT: { value: "CollegeStudent", text: "College Student" },
-    COLLEGE_TEACHER: { value: "CollegeTeacher", text: "College Teacher" },
+    ASYLUM: { value: "Asylum", text: "Asylum" },
+    DOMINANT_MISTRESS: {
+      value: "DominantMistress",
+      text: "Dominant / Mistress",
+    },
+    ABDL: { value: "ABDL", text: "ABDL" },
+    COLLEGE: { value: "College", text: "College" },
+    SHIBARI_SENSEI_KNOT: {
+      value: "ShibariSenseiKnot",
+      text: "Shibari / Sensei",
+      //text: "Shibari / Sensei / Knot",
+    },
   });
 
   const MoonCEBCAddonName = "Moon Cards Editor BC";
@@ -514,6 +517,8 @@ var bcModSdk = (function () {
   const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
   const moneyTextColor = "#006400";
+
+  //TODO I think you have to make a formula. Because there may be problems for widescreens.
   const cardNameFontSize = "0.75vw";
   const cardGroupFontSize = "0.70vw";
   const cardTextFontSize = "0.63vw";
@@ -565,6 +570,9 @@ var bcModSdk = (function () {
   });
 
   //#endregion
+
+  //////////////////START//////////////////
+  AddonLoad();
 
   //#region UI
 
@@ -699,7 +707,7 @@ var bcModSdk = (function () {
    * @param {boolean} isCurrentCardInfoCell property for separating logical cards from the array and for one enlarged card
    * @returns {void} - Nothing
    */
-  function DrawCard(
+  function CardRender(
     Card,
     cardCell,
     cardNameSize = cardNameFontSize,
@@ -763,7 +771,7 @@ var bcModSdk = (function () {
           const cardInfoPanel =
             MainWindowPanel.querySelector("#CardInfoPanelId");
           if (cardInfoPanel) cardInfoPanel.innerHTML = "";
-          DrawCard(
+          CardRender(
             MoonCEBCMouseOverCard,
             cardInfoPanel,
             bigCardNameFontSize,
@@ -916,10 +924,11 @@ var bcModSdk = (function () {
     bottomContainer.style.borderRadius = "0 0 10px 10px";
     bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
 
+    let GroupText = ClubCardGetGroupText(Card.Group);
+    if (Card.RewardMemberNumber != null)
+      GroupText = GroupText + " #" + Card.RewardMemberNumber.toString();
     const cardGroupTextElement = document.createElement("div");
-    cardGroupTextElement.textContent = `${
-      Card.Group ? Card.Group.join(", ") : ""
-    }`;
+    cardGroupTextElement.textContent = GroupText;
     cardGroupTextElement.style.fontSize = cardGroupSize;
     cardGroupTextElement.style.textAlign = "center";
     cardGroupTextElement.style.fontWeight = "bold";
@@ -969,7 +978,6 @@ var bcModSdk = (function () {
   function LoadMainWindow() {
     //#region mainWindow
     const mainWindow = document.createElement("div");
-    //mainWindow.id = "MainWindowId";
     mainWindow.style.position = "fixed";
     mainWindow.style.top = "50%";
     mainWindow.style.left = "50%";
@@ -979,7 +987,7 @@ var bcModSdk = (function () {
     mainWindow.style.border = "3px solid black";
     mainWindow.style.boxSizing = "border-box";
     mainWindow.style.display = "block";
-    mainWindow.style.zIndex = "9999"; // TODO ???????? look very bad
+    mainWindow.style.zIndex = "9999";
     mainWindow.style.backgroundImage =
       "url('Backgrounds/ClubCardPlayBoard1.jpg')";
     mainWindow.style.backgroundSize = "cover";
@@ -1414,9 +1422,6 @@ var bcModSdk = (function () {
 
   //#endregion
 
-  //////////////////START//////////////////
-  AddonLoad();
-
   /**
    * Loads and stores card data.  Text_ClubCard.csv
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
@@ -1460,6 +1465,7 @@ var bcModSdk = (function () {
       "#PlayerDecksSelectId"
     );
 
+    playerDecksSelect.innerHTML = "";
     const playerDecksData = Player.Game.ClubCard.DeckName;
 
     if (playerDecksData && playerDecksData.length > 0) {
@@ -1494,13 +1500,8 @@ var bcModSdk = (function () {
     let decodedDeck = decodeStringDeckToID(encodedDeck);
     let deckData = [];
 
-    //TODO very bad crutch with cardData.RequiredLevel = 1;
-    for (let id of decodedDeck) {
-      let cardData = MoonCEBCClubCardList.find((card) => card.ID === id);
-      if (cardData.RequiredLevel == null) cardData.RequiredLevel = 1;
-
-      deckData.push(cardData);
-    }
+    for (let id of decodedDeck)
+      deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
 
     const sortedCards = SortCardsList(deckData);
     MoonCEBCEditCurrentDeck = [...sortedCards];
@@ -1521,7 +1522,7 @@ var bcModSdk = (function () {
           "Text " + cardsArray[i].Name
         ).replace(/<F>/g, "");
         cardsArray[i].Text = formatTextForInnerHTML(cardText);
-        DrawCard(cardsArray[i], CardCells[i]);
+        CardRender(cardsArray[i], CardCells[i]);
       }
     }
   }
@@ -1598,19 +1599,22 @@ var bcModSdk = (function () {
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length < 31;
+
+    topSettingsLeftViewPanel.style.display = "flex";
+    topSettingsLeftEditPanel.style.display = "none";
+    MoonCEBCPageMode = WindowStatus.VIEW;
+    MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
+    MoonCEBCBuilderSeacrhGroupList = [];
+    MoonCEBCBuilderCurrentGroupsList = [];
+    MoonCEBCCurrentCardsListPage = 0;
+
     if (isSave) {
       if (MoonCEBCEditCurrentDeck.length == 30 && isDeckNameValidation) {
-        topSettingsLeftViewPanel.style.display = "flex";
-        topSettingsLeftEditPanel.style.display = "none";
         SaveNewDeck();
-        MoonCEBCPageMode = WindowStatus.VIEW;
         UpdateCardsCells(MoonCEBCEditCurrentDeck);
         LoadDecksComboboxData();
       }
     } else {
-      topSettingsLeftViewPanel.style.display = "flex";
-      topSettingsLeftEditPanel.style.display = "none";
-      MoonCEBCPageMode = WindowStatus.VIEW;
       UpdateCardsCells(MoonCEBCCurrentDeck);
     }
   }
@@ -1690,7 +1694,13 @@ var bcModSdk = (function () {
     if (isVisibleMainWindow) {
       isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
+
+      MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
       MoonCEBCBuilderSeacrhGroupList = [];
+      MoonCEBCBuilderCurrentGroupsList = [];
+      MoonCEBCPageMode = WindowStatus.VIEW;
+      MoonCEBCCurrentCardsListPage = 0;
+
       CardCells = [];
     } else {
       isMainWindowLoaded = true;
@@ -1800,6 +1810,53 @@ var bcModSdk = (function () {
       case CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
         break;
+      case CardTypes.POLICE_CRIMINAL.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("Police") || card.Group.includes("Criminal"))
+        );
+        break;
+      case CardTypes.ASYLUM.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("AsylumPatient") ||
+              card.Group.includes("AsylumNurse"))
+        );
+        break;
+      case CardTypes.DOMINANT_MISTRESS.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("Dominant") || card.Group.includes("Mistress"))
+        );
+        break;
+      case CardTypes.ABDL.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("ABDLBaby") ||
+              card.Group.includes("ABDLMommy"))
+        );
+        break;
+      case CardTypes.COLLEGE.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("CollegeStudent") ||
+              card.Group.includes("CollegeTeacher"))
+        );
+        break;
+      case CardTypes.SHIBARI_SENSEI_KNOT.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("Shibari") ||
+              card.Group.includes("Sensei") ||
+              card.Group.includes("Knot"))
+        );
+        break;
       default:
         cardGroupList = MoonCEBCClubCardList.filter(
           (card) => card.Group && card.Group.includes(MoonCEBCCurrentGroup)
@@ -1863,27 +1920,23 @@ var bcModSdk = (function () {
     let events = cardsArray.filter((card) => card.Type === "Event");
     let normalCards = cardsArray.filter((card) => card.Type !== "Event");
 
-    events.forEach((card) => {
-      if (card.RequiredLevel == null) {
-        card.RequiredLevel = 1;
-      }
-    });
-
-    normalCards.forEach((card) => {
-      if (card.RequiredLevel == null) {
-        card.RequiredLevel = 1;
-      }
-    });
-
-    events.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
-    normalCards.sort((a, b) => a.RequiredLevel - b.RequiredLevel);
+    events.sort(
+      (a, b) =>
+        (a.RequiredLevel == null ? 1 : a.RequiredLevel) -
+        (b.RequiredLevel == null ? 1 : b.RequiredLevel)
+    );
+    normalCards.sort(
+      (a, b) =>
+        (a.RequiredLevel == null ? 1 : a.RequiredLevel) -
+        (b.RequiredLevel == null ? 1 : b.RequiredLevel)
+    );
 
     normalCards.sort((a, b) => {
       const levelComparison =
         (a.RequiredLevel === null ? 1 : a.RequiredLevel) -
         (b.RequiredLevel === null ? 1 : b.RequiredLevel);
 
-      if (levelComparison === 0) {
+      if (levelComparison == 0) {
         return a.ID - b.ID;
       }
 
@@ -1895,7 +1948,13 @@ var bcModSdk = (function () {
     return sortedCards;
   }
 
+  /**
+   *
+   * @param {String} userColorHex - user hex color
+   * @returns {String} new color for Themed
+   */
   function getErrorColor(userColorHex) {
+    if (userColorHex == "#000000") return "red";
     let r = parseInt(userColorHex.slice(1, 3), 16);
     let g = parseInt(userColorHex.slice(3, 5), 16);
     let b = parseInt(userColorHex.slice(5, 7), 16);

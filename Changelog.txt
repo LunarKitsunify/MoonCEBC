@@ -13,7 +13,7 @@ Update 1.2.0
 3. made it compatible with the theme addon.
 4. Changed the interface storage logic. Now all UI is deleted when closing mainWindow and created again when opening it.
 
-Next Update 
+Update 1.2.1 
 1. In the card groups, added spaces between words.
 2. Add ID for online players cards
 3. Combined some of the groups 
