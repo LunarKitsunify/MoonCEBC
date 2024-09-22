@@ -1,11 +1,11 @@
 MoonCEBC
 
 Release 1.0.0
-1.Interface for viewing and editing player decks.
+1. Interface for viewing and editing player decks.
 
 Update 1.1.0
-1.Add tooltip for Buttons
-2.Added the ability to replace the card cover and the playing board background. For the moment, without possibility of user to set own images. So it is disabled for now.
+1. Add tooltip for Buttons
+2. Added the ability to replace the card cover and the playing board background. For the moment, without possibility of user to set own images. So it is disabled for now.
 
 Update 1.2.0
 1. Add Seach Input
@@ -19,6 +19,9 @@ Update 1.2.1
 3. Combined some of the groups 
 Update 1.2.2
 1. Fixed problems with displaying default decks with default names.
+
+Update 1.2.3
+1. Fixed resetting the index of the selected deck to select after saving the deck.
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.

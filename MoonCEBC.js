@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.2
+// @version 1.2.3
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -1416,7 +1416,7 @@ var bcModSdk = (function () {
 
     UpdateCardHeightWidth();
     //load decks data
-    LoadDecksComboboxData();
+    LoadPlayerDecksSelectData();
   }
 
   //#endregion
@@ -1457,13 +1457,14 @@ var bcModSdk = (function () {
    * Checks the player's data and fills the drop-down list with the player's decks.
    * Also updates the card boxes for the first option.
    */
-  function LoadDecksComboboxData() {
+  function LoadPlayerDecksSelectData() {
     if (Player.Game.ClubCard == null) return;
 
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
 
+    const oldSelectedIndex = playerDecksSelect.selectedIndex;
     playerDecksSelect.innerHTML = "";
     let playerDecksData = [];
     if (
@@ -1476,6 +1477,8 @@ var bcModSdk = (function () {
     for (let i = 0; i <= 9; i++)
       if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
 
+    //I'm deleting the 11th element of the deck array.
+    //I don't quite understand why it is needed, because there are no decks under this index.
     if (playerDecksData.length == 11) playerDecksData.pop();
 
     playerDecksData.forEach((name, index) => {
@@ -1491,6 +1494,9 @@ var bcModSdk = (function () {
         playerDecksSelect.appendChild(option);
       }
     });
+
+    playerDecksSelect.selectedIndex =
+      oldSelectedIndex != -1 ? oldSelectedIndex : 0;
 
     GetDeckData(playerDecksSelect);
   }
@@ -1622,7 +1628,7 @@ var bcModSdk = (function () {
       if (MoonCEBCEditCurrentDeck.length == 30 && isDeckNameValidation) {
         SaveNewDeck();
         UpdateCardsCells(MoonCEBCEditCurrentDeck);
-        LoadDecksComboboxData();
+        LoadPlayerDecksSelectData();
       }
     } else {
       UpdateCardsCells(MoonCEBCCurrentDeck);
