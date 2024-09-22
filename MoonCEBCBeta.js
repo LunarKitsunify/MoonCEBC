@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Beta Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.1
+// @version 1.2.2
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -1458,34 +1458,41 @@ var bcModSdk = (function () {
    * Also updates the card boxes for the first option.
    */
   function LoadDecksComboboxData() {
-    if (Player.Game.ClubCard === undefined) return;
+    if (Player.Game.ClubCard == null) return;
 
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
 
     playerDecksSelect.innerHTML = "";
-    const playerDecksData = Player.Game.ClubCard.DeckName;
+    let playerDecksData = [];
+    if (
+      Player.Game.ClubCard.DeckName != null &&
+      Player.Game.ClubCard.DeckName.length > 0
+    )
+      playerDecksData = Player.Game.ClubCard.DeckName;
+    else playerDecksData = ["", "", "", "", "", "", "", "", "", ""];
 
-    if (playerDecksData && playerDecksData.length > 0) {
-      playerDecksData.forEach((name, index) => {
-        if (name != null && name != "") {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = name;
-          if (Player.Themed) {
-            option.style.backgroundColor =
-              Player.Themed.ColorsModule.primaryColor;
-            option.style.borderColor = Player.Themed.ColorsModule.accentColor;
-          }
-          playerDecksSelect.appendChild(option);
+    for (let i = 0; i <= 9; i++)
+      if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
+
+    if (playerDecksData.length == 11) playerDecksData.pop();
+
+    playerDecksData.forEach((name, index) => {
+      if (name != null) {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = name;
+        if (Player.Themed) {
+          option.style.backgroundColor =
+            Player.Themed.ColorsModule.primaryColor;
+          option.style.borderColor = Player.Themed.ColorsModule.accentColor;
         }
-      });
+        playerDecksSelect.appendChild(option);
+      }
+    });
 
-      GetDeckData(playerDecksSelect);
-    } else {
-      console.log(`${MoonCEBCAddonName} DeckName is empty or undefined`);
-    }
+    GetDeckData(playerDecksSelect);
   }
 
   /**
@@ -1496,12 +1503,16 @@ var bcModSdk = (function () {
   function GetDeckData(decksCombobox) {
     let selectedIndex = decksCombobox.value;
     const encodedDeck = Player.Game.ClubCard.Deck[selectedIndex];
-    let decodedDeck = decodeStringDeckToID(encodedDeck);
     let deckData = [];
+    let decodedDeck = [];
+    if (encodedDeck == "" || encodedDeck == null) {
+      decodedDeck = [...ClubCardBuilderDefaultDeck];
+    } else {
+      decodedDeck = decodeStringDeckToID(encodedDeck);
+    }
 
     for (let id of decodedDeck)
       deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
-
     const sortedCards = SortCardsList(deckData);
     MoonCEBCEditCurrentDeck = [...sortedCards];
     MoonCEBCCurrentDeck = [...sortedCards];

@@ -17,3 +17,11 @@ Update 1.2.1
 1. In the card groups, added spaces between words.
 2. Add ID for online players cards
 3. Combined some of the groups 
+Update 1.2.2
+1. Fixed problems with displaying default decks with default names.
+
+Plans
+1. Show all reward card, but block acess if player dont have it. And show info how find.
+2. Instead of a large card, display a list of all currently selected cards.
+   Make a toggle to change the mode to Big Card or a list of selected cards.
+3. Settings Menu ???
