@@ -1648,6 +1648,10 @@ var bcModSdk = (function () {
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
 
+    if (Player.Game.ClubCard.DeckName == null) {
+      Player.Game.ClubCard.DeckName = ["Deck #1","Deck #2","Deck #3","Deck #4","Deck #5","Deck #6","Deck #7", "Deck #8", "Deck #9", "Deck #10"];
+    }
+
     Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
 
