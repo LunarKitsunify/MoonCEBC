@@ -23,6 +23,9 @@ Update 1.2.2
 Update 1.2.3
 1. Fixed resetting the index of the selected deck to select after saving the deck.
 
+Update 1.2.4
+1. Fixed bug save default deck with array DeckName == null.
+
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
 2. Instead of a large card, display a list of all currently selected cards.
