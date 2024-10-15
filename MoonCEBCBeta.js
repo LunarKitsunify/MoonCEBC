@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Beta Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.4
+// @version 1.2.5
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -531,6 +531,8 @@ var bcModSdk = (function () {
     (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
+  
+  const AddonVersion = "1.2.5";
 
   //#endregion
 
@@ -541,7 +543,7 @@ var bcModSdk = (function () {
   const modApi = bcModSdk.registerMod({
     name: "MoonCEBC",
     fullName: "Moon Cards Editor BC",
-    version: "1.2.0",
+    version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
 
@@ -1434,6 +1436,9 @@ var bcModSdk = (function () {
       let copiedCard = { ...ClubCardList[i] };
       MoonCEBCClubCardList.push(copiedCard);
     }
+
+    Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
 
     console.log(`${MoonCEBCAddonName} Load Complete`);
   }
