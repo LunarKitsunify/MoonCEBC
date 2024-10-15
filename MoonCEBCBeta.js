@@ -577,12 +577,16 @@ var bcModSdk = (function () {
     Player.OnlineSharedSettings.MoonCEBC
     if (C.OnlineSharedSettings.MoonCEBC != null) {
       const iconPath = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
-      DrawImage(iconPath, CharX + 325 * Zoom, CharY + 5, false);
+      DrawImage(cardIconCheck, CharX + 315 * Zoom, CharY + 5, false);
       //drawIcon(MainCanvas, iconPath, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
     }
 
   });
 
+  //#endregion
+
+  //#region 
+  const cardIconCheck = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyBpZD0ic3ZnMiIgdmlld0JveD0iODEuOTM3IDE5OS43MiAzMTMuMDgyIDE2NS41NzkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlc2M+U291cmNlOiBvcGVuY2xpcGFydC5vcmcvZGV0YWlsLzIwOTU0NTwvZGVzYz4KICA8ZGVmcy8+CiAgPHRleHQgc3R5bGU9ImZpbGw6IHJnYigyMDYsIDAsIDApOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtc2l6ZTogMjhweDsgd2hpdGUtc3BhY2U6IHByZTsiIHRyYW5zZm9ybT0ibWF0cml4KDIuNzkxMjE0LCAwLCAwLCA0Ljc0ODY3MiwgLTM5Ny4yMjU5MDMsIC0xMjIwLjc0NDE3NykiIHg9IjE3NC4xMTQiIHk9IjMyNi4wMzgiPkRFTklFRDwvdGV4dD4KICA8cmVjdCB4PSI4MS4wODMiIHk9IjIwMC44NTgiIHdpZHRoPSIzMTIiIGhlaWdodD0iMTYzLjAyIiBzdHlsZT0iZmlsbDogbm9uZTsgcGFpbnQtb3JkZXI6IGZpbGw7IHN0cm9rZS13aWR0aDogNHB4OyBzdHJva2U6IHJnYigxNjcsIDIsIDIpOyIvPgo8L3N2Zz4=";
   //#endregion
 
   //////////////////START//////////////////
