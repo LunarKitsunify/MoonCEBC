@@ -574,7 +574,12 @@ var bcModSdk = (function () {
     next(args);
 
     const [C, CharX, CharY, Zoom] = args;
-    //drawIcon(MainCanvas, icon_heart, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
+    Player.OnlineSharedSettings.MoonCEBC
+    if (C.OnlineSharedSettings.MoonCEBC != null) {
+      const iconPath = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
+      DrawImage(iconPath, CharX + 325 * Zoom, CharY + 5, false);
+      //drawIcon(MainCanvas, iconPath, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
+    }
 
   });
 
