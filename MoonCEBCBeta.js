@@ -576,8 +576,8 @@ var bcModSdk = (function () {
     const [C, CharX, CharY, Zoom] = args;
     Player.OnlineSharedSettings.MoonCEBC
     if (C.OnlineSharedSettings.MoonCEBC != null) {
-      const iconPath = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
-      DrawImage(cardIconCheck, CharX + 315 * Zoom, CharY + 5, false);
+      //const iconPath = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
+      DrawImage(cardIconCheck, CharX + 330 * Zoom, CharY + 5, false);
       //drawIcon(MainCanvas, iconPath, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
     }
 
