@@ -570,6 +570,14 @@ var bcModSdk = (function () {
     UpdateStatusShowButton();
   });
 
+  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
+    next(args);
+
+    const [C, CharX, CharY, Zoom] = args;
+    //drawIcon(MainCanvas, icon_heart, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
+
+  });
+
   //#endregion
 
   //////////////////START//////////////////
@@ -1428,7 +1436,6 @@ var bcModSdk = (function () {
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   function AddonLoad() {
-    console.log(`${MoonCEBCAddonName} Start Load`);
     const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
     MoonCEBCTextContent = new TextCache(TextPath); //Load Cards data from BC Server
 
@@ -1440,7 +1447,7 @@ var bcModSdk = (function () {
     Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
     ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
 
-    console.log(`${MoonCEBCAddonName} Load Complete`);
+    console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
   /**
    * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
