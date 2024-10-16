@@ -652,7 +652,7 @@ var bcModSdk = (function () {
         },
       }
     );
-    if (layer.Themed && Player.Themed.ColorsModule.base) {
+    if (Player.Themed && Player.Themed.ColorsModule.base) {
       button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
       button.style.borderColor = Player.Themed.ColorsModule.base.accent;
       button.style.color = Player.Themed.ColorsModule.base.text;
