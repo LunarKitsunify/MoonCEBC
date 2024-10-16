@@ -581,8 +581,7 @@ var bcModSdk = (function () {
 
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) {
-      const xxxx = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
-      DrawImageResize(xxxx, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+      DrawImageResize(cardIconCheck, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
     }
 
   });
