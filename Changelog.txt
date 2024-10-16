@@ -27,9 +27,10 @@ Update 1.2.4
 1. Fixed bug save default deck with array DeckName == null.
 
 Update 1.2.5
-1. Removed the color calculation for highlighting the deck name text when editing a deck for the theme addon.
+1. Fix synergy with Theme Addon after it's been updated.
+2. Removed the color calculation for highlighting the deck name text when editing a deck for the theme addon.
    Now just red color.
-2. Made a check to see if all players in the room have the addon and added an icon for it.
+3. Made a check to see if all players in the room have the addon and added an icon for it.
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.

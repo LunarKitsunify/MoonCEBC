@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.4
+// @version 1.2.5
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -531,6 +531,8 @@ var bcModSdk = (function () {
     (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
+  
+  const AddonVersion = "1.2.5";
 
   //#endregion
 
@@ -541,7 +543,7 @@ var bcModSdk = (function () {
   const modApi = bcModSdk.registerMod({
     name: "MoonCEBC",
     fullName: "Moon Cards Editor BC",
-    version: "1.2.0",
+    version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
 
@@ -568,6 +570,23 @@ var bcModSdk = (function () {
     UpdateStatusShowButton();
   });
 
+  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
+    next(args);
+
+    const [C, CharX, CharY, Zoom] = args;
+    if (C.OnlineSharedSettings.MoonCEBC != null) 
+      DrawImage(cardIconCheck, CharX + 350 * Zoom, CharY + 5, false);
+
+  });
+
+  //#endregion
+
+  //#region 
+  /**
+   * base64 png for check who with addon icon
+   */
+  const cardIconCheck = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsEAAA7BAbiRa+0AAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAABsklEQVRYR82XS0rEQBiEk2xciCCo4IgoHkPEtd5PxksIulIZceklRFRUZBY+EGXA1WhVqB6SmEf/PZPgB0VX5/F3pZOGdFTGeDxeg86h758pYQ3ojDVVPkeitsghdJMkyVwcx9E0Yg3UuoX6LFwkVpsDaV9x4xI9HoK6S0/YGaLODg1qvsEvp0ebwMWfaDh9l5xG+hAR1LigV80/VL0CxzqnMRTdu5F2KmgK0DpNAd7VtkZtAHw027Kt8b9fAb7ca9nWMM0AVyRCDaAH+qxw7N55C94BXGEsrT1oM+1kwLEtWVMIrwB6si96ru066fqRbwjvGUDxBTdAHQoyr24jpm+gDcwfYRO+U+/wCuAz9UV87zG/gron5DnoQ10vLB+hXHkIdwzXLVpmzDQDVSGy3jI4Mb8CNwAGfeHA0jB7zoI5AOFA0Iq69L2QwUlQAKIQE4USHGBWdBlgpDZHZwHwd7Uqm6OzAFgpR7I5ugywL5ujKcAT13kouvcx7VRQun7wezXZmsFfoSndWHrwjDq7NKhj2pqdQAewfISphVp96BjeD1zM7Tm31LPanp9CPZXPEEW/xTOGTp/t0UUAAAAASUVORK5CYII=";
+  
   //#endregion
 
   //////////////////START//////////////////
@@ -632,15 +651,15 @@ var bcModSdk = (function () {
         },
       }
     );
-    if (Player.Themed) {
-      button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
-      button.style.borderColor = Player.Themed.ColorsModule.accentColor;
-      button.style.color = Player.Themed.ColorsModule.textColor;
+    if (Player.Themed.ColorsModule.base) {
+      button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
+      button.style.borderColor = Player.Themed.ColorsModule.base.accent;
+      button.style.color = Player.Themed.ColorsModule.base.text;
       button.addEventListener("mouseover", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.accentColor;
+        button.style.backgroundColor = Player.Themed.ColorsModule.base.accent;
       });
       button.addEventListener("mouseout", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
+        button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
       });
     }
 
@@ -1123,7 +1142,7 @@ var bcModSdk = (function () {
       deckNameInput.style.color = userColor;
       deckNameInput.addEventListener("input", (event) => {
         if (deckNameInput.value.length > 30)
-          deckNameInput.style.color = getErrorColor(userColor);
+          deckNameInput.style.color = "red";
         else deckNameInput.style.color = userColor;
       });
     } else {
@@ -1426,7 +1445,6 @@ var bcModSdk = (function () {
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   function AddonLoad() {
-    console.log(`${MoonCEBCAddonName} Start Load`);
     const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
     MoonCEBCTextContent = new TextCache(TextPath); //Load Cards data from BC Server
 
@@ -1435,7 +1453,10 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    console.log(`${MoonCEBCAddonName} Load Complete`);
+    Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+
+    console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
   /**
    * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
@@ -1647,7 +1668,7 @@ var bcModSdk = (function () {
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
-    
+
     if (Player.Game.ClubCard.DeckName == null) {
       Player.Game.ClubCard.DeckName = ["Deck #1","Deck #2","Deck #3","Deck #4","Deck #5","Deck #6","Deck #7", "Deck #8", "Deck #9", "Deck #10"];
     }
@@ -1966,27 +1987,6 @@ var bcModSdk = (function () {
     const sortedCards = [...normalCards, ...events];
 
     return sortedCards;
-  }
-
-  /**
-   *
-   * @param {String} userColorHex - user hex color
-   * @returns {String} new color for Themed
-   */
-  function getErrorColor(userColorHex) {
-    if (userColorHex == "#000000") return "red";
-    let r = parseInt(userColorHex.slice(1, 3), 16);
-    let g = parseInt(userColorHex.slice(3, 5), 16);
-    let b = parseInt(userColorHex.slice(5, 7), 16);
-
-    r = Math.floor(r * 0.7);
-    g = Math.floor(g * 0.7);
-    b = Math.floor(b * 0.7);
-
-    const errorColorHex = `#${((1 << 24) + (r << 16) + (g << 8) + b)
-      .toString(16)
-      .slice(1)}`;
-    return errorColorHex;
   }
 
   //#region parser functions

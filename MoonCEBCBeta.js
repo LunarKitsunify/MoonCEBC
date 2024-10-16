@@ -573,6 +573,10 @@ var bcModSdk = (function () {
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
     next(args);
 
+    if (Player.OnlineSharedSettings.MoonCEBC == null) {
+      Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    }
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) 
       DrawImage(cardIconCheck, CharX + 350 * Zoom, CharY + 5, false);
@@ -1378,7 +1382,7 @@ var bcModSdk = (function () {
       "left"
     );
 
-    topSettingsRightPanel.appendChild(settingsButton);
+    //topSettingsRightPanel.appendChild(settingsButton);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
     //#endregion
