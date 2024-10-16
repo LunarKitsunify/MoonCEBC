@@ -1453,8 +1453,10 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
-    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    if (Player.OnlineSharedSettings != null) {
+      Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    }
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }

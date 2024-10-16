@@ -573,10 +573,12 @@ var bcModSdk = (function () {
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
     next(args);
 
+    //This part only for beta test
     if (Player.OnlineSharedSettings.MoonCEBC == null) {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
+    
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) 
       DrawImage(cardIconCheck, CharX + 350 * Zoom, CharY + 5, false);
@@ -1457,8 +1459,10 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
-    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    if (Player.OnlineSharedSettings != null) {
+      Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    }
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
