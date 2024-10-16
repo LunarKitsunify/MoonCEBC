@@ -574,19 +574,17 @@ var bcModSdk = (function () {
     next(args);
 
     const [C, CharX, CharY, Zoom] = args;
-    Player.OnlineSharedSettings.MoonCEBC
-    if (C.OnlineSharedSettings.MoonCEBC != null) {
-      //const iconPath = "Screens/MiniGame/ClubCard/Button/CancelPending.png";
-      DrawImage(cardIconCheck, CharX + 330 * Zoom, CharY + 5, false);
-      //drawIcon(MainCanvas, iconPath, CharX + 325 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
-    }
+    if (C.OnlineSharedSettings.MoonCEBC != null) 
+      DrawImage(cardIconCheck, CharX + 350 * Zoom, CharY + 5, false);
 
   });
 
   //#endregion
 
   //#region 
-  
+  /**
+   * base64 png for check who with addon icon
+   */
   const cardIconCheck = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsEAAA7BAbiRa+0AAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAABsklEQVRYR82XS0rEQBiEk2xciCCo4IgoHkPEtd5PxksIulIZceklRFRUZBY+EGXA1WhVqB6SmEf/PZPgB0VX5/F3pZOGdFTGeDxeg86h758pYQ3ojDVVPkeitsghdJMkyVwcx9E0Yg3UuoX6LFwkVpsDaV9x4xI9HoK6S0/YGaLODg1qvsEvp0ebwMWfaDh9l5xG+hAR1LigV80/VL0CxzqnMRTdu5F2KmgK0DpNAd7VtkZtAHw027Kt8b9fAb7ca9nWMM0AVyRCDaAH+qxw7N55C94BXGEsrT1oM+1kwLEtWVMIrwB6si96ru066fqRbwjvGUDxBTdAHQoyr24jpm+gDcwfYRO+U+/wCuAz9UV87zG/gron5DnoQ10vLB+hXHkIdwzXLVpmzDQDVSGy3jI4Mb8CNwAGfeHA0jB7zoI5AOFA0Iq69L2QwUlQAKIQE4USHGBWdBlgpDZHZwHwd7Uqm6OzAFgpR7I5ugywL5ujKcAT13kouvcx7VRQun7wezXZmsFfoSndWHrwjDq7NKhj2pqdQAewfISphVp96BjeD1zM7Tm31LPanp9CPZXPEEW/xTOGTp/t0UUAAAAASUVORK5CYII=";
   
   //#endregion
@@ -1144,7 +1142,7 @@ var bcModSdk = (function () {
       deckNameInput.style.color = userColor;
       deckNameInput.addEventListener("input", (event) => {
         if (deckNameInput.value.length > 30)
-          deckNameInput.style.color = getErrorColor(userColor);
+          deckNameInput.style.color = "red";
         else deckNameInput.style.color = userColor;
       });
     } else {
@@ -1989,27 +1987,6 @@ var bcModSdk = (function () {
     const sortedCards = [...normalCards, ...events];
 
     return sortedCards;
-  }
-
-  /**
-   *
-   * @param {String} userColorHex - user hex color
-   * @returns {String} new color for Themed
-   */
-  function getErrorColor(userColorHex) {
-    if (userColorHex == "#000000") return "red";
-    let r = parseInt(userColorHex.slice(1, 3), 16);
-    let g = parseInt(userColorHex.slice(3, 5), 16);
-    let b = parseInt(userColorHex.slice(5, 7), 16);
-
-    r = Math.floor(r * 0.7);
-    g = Math.floor(g * 0.7);
-    b = Math.floor(b * 0.7);
-
-    const errorColorHex = `#${((1 << 24) + (r << 16) + (g << 8) + b)
-      .toString(16)
-      .slice(1)}`;
-    return errorColorHex;
   }
 
   //#region parser functions
