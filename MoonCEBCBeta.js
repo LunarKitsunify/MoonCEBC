@@ -578,10 +578,11 @@ var bcModSdk = (function () {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
-    
+
     const [C, CharX, CharY, Zoom] = args;
-    if (C.OnlineSharedSettings.MoonCEBC != null) 
-      DrawImage(cardIconCheck, CharX + 350 * Zoom, CharY + 5, false);
+    if (C.OnlineSharedSettings.MoonCEBC != null) {
+      DrawImageResize(cardIconCheck, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+    }
 
   });
 
