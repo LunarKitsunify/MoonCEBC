@@ -653,10 +653,10 @@ var bcModSdk = (function () {
     );
     if (Player.Themed.ColorsModule.base) {
       button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
-      button.style.borderColor = Player.Themed.ColorsModule.base.accentColor;
+      button.style.borderColor = Player.Themed.ColorsModule.base.accent;
       button.style.color = Player.Themed.ColorsModule.base.text;
       button.addEventListener("mouseover", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.base.accentColor;
+        button.style.backgroundColor = Player.Themed.ColorsModule.base.accent;
       });
       button.addEventListener("mouseout", () => {
         button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
