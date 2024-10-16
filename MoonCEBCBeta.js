@@ -651,15 +651,15 @@ var bcModSdk = (function () {
         },
       }
     );
-    if (Player.Themed) {
-      button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
-      button.style.borderColor = Player.Themed.ColorsModule.accentColor;
-      button.style.color = Player.Themed.ColorsModule.textColor;
+    if (Player.Themed.ColorsModule.base) {
+      button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
+      button.style.borderColor = Player.Themed.ColorsModule.base.accentColor;
+      button.style.color = Player.Themed.ColorsModule.base.text;
       button.addEventListener("mouseover", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.accentColor;
+        button.style.backgroundColor = Player.Themed.ColorsModule.base.accentColor;
       });
       button.addEventListener("mouseout", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.primaryColor;
+        button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
       });
     }
 
