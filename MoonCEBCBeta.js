@@ -581,7 +581,8 @@ var bcModSdk = (function () {
 
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) {
-      DrawImageResize(cardIconCheck, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+      const image = "https://i.imgur.com/SXAG27j.png"; // cardIconCheck
+      DrawImageResize(image, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
     }
 
   });
