@@ -32,6 +32,10 @@ Update 1.2.5
    Now just red color.
 3. Made a check to see if all players in the room have the addon and added an icon for it.
 
+Update 1.2.6
+1. Update Status icon
+2. Fixed the ability to use the addon without FUSAM. 
+
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
 2. Instead of a large card, display a list of all currently selected cards.

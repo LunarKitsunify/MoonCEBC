@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Beta Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.5
+// @version 1.2.6
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -410,6 +410,12 @@ var bcModSdk = (function () {
 
   const MoonCEBCAddonName = "Moon Cards Editor BC";
   const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
+  const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
+  const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
+  /**
+   * If the people in the room pass the addon check, draws a card icon for them.
+   */
+  const MoonCEBCStatusIsAddonIcon = "https://i.imgur.com/SXAG27j.png";
   /**
    * variable for loading description for cards
    */
@@ -494,9 +500,6 @@ var bcModSdk = (function () {
   let MoonCEBCBigCardHeight = 0;
   let MoonCEBCBigCardWidth = 0;
 
-  const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
-  const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
-
   function UpdateServerPlayerData() {
     Player.Game.ClubCard.CardCoverBackground = CardGameCardCoverBackground;
     Player.Game.ClubCard.BoardBackground = CardGameBoardBackground;
@@ -573,7 +576,6 @@ var bcModSdk = (function () {
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
     next(args);
 
-    //This part only for beta test
     if (Player.OnlineSharedSettings.MoonCEBC == null) {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
@@ -581,20 +583,11 @@ var bcModSdk = (function () {
 
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) {
-      const image = "https://i.imgur.com/SXAG27j.png"; // cardIconCheck
-      DrawImageResize(image, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+      DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
     }
 
   });
 
-  //#endregion
-
-  //#region 
-  /**
-   * base64 png for check who with addon icon
-   */
-  const cardIconCheck = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsEAAA7BAbiRa+0AAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAABsklEQVRYR82XS0rEQBiEk2xciCCo4IgoHkPEtd5PxksIulIZceklRFRUZBY+EGXA1WhVqB6SmEf/PZPgB0VX5/F3pZOGdFTGeDxeg86h758pYQ3ojDVVPkeitsghdJMkyVwcx9E0Yg3UuoX6LFwkVpsDaV9x4xI9HoK6S0/YGaLODg1qvsEvp0ebwMWfaDh9l5xG+hAR1LigV80/VL0CxzqnMRTdu5F2KmgK0DpNAd7VtkZtAHw027Kt8b9fAb7ca9nWMM0AVyRCDaAH+qxw7N55C94BXGEsrT1oM+1kwLEtWVMIrwB6si96ru066fqRbwjvGUDxBTdAHQoyr24jpm+gDcwfYRO+U+/wCuAz9UV87zG/gron5DnoQ10vLB+hXHkIdwzXLVpmzDQDVSGy3jI4Mb8CNwAGfeHA0jB7zoI5AOFA0Iq69L2QwUlQAKIQE4USHGBWdBlgpDZHZwHwd7Uqm6OzAFgpR7I5ugywL5ujKcAT13kouvcx7VRQun7wezXZmsFfoSndWHrwjDq7NKhj2pqdQAewfISphVp96BjeD1zM7Tm31LPanp9CPZXPEEW/xTOGTp/t0UUAAAAASUVORK5CYII=";
-  
   //#endregion
 
   //////////////////START//////////////////
@@ -1461,7 +1454,7 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    if (Player.OnlineSharedSettings != null) {
+    if (Player && Player.OnlineSharedSettings) {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
