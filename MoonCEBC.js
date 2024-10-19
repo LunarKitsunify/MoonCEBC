@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.6
+// @version 1.2.7
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -412,10 +412,10 @@ var bcModSdk = (function () {
   const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
   const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
-    /**
+  /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
-    const MoonCEBCStatusIsAddonIcon = "https://i.imgur.com/SXAG27j.png";
+  const MoonCEBCStatusIsAddonIcon = "https://i.imgur.com/SXAG27j.png";
   /**
    * variable for loading description for cards
    */
@@ -535,7 +535,7 @@ var bcModSdk = (function () {
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
   
-  const AddonVersion = "1.2.5";
+  const AddonVersion = "1.2.7";
 
   //#endregion
 
@@ -1963,6 +1963,25 @@ var bcModSdk = (function () {
    * @returns sorted array
    */
   function SortCardsList(cardsArray) {
+    //In case there was an error when receiving the card, fills the data with an empty object.
+    cardsArray.forEach((card, index) => {
+      if (card === undefined) {
+        cardsArray[index] = {
+          ID: 0,
+          Name: "Error",
+          Type: "Error",
+          Title: "Error",
+          Text: "Error",
+          Reward: "Error",
+          RewardMemberNumber: 0,
+          MoneyPerTurn: 0,
+          FamePerTurn: 0,
+          RequiredLevel: 0,
+          Group: ["Error"],
+        };
+      }
+    });
+
     let events = cardsArray.filter((card) => card.Type === "Event");
     let normalCards = cardsArray.filter((card) => card.Type !== "Event");
 

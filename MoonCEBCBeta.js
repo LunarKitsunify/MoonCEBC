@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name Beta Moon Cards Editor BC
+// @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.6
+// @version 1.2.7
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -535,7 +535,7 @@ var bcModSdk = (function () {
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
   
-  const AddonVersion = "1.2.5";
+  const AddonVersion = "1.2.7";
 
   //#endregion
 
