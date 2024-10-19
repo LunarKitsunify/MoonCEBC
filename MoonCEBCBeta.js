@@ -576,6 +576,8 @@ var bcModSdk = (function () {
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
     next(args);
 
+    if (ChatRoomHideIconState != 0) return;
+
     if (Player.OnlineSharedSettings.MoonCEBC == null) {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
@@ -1961,6 +1963,25 @@ var bcModSdk = (function () {
    * @returns sorted array
    */
   function SortCardsList(cardsArray) {
+    //In case there was an error when receiving the card, fills the data with an empty object.
+    cardsArray.forEach((card, index) => {
+      if (card === undefined) {
+        cardsArray[index] = {
+          ID: 0,
+          Name: "Error",
+          Type: "Error",
+          Title: "Error",
+          Text: "Error",
+          Reward: "Error",
+          RewardMemberNumber: 0,
+          MoneyPerTurn: 0,
+          FamePerTurn: 0,
+          RequiredLevel: 0,
+          Group: ["Error"],
+        };
+      }
+    });
+
     let events = cardsArray.filter((card) => card.Type === "Event");
     let normalCards = cardsArray.filter((card) => card.Type !== "Event");
 

@@ -36,6 +36,12 @@ Update 1.2.6
 1. Update Status icon
 2. Fixed the ability to use the addon without FUSAM. 
 
+Update 1.2.7
+1. Now if hide all objects from the screen ( using the eye button in the chat room ), 
+   the icon from Card Editor will also be hidden. 
+2. Fixed a bug when processing cards from the beta version, which are not yet in the main game client.
+
+
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
 2. Instead of a large card, display a list of all currently selected cards.

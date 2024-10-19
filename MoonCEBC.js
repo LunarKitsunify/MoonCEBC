@@ -576,6 +576,8 @@ var bcModSdk = (function () {
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
     next(args);
 
+    if (ChatRoomHideIconState != 0) return;
+
     if (Player.OnlineSharedSettings.MoonCEBC == null) {
       Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
