@@ -45,6 +45,9 @@ Update 1.2.8
 1. Fix dont work input in room-map with w-a-s-d keys.
 2. Add draw icon, when player open addon interface for other players with addon.
 
+Update 1.2.9
+1. Fix a few problem with 1.2.8
+
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
