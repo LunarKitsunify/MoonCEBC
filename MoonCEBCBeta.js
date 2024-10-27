@@ -583,11 +583,30 @@ var bcModSdk = (function () {
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
 
+    const testImage = "https://i.imgur.com/nje9iy8.png";
     const [C, CharX, CharY, Zoom] = args;
     if (C.OnlineSharedSettings.MoonCEBC != null) {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
     }
 
+    //DrawImageResize(testImage, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
+
+  });
+
+  //To block move events on room-map when addons input focus.
+  modApi.hookFunction("ChatRoomKeyDown", 5, (args, next) => {
+    const searchCardInput = /** @type {HTMLTextAreaElement} */(document.getElementById("MoonCEBCSearchCardInputId"));
+    const deckNameInput = /** @type {HTMLTextAreaElement} */(document.getElementById("MoonCEBCDeckNameInputId"));
+    const isFocus = searchCardInput && deckNameInput
+      && (document.activeElement === searchCardInput || document.activeElement === deckNameInput);
+
+    if (isFocus) {
+      const event = args[0];
+      if (event.code == "KeyW" || event.code == "KeyA" || event.code == "KeyS" || event.code == "KeyD")
+        return false;
+    }
+    
+    next(args);
   });
 
   //#endregion
@@ -1133,7 +1152,7 @@ var bcModSdk = (function () {
     //#region deckNameImput
 
     const deckNameInput = document.createElement("input");
-    deckNameInput.id = "DeckNameInputId";
+    deckNameInput.id = "MoonCEBCDeckNameInputId";
     deckNameInput.style.width = DeckNamePanelWidth;
     deckNameInput.style.height = "80%";
     deckNameInput.style.alignContent = "center";
@@ -1207,7 +1226,7 @@ var bcModSdk = (function () {
     //#region Search Card Input
 
     const searchCardInput = document.createElement("input");
-    searchCardInput.id = "SearchCardInputId";
+    searchCardInput.id = "MoonCEBCSearchCardInputId";
     searchCardInput.style.width = "10%";
     searchCardInput.style.height = "80%";
     searchCardInput.style.alignContent = "center";
@@ -1597,7 +1616,7 @@ var bcModSdk = (function () {
     const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftEditPanelId"
     );
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
@@ -1630,7 +1649,7 @@ var bcModSdk = (function () {
    * @param {boolean} isSave Switch to check whether the deck will be saved or not
    */
   function SetViewMode(isSave) {
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftViewPanelId"
     );
@@ -1665,7 +1684,7 @@ var bcModSdk = (function () {
    * Save new Deck  :)
    */
   function SaveNewDeck() {
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
@@ -1738,6 +1757,8 @@ var bcModSdk = (function () {
    */
   function OpenExitAddonWindow() {
     if (isVisibleMainWindow) {
+      //TODO maybe save prev emotion?
+      CharacterSetFacialExpression(Player, "Emoticon", null);
       isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
 
@@ -1749,6 +1770,7 @@ var bcModSdk = (function () {
 
       CardCells = [];
     } else {
+      CharacterSetFacialExpression(Player, "Emoticon", "Read", null, "White");
       isMainWindowLoaded = true;
       LoadMainWindow();
     }
@@ -1936,7 +1958,7 @@ var bcModSdk = (function () {
   function Get30CardsGroup() {
     const cardsPerPage = 30;
     const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
-    const searchCardInput = MainWindowPanel.querySelector("#SearchCardInputId");
+    const searchCardInput = MainWindowPanel.querySelector("#MoonCEBCSearchCardInputId");
 
     const cardsSources =
       searchCardInput.value.length > 0
