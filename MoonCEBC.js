@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.7
+// @version 1.2.8
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -417,6 +417,10 @@ var bcModSdk = (function () {
    */
   const MoonCEBCStatusIsAddonIcon = "https://i.imgur.com/SXAG27j.png";
   /**
+   * If a player opens the addon menu, an icon is rendered for the other players.
+   */
+  const MoonCEBCIsOpenMenuIcon = "https://i.imgur.com/nje9iy8.png";
+  /**
    * variable for loading description for cards
    */
   let MoonCEBCTextContent = null;
@@ -500,12 +504,6 @@ var bcModSdk = (function () {
   let MoonCEBCBigCardHeight = 0;
   let MoonCEBCBigCardWidth = 0;
 
-  function UpdateServerPlayerData() {
-    Player.Game.ClubCard.CardCoverBackground = CardGameCardCoverBackground;
-    Player.Game.ClubCard.BoardBackground = CardGameBoardBackground;
-    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
-  }
-
   //#region Size and color customization
 
   const TopPanelHeight = "7%";
@@ -534,6 +532,8 @@ var bcModSdk = (function () {
     (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
+  
+  const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   
   const AddonVersion = "1.2.7";
 
@@ -578,14 +578,22 @@ var bcModSdk = (function () {
 
     if (ChatRoomHideIconState != 0) return;
 
-    if (Player.OnlineSharedSettings.MoonCEBC == null) {
-      Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+
+    const isSetMoonCEBC = Player.OnlineSharedSettings.MoonCEBC.Version != null
+      && Player.OnlineSharedSettings.MoonCEBC.IsMenuOpen != null;
+    if (Player && Player.OnlineSharedSettings && Player.OnlineSharedSettings.MoonCEBC && isSetMoonCEBC == false) {
+      Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
 
     const [C, CharX, CharY, Zoom] = args;
+    //Is Addon active Icon
     if (C.OnlineSharedSettings.MoonCEBC != null) {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+    }
+    //Is Menu Addon Open Icon
+    if (C.OnlineSharedSettings.MoonCEBC.IsMenuOpen) {
+      DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
     }
 
   });
@@ -1133,7 +1141,7 @@ var bcModSdk = (function () {
     //#region deckNameImput
 
     const deckNameInput = document.createElement("input");
-    deckNameInput.id = "DeckNameInputId";
+    deckNameInput.id = "MoonCEBCDeckNameInputId";
     deckNameInput.style.width = DeckNamePanelWidth;
     deckNameInput.style.height = "80%";
     deckNameInput.style.alignContent = "center";
@@ -1154,6 +1162,10 @@ var bcModSdk = (function () {
         else deckNameInput.style.color = "black";
       });
     }
+    deckNameInput.addEventListener("keydown", (event) => {
+      if (movementKeys.includes(event.code))
+        event.stopPropagation();
+    });
 
     //#endregion
 
@@ -1207,7 +1219,7 @@ var bcModSdk = (function () {
     //#region Search Card Input
 
     const searchCardInput = document.createElement("input");
-    searchCardInput.id = "SearchCardInputId";
+    searchCardInput.id = "MoonCEBCSearchCardInputId";
     searchCardInput.style.width = "10%";
     searchCardInput.style.height = "80%";
     searchCardInput.style.alignContent = "center";
@@ -1227,7 +1239,11 @@ var bcModSdk = (function () {
       MoonCEBCCurrent30Cards = Get30CardsGroup();
       UpdateCardsCells(MoonCEBCCurrent30Cards);
     });
-
+    searchCardInput.addEventListener("keydown", (event) => {
+      if (movementKeys.includes(event.code))
+        event.stopPropagation();
+    });
+    
     //#endregion
 
     //#region groupButtons
@@ -1456,8 +1472,8 @@ var bcModSdk = (function () {
       MoonCEBCClubCardList.push(copiedCard);
     }
 
-    if (Player && Player.OnlineSharedSettings) {
-      Player.OnlineSharedSettings.MoonCEBC = AddonVersion;
+    if (Player && Player.OnlineSharedSettings && Player.OnlineSharedSettings.MoonCEBC && Player.OnlineSharedSettings.MoonCEBC.Version) {
+      Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
 
@@ -1597,7 +1613,7 @@ var bcModSdk = (function () {
     const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftEditPanelId"
     );
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
@@ -1630,7 +1646,7 @@ var bcModSdk = (function () {
    * @param {boolean} isSave Switch to check whether the deck will be saved or not
    */
   function SetViewMode(isSave) {
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftViewPanelId"
     );
@@ -1665,7 +1681,7 @@ var bcModSdk = (function () {
    * Save new Deck  :)
    */
   function SaveNewDeck() {
-    const deckNameInput = MainWindowPanel.querySelector("#DeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
@@ -1738,17 +1754,21 @@ var bcModSdk = (function () {
    */
   function OpenExitAddonWindow() {
     if (isVisibleMainWindow) {
+      Player.OnlineSharedSettings.MoonCEBC.IsMenuOpen = false;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
       isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
-
+      
       MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
       MoonCEBCBuilderSeacrhGroupList = [];
       MoonCEBCBuilderCurrentGroupsList = [];
       MoonCEBCPageMode = WindowStatus.VIEW;
       MoonCEBCCurrentCardsListPage = 0;
-
+      
       CardCells = [];
     } else {
+      Player.OnlineSharedSettings.MoonCEBC.IsMenuOpen = true;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
       isMainWindowLoaded = true;
       LoadMainWindow();
     }
@@ -1936,7 +1956,7 @@ var bcModSdk = (function () {
   function Get30CardsGroup() {
     const cardsPerPage = 30;
     const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
-    const searchCardInput = MainWindowPanel.querySelector("#SearchCardInputId");
+    const searchCardInput = MainWindowPanel.querySelector("#MoonCEBCSearchCardInputId");
 
     const cardsSources =
       searchCardInput.value.length > 0

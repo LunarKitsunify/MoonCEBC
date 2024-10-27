@@ -41,6 +41,10 @@ Update 1.2.7
    the icon from Card Editor will also be hidden. 
 2. Fixed a bug when processing cards from the beta version, which are not yet in the main game client.
 
+Update 1.2.8
+1. Fix dont work input in room-map with w-a-s-d keys.
+2. Add draw icon, when player open addon interface for other players with addon.
+
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
