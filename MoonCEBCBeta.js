@@ -1474,13 +1474,11 @@ var bcModSdk = (function () {
       let copiedCard = { ...ClubCardList[i] };
       MoonCEBCClubCardList.push(copiedCard);
     }
-
-    const isPlayer = Player != null && Player.OnlineSharedSettings != null;
-    const isSetMoonCEBC = Player.OnlineSharedSettings.MoonCEBC == null
-      || Player.OnlineSharedSettings.MoonCEBC.Version == null
-      || Player.OnlineSharedSettings.MoonCEBC.Version != AddonVersion;
     
-      if (isPlayer && isSetMoonCEBC) {
+    if (Player != null && Player.OnlineSharedSettings != null
+      && (Player.OnlineSharedSettings.MoonCEBC == null
+        || Player.OnlineSharedSettings.MoonCEBC.Version == null
+        || Player.OnlineSharedSettings.MoonCEBC.Version != AddonVersion)) {
         Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
         ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
       }
