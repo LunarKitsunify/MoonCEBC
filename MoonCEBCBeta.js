@@ -535,7 +535,7 @@ var bcModSdk = (function () {
   
   const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   
-  const AddonVersion = "1.2.7";
+  const AddonVersion = "1.2.8";
 
   //#endregion
 
