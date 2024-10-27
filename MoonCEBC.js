@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.8
+// @version 1.2.9
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -535,7 +535,7 @@ var bcModSdk = (function () {
   
   const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   
-  const AddonVersion = "1.2.8";
+  const AddonVersion = "1.2.9";
 
   //#endregion
 
@@ -578,10 +578,12 @@ var bcModSdk = (function () {
 
     if (ChatRoomHideIconState != 0) return;
 
-
-    const isSetMoonCEBC = Player.OnlineSharedSettings.MoonCEBC.Version != null
-      && Player.OnlineSharedSettings.MoonCEBC.IsMenuOpen != null;
-    if (Player && Player.OnlineSharedSettings && Player.OnlineSharedSettings.MoonCEBC && isSetMoonCEBC == false) {
+    const isPlayer = Player != null && Player.OnlineSharedSettings != null;
+    const isSetMoonCEBC = Player.OnlineSharedSettings.MoonCEBC == null
+      || Player.OnlineSharedSettings.MoonCEBC.Version == null
+      || Player.OnlineSharedSettings.MoonCEBC.Version != AddonVersion;
+    
+    if (isPlayer && isSetMoonCEBC) {
       Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     }
@@ -590,10 +592,11 @@ var bcModSdk = (function () {
     //Is Addon active Icon
     if (C.OnlineSharedSettings.MoonCEBC != null) {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
-    }
-    //Is Menu Addon Open Icon
-    if (C.OnlineSharedSettings.MoonCEBC != null && C.OnlineSharedSettings.MoonCEBC.IsMenuOpen != null && C.OnlineSharedSettings.MoonCEBC.IsMenuOpen) {
-      DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
+    
+      //Is Menu Addon Open Icon
+      if (C.OnlineSharedSettings.MoonCEBC.IsMenuOpen != null && C.OnlineSharedSettings.MoonCEBC.IsMenuOpen) {
+        DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
+      }
     }
 
   });
@@ -1471,11 +1474,14 @@ var bcModSdk = (function () {
       let copiedCard = { ...ClubCardList[i] };
       MoonCEBCClubCardList.push(copiedCard);
     }
-
-    if (Player && Player.OnlineSharedSettings && Player.OnlineSharedSettings.MoonCEBC && Player.OnlineSharedSettings.MoonCEBC.Version) {
-      Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
-      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
-    }
+    
+    if (Player != null && Player.OnlineSharedSettings != null
+      && (Player.OnlineSharedSettings.MoonCEBC == null
+        || Player.OnlineSharedSettings.MoonCEBC.Version == null
+        || Player.OnlineSharedSettings.MoonCEBC.Version != AddonVersion)) {
+        Player.OnlineSharedSettings.MoonCEBC = { Version: AddonVersion, IsMenuOpen: false };
+        ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+      }
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
