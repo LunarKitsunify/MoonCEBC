@@ -592,7 +592,7 @@ var bcModSdk = (function () {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
     }
     //Is Menu Addon Open Icon
-    if (C.OnlineSharedSettings.MoonCEBC.IsMenuOpen) {
+    if (C.OnlineSharedSettings.MoonCEBC.IsMenuOpen != null && C.OnlineSharedSettings.MoonCEBC.IsMenuOpen) {
       DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
     }
 
