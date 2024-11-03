@@ -48,6 +48,9 @@ Update 1.2.8
 Update 1.2.9
 1. Fix a few problem with 1.2.8
 
+Update 1.2.10
+1. Stopped using Player.OnlineSharedSettings to pass data between players due to some issues with it. And started using hidden messages.
+
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.

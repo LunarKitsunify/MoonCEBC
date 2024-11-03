@@ -573,7 +573,9 @@ var bcModSdk = (function () {
     UpdateStatusShowButton();
   });
 
-  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
+  //#region ---------------Draw Addon Icons--------------- //
+
+  modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 0, (args, next) => {
     if (ChatRoomHideIconState != 0) return next(args);
     const [C, CharX, CharY, Zoom] = args;
 
@@ -581,16 +583,33 @@ var bcModSdk = (function () {
     if (C.MoonCEBC) 
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
+    return next(args);
+
+  });
+
+  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
+    if (ChatRoomHideIconState != 0) return next(args);
+    const [C, CharX, CharY, Zoom] = args;
+
     //Is Menu Addon Open Icon
     if (C.MoonCEBC && C.MoonCEBC.IsMenuOpen) 
       DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
 
     return next(args);
-
   });
 
+  //#endregion //------------------------------//
+
+  //#region ---------------Addon work with hiden message--------------- // 
+  
   modApi.hookFunction("ChatRoomSync", 0, (args, next) => {
     AddonInfoMessage();
+
+    if (Player.OnlineSharedSettings.MoonCEBC) {
+      delete Player.OnlineSharedSettings.MoonCEBC;
+      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    }
+
     return next(args);
   });
 
@@ -610,6 +629,8 @@ var bcModSdk = (function () {
     }
     return next(args);
   });
+
+    //#endregion //------------------------------//
 
   //#endregion
 
@@ -2041,6 +2062,11 @@ var bcModSdk = (function () {
 
   //#region ChatMessageFunc
 
+  /**
+   * Func for send on server hidden message with addon data
+   * @param {*} target - maybe later will use it for a few func
+   * @param {boolean} isMenuOpen - IsOpen Addon Menu  
+   */
   function AddonInfoMessage(target = null, isMenuOpen = false) {
     const message = {
       Type: Hidden,
@@ -2056,6 +2082,11 @@ var bcModSdk = (function () {
     ServerSend("ChatRoomChat", message);
   }
 
+  /**
+   * Func for parse data string to object
+   * @param {*} data -message data
+   * @returns 
+   */
   function ParseAddonMessage(data) {
     let moonMessage = null;
   
