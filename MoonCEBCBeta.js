@@ -601,7 +601,7 @@ var bcModSdk = (function () {
 
   modApi.hookFunction("ChatRoomMessage", 0, (args, next) => {
     const data = args[0];
-    if (data.Type !== Hidden) next(args);
+    if (data.Type !== Hidden) return next(args);
     if (data.Content === "MoonCEBC") { 
       const sender = Character.find(a => a.MemberNumber === data.Sender);
       if (!sender) next(args);
