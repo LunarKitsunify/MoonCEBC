@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.10
+// @version 1.2.11
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -534,7 +534,7 @@ var bcModSdk = (function () {
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
   
   const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.10";
+  const AddonVersion = "1.2.11";
   const Hidden = "Hidden";
 
   //#endregion
@@ -619,14 +619,17 @@ var bcModSdk = (function () {
   });
 
   modApi.hookFunction("ChatRoomMessage", 0, (args, next) => {
-    const data = args[0];
-    if (data.Type !== Hidden) return next(args);
-    if (data.Content === "MoonCEBC") { 
-      const sender = Character.find(a => a.MemberNumber === data.Sender);
-      if (!sender) next(args);
-      const message = ParseAddonMessage(data);
-      sender.MoonCEBC = message;
+    for (let arg of args) {
+      const data = arg;
+      if (data.Type && data.Type !== Hidden) continue;
+      if (data.Content === "MoonCEBC") { 
+        const sender = Character.find(a => a.MemberNumber === data.Sender);
+        if (!sender) next(args);
+        const message = ParseAddonMessage(data);
+        sender.MoonCEBC = message;
+      }  
     }
+    
     return next(args);
   });
 
