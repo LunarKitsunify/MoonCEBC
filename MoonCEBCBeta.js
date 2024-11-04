@@ -619,16 +619,19 @@ var bcModSdk = (function () {
   });
 
   modApi.hookFunction("ChatRoomMessage", 0, (args, next) => {
-    args.forEach(arg => {
+
+    for (let arg of args) {
+
       const data = arg;
-      if (data.Type !== Hidden) return next(args);
+      if (data.Type && data.Type !== Hidden) continue;
       if (data.Content === "MoonCEBC") { 
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) next(args);
         const message = ParseAddonMessage(data);
         sender.MoonCEBC = message;
       }  
-    });
+
+    }
     
     return next(args);
   });
