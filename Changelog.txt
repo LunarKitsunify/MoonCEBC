@@ -54,6 +54,11 @@ Update 1.2.10
 Update 1.2.11 
 1. Fix display addon icons in room.
 
+Update 1.2.12
+1. Added an adequate authorisation check, after passing which the addon will load.
+2. Fix bug, with attempt save deck < 30 or > 30.
+3. Now deck cards counter reacting if cards count != 30. 
+
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
