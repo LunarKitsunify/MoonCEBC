@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.11
+// @version 1.2.12
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -534,7 +534,7 @@ var bcModSdk = (function () {
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
   
   const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.11";
+  const AddonVersion = "1.2.12";
   const Hidden = "Hidden";
 
   //#endregion
@@ -811,6 +811,7 @@ var bcModSdk = (function () {
     cardButton.addEventListener("click", () => {
       const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
       const isInfoPanel = isCurrentCardInfoCell;
+      //If it's not a big card and we're in edit mode.
       if (!isInfoPanel && isEditMode) {
         if (MoonCEBCEditCurrentDeck.includes(Card)) {
           const indexToRemove = MoonCEBCEditCurrentDeck.findIndex(
@@ -1345,7 +1346,7 @@ var bcModSdk = (function () {
     const saveDeckButtonWithImage = createButton(
       null,
       "Icons/Accept.png",
-      () => SetViewMode(true),
+      SaveDeckButtonClick,
       "20%",
       "80%",
       "0",
@@ -1357,7 +1358,7 @@ var bcModSdk = (function () {
     const cancelDeckButtonWithImage = createButton(
       null,
       "Icons/Cancel.png",
-      () => SetViewMode(false),
+      CancelDeckButtonClick,
       "20%",
       "80%",
       "0",
@@ -1500,10 +1501,14 @@ var bcModSdk = (function () {
    * Loads and stores card data.  Text_ClubCard.csv
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
-  function AddonLoad() {
-    const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-    MoonCEBCTextContent = new TextCache(TextPath); //Load Cards data from BC Server
+  async function AddonLoad() {
 
+    await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
+
+    const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+    
+     //Load Cards data from BC Server
+    MoonCEBCTextContent = new TextCache(TextPath);
     for (let i = 0; i < ClubCardList.length; i++) {
       let copiedCard = { ...ClubCardList[i] };
       MoonCEBCClubCardList.push(copiedCard);
@@ -1511,6 +1516,22 @@ var bcModSdk = (function () {
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
+
+  /**
+   * Waits until the given condition function returns true, or the cancel function (if provided) returns true.
+   * @param {() => boolean} func - Condition function to wait for.
+   * @param {() => boolean} [cancelFunc] - Optional cancel function to stop waiting.
+   * @returns {Promise<boolean>}
+   */
+  async function waitFor(func, cancelFunc = () => false) {
+    while (!func()) {
+      if (cancelFunc()) return false;
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    return true;
+  }
+
+
   /**
    * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
    */
@@ -1627,7 +1648,7 @@ var bcModSdk = (function () {
     const countCards = MoonCEBCEditCurrentDeck.length;
     deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
 
-    if (countCards > 30) deckCardsCounter.style.color = "red";
+    if (countCards != 30) deckCardsCounter.style.color = "red";
     else deckCardsCounter.style.color = "white";
   }
 
@@ -1673,22 +1694,13 @@ var bcModSdk = (function () {
 
   //#region EDIT Left Top Panel
 
-  /**
-   * The function changes the top panel and, depending on isSave, undoes or saves changes to the deck.
-   * @param {boolean} isSave Switch to check whether the deck will be saved or not
-   */
-  function SetViewMode(isSave) {
-    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
+  function CancelDeckButtonClick() {
     const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftViewPanelId"
     );
     const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftEditPanelId"
     );
-    const isDeckNameValidation =
-      deckNameInput.value != "" &&
-      deckNameInput.value != null &&
-      deckNameInput.value.length < 31;
 
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftEditPanel.style.display = "none";
@@ -1697,15 +1709,34 @@ var bcModSdk = (function () {
     MoonCEBCBuilderSeacrhGroupList = [];
     MoonCEBCBuilderCurrentGroupsList = [];
     MoonCEBCCurrentCardsListPage = 0;
+    UpdateCardsCells(MoonCEBCCurrentDeck);
+  }
 
-    if (isSave) {
-      if (MoonCEBCEditCurrentDeck.length == 30 && isDeckNameValidation) {
-        SaveNewDeck();
-        UpdateCardsCells(MoonCEBCEditCurrentDeck);
-        LoadPlayerDecksSelectData();
-      }
-    } else {
-      UpdateCardsCells(MoonCEBCCurrentDeck);
+  function SaveDeckButtonClick() {
+    const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftViewPanelId"
+    );
+    const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
+      "#TopSettingsLeftEditPanelId"
+    );
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
+    const isDeckNameValidation =
+      deckNameInput.value != "" &&
+      deckNameInput.value != null &&
+      deckNameInput.value.length <= 30;
+    
+    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length == 30) {
+      topSettingsLeftViewPanel.style.display = "flex";
+      topSettingsLeftEditPanel.style.display = "none";
+      MoonCEBCPageMode = WindowStatus.VIEW;
+      MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
+      MoonCEBCBuilderSeacrhGroupList = [];
+      MoonCEBCBuilderCurrentGroupsList = [];
+      MoonCEBCCurrentCardsListPage = 0;
+
+      SaveNewDeck();
+      UpdateCardsCells(MoonCEBCEditCurrentDeck);
+      LoadPlayerDecksSelectData();
     }
   }
 
@@ -1714,17 +1745,15 @@ var bcModSdk = (function () {
    */
   function SaveNewDeck() {
     const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
-    const playerDecksSelect = MainWindowPanel.querySelector(
-      "#PlayerDecksSelectId"
-    );
+    const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
     const newDeckName = deckNameInput.value;
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
 
-    if (Player.Game.ClubCard.DeckName == null) {
+    //fix null deck if player dont created them
+    if (Player.Game.ClubCard.DeckName == null)
       Player.Game.ClubCard.DeckName = ["Deck #1","Deck #2","Deck #3","Deck #4","Deck #5","Deck #6","Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-    }
 
     Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
