@@ -946,7 +946,6 @@ var bcModSdk = (function () {
 
     const imgCard = document.createElement("img");
     imgCard.src = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
-
     imgCard.style.height = "85%";
     imgCard.style.position = "absolute";
     imgCard.style.top = "15%";
@@ -1044,7 +1043,7 @@ var bcModSdk = (function () {
       );
       valueCardPanel.appendChild(liabilityBoard);
     }
-    
+
     // Add Required Level if > 1
     if (card.RequiredLevel > 1) {
       const levelBoard = createBoard(
@@ -1142,11 +1141,26 @@ var bcModSdk = (function () {
     return cardViewer; // Return the created panel
   }
   function LittleCardRender(parent) {
+    const card = ClubCardList[20];
+    const Level =
+      card.RequiredLevel == null || card.RequiredLevel <= 1
+        ? 1
+        : card.RequiredLevel;
+    if (card.Type == null) card.Type = "Member";
     // imgCard.src = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
+    // addValuePanel
     const littleCardDiv = document.createElement("div");
     littleCardDiv.style.width = '150px';
     littleCardDiv.style.height = '200px';
-    littleCardDiv.style.backgroundColor = "green";
+    //littleCardDiv.style.padding = '10%';
+    littleCardDiv.style.backgroundColor = 'whitesmoke';
+    littleCardDiv.style.backgroundImage = `url("Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png")`;
+    littleCardDiv.style.backgroundSize = 'auto 100%';
+    littleCardDiv.style.backgroundRepeat = 'no-repeat';
+    littleCardDiv.style.backgroundPosition = 'center';
+    littleCardDiv.style.borderRadius = '15px';
+    littleCardDiv.style.overflow = 'hidden';
+
     parent.appendChild(littleCardDiv);
   }
   /**
@@ -1234,9 +1248,9 @@ var bcModSdk = (function () {
       // playerDecksSelect.addEventListener("change", function () {
       //   GetDeckData(playerDecksSelect.selectedIndex);
       // });
-      
+
       //buttonsDiv.appendChild(playerDecksSelect);
-      
+
       //LoadPlayerDecksSelectData();
       // Example of adding a dropdown (currently commented out)
       // const dropDown = document.createElement("select");
