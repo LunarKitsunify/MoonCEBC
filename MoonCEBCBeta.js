@@ -1034,6 +1034,17 @@ var bcModSdk = (function () {
     valueCardPanel.style.flexDirection = "column";
     valueCardPanel.style.gap = "10%";
 
+    //Liability Icon
+    if (card.Group && card.Group.includes("Liability")) {
+      const liabilityBoard = createBoard(
+        "Screens/MiniGame/ClubCard/Bubble/Liability.png",
+        null,
+        null,
+        null
+      );
+      valueCardPanel.appendChild(liabilityBoard);
+    }
+    
     // Add Required Level if > 1
     if (card.RequiredLevel > 1) {
       const levelBoard = createBoard(
@@ -1065,18 +1076,6 @@ var bcModSdk = (function () {
         valueSize
       );
       valueCardPanel.appendChild(moneyBoard);
-    }
-
-    // Add any other dynamic values here
-    // Example: Custom data properties
-    if (card.CustomValue) {
-      const customBoard = createBoard(
-        "Screens/MiniGame/ClubCard/Bubble/Custom.png",
-        card.CustomValue,
-        customTextColor,
-        valueSize
-      );
-      valueCardPanel.appendChild(customBoard);
     }
 
     cardButton.appendChild(valueCardPanel);
@@ -1142,6 +1141,14 @@ var bcModSdk = (function () {
 
     return cardViewer; // Return the created panel
   }
+  function LittleCardRender(parent) {
+    // imgCard.src = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
+    const littleCardDiv = document.createElement("div");
+    littleCardDiv.style.width = '150px';
+    littleCardDiv.style.height = '200px';
+    littleCardDiv.style.backgroundColor = "green";
+    parent.appendChild(littleCardDiv);
+  }
   /**
    * Renders the deck selection menu for club cards.
    * This function ensures the menu aligns with the `MainCanvas` element and updates its position and size dynamically.
@@ -1160,7 +1167,7 @@ var bcModSdk = (function () {
       mainDeckSelectionDiv.style.left = `${canvasRect.left}px`;
       mainDeckSelectionDiv.style.width = `${canvasWidth * 0.85}px`; // 85% of the canvas width
       mainDeckSelectionDiv.style.height = `${canvasHeight}px`; // Full canvas height
-      UpdateCardHeightWidth(); // Adjust card dimensions
+      //UpdateCardHeightWidth(); // Adjust card dimensions
       return;
     } else {
       // Create a new deck selection menu if it doesn't exist
@@ -1195,12 +1202,14 @@ var bcModSdk = (function () {
       backgroundOverlay.style.zIndex = "1"; // Place it below the cards viewer
       mainDeckSelectionDiv.appendChild(backgroundOverlay);
 
-      // Create a panel to display the cards
-      CreateCardsCollectionPanel(cardsViewerDiv);
+      LittleCardRender(cardsViewerDiv);
 
-      // TODO: Implement dropdown menu functionality for deck selection
-      GetDeckData(2); // Load data for deck ID 2
-      UpdateCardHeightWidth(); // Adjust card dimensions to fit
+      // // Create a panel to display the cards
+      // CreateCardsCollectionPanel(cardsViewerDiv);
+
+      // // TODO: Implement dropdown menu functionality for deck selection
+      // GetDeckData(2); // Load data for deck ID 2
+      // UpdateCardHeightWidth(); // Adjust card dimensions to fit
 
       // Create a buttons container below the cards viewer
       const buttonsDiv = document.createElement("div");
@@ -1215,20 +1224,20 @@ var bcModSdk = (function () {
       buttonsDiv.style.display = "flex";
       mainDeckSelectionDiv.appendChild(buttonsDiv);
 
-      const playerDecksSelect = document.createElement("select");
-      playerDecksSelect.id = "PlayerDecksSelectId";
-      playerDecksSelect.style.width = DeckNamePanelWidth;
-      playerDecksSelect.style.height = "80%";
-      playerDecksSelect.style.alignContent = "center";
-      playerDecksSelect.style.textAlign = "center";
-      playerDecksSelect.style.fontSize = TopPanelTextSize;
-      playerDecksSelect.addEventListener("change", function () {
-        GetDeckData(playerDecksSelect.selectedIndex);
-      });
+      // const playerDecksSelect = document.createElement("select");
+      // playerDecksSelect.id = "PlayerDecksSelectId";
+      // playerDecksSelect.style.width = DeckNamePanelWidth;
+      // playerDecksSelect.style.height = "80%";
+      // playerDecksSelect.style.alignContent = "center";
+      // playerDecksSelect.style.textAlign = "center";
+      // playerDecksSelect.style.fontSize = TopPanelTextSize;
+      // playerDecksSelect.addEventListener("change", function () {
+      //   GetDeckData(playerDecksSelect.selectedIndex);
+      // });
       
-      buttonsDiv.appendChild(playerDecksSelect);
+      //buttonsDiv.appendChild(playerDecksSelect);
       
-      LoadPlayerDecksSelectData();
+      //LoadPlayerDecksSelectData();
       // Example of adding a dropdown (currently commented out)
       // const dropDown = document.createElement("select");
       // dropDown.id = "SelectionMenuDeckDropDownID";
