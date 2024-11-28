@@ -10,6 +10,7 @@
 // @match https://www.bondage-europe.com/*
 // @match https://bondageprojects.com/*
 // @match https://www.bondageprojects.com/*
+// @match https://bc-cards-test.netlify.app/
 // @icon data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant none
 // @run-at document-end
@@ -51,10 +52,8 @@ var bcModSdk = (function () {
           t.has(e) &&
             t.get(e) !== a &&
             c(
-              `ModSDK: Mod '${r.name}' is patching function ${
-                o.name
-              } with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${e}\nPatch1:\n${
-                t.get(e) || ""
+              `ModSDK: Mod '${r.name}' is patching function ${o.name
+              } with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${e}\nPatch1:\n${t.get(e) || ""
               }\nPatch2:\n${a}`
             ),
             t.set(e, a),
@@ -74,10 +73,10 @@ var bcModSdk = (function () {
     let i = function (e) {
       var t, i;
       const a =
-          null === (i = (t = m.errorReporterHooks).hookChainExit) ||
+        null === (i = (t = m.errorReporterHooks).hookChainExit) ||
           void 0 === i
-            ? void 0
-            : i.call(t, o.name, n),
+          ? void 0
+          : i.call(t, o.name, n),
         c = r.apply(this, e);
       return null == a || a(), c;
     };
@@ -87,16 +86,15 @@ var bcModSdk = (function () {
       i = function (e) {
         var t, i;
         const a =
-            null === (i = (t = m.errorReporterHooks).hookEnter) || void 0 === i
-              ? void 0
-              : i.call(t, o.name, n.mod),
+          null === (i = (t = m.errorReporterHooks).hookEnter) || void 0 === i
+            ? void 0
+            : i.call(t, o.name, n.mod),
           c = n.hook.apply(this, [
             e,
             (o) => {
               if (1 !== arguments.length || !Array.isArray(e))
                 throw new Error(
-                  `Mod ${
-                    n.mod
+                  `Mod ${n.mod
                   } failed to call next hook: Expected args to be array, got ${typeof o}`
                 );
               return r.call(this, o);
@@ -124,19 +122,19 @@ var bcModSdk = (function () {
       if ("function" != typeof c)
         throw new Error(`ModSDK: Function ${o} to be patched not found`);
       const l = (function (o) {
-          let e = -1;
-          for (const n of t.encode(o)) {
-            let o = 255 & (e ^ n);
-            for (let e = 0; e < 8; e++)
-              o = 1 & o ? -306674912 ^ (o >>> 1) : o >>> 1;
-            e = (e >>> 8) ^ o;
-          }
-          return ((-1 ^ e) >>> 0).toString(16).padStart(8, "0").toUpperCase();
-        })(c.toString().replaceAll("\r\n", "\n")),
+        let e = -1;
+        for (const n of t.encode(o)) {
+          let o = 255 & (e ^ n);
+          for (let e = 0; e < 8; e++)
+            o = 1 & o ? -306674912 ^ (o >>> 1) : o >>> 1;
+          e = (e >>> 8) ^ o;
+        }
+        return ((-1 ^ e) >>> 0).toString(16).padStart(8, "0").toUpperCase();
+      })(c.toString().replaceAll("\r\n", "\n")),
         d = { name: o, original: c, originalHash: l };
       (r = Object.assign(Object.assign({}, d), {
         precomputed: s(d),
-        router: () => {},
+        router: () => { },
         context: e,
         contextProperty: a[a.length - 1],
       })),
@@ -179,10 +177,10 @@ var bcModSdk = (function () {
     (o && "object" == typeof o) ||
       e("Failed to register mod: Expected info object, got " + typeof o),
       ("string" == typeof o.name && o.name) ||
-        e(
-          "Failed to register mod: Expected name to be non-empty string, got " +
-            typeof o.name
-        );
+      e(
+        "Failed to register mod: Expected name to be non-empty string, got " +
+        typeof o.name
+      );
     let r = `'${o.name}'`;
     ("string" == typeof o.fullName && o.fullName) ||
       e(
@@ -190,20 +188,20 @@ var bcModSdk = (function () {
       ),
       (r = `'${o.fullName} (${o.name})'`),
       "string" != typeof o.version &&
-        e(
-          `Failed to register mod ${r}: Expected version to be string, got ${typeof o.version}`
-        ),
+      e(
+        `Failed to register mod ${r}: Expected version to be string, got ${typeof o.version}`
+      ),
       o.repository || (o.repository = void 0),
       void 0 !== o.repository &&
-        "string" != typeof o.repository &&
-        e(
-          `Failed to register mod ${r}: Expected repository to be undefined or string, got ${typeof o.version}`
-        ),
+      "string" != typeof o.repository &&
+      e(
+        `Failed to register mod ${r}: Expected repository to be undefined or string, got ${typeof o.version}`
+      ),
       null == t && (t = {}),
       (t && "object" == typeof t) ||
-        e(
-          `Failed to register mod ${r}: Expected options to be undefined or object, got ${typeof t}`
-        );
+      e(
+        `Failed to register mod ${r}: Expected options to be undefined or object, got ${typeof t}`
+      );
     const i = !0 === t.allowReplace,
       a = f.get(o.name);
     a &&
@@ -211,30 +209,30 @@ var bcModSdk = (function () {
         e(
           `Refusing to load mod ${r}: it is already loaded and doesn't allow being replaced.\nWas the mod loaded multiple times?`
         ),
-      u(a));
+        u(a));
     const c = (o) => {
-        let e = g.patching.get(o.name);
-        return (
-          e ||
-            ((e = { hooks: [], patches: new Map() }),
-            g.patching.set(o.name, e)),
-          e
-        );
-      },
+      let e = g.patching.get(o.name);
+      return (
+        e ||
+        ((e = { hooks: [], patches: new Map() }),
+          g.patching.set(o.name, e)),
+        e
+      );
+    },
       s =
         (o, t) =>
-        (...n) => {
-          var i, a;
-          const c =
-            null === (a = (i = m.errorReporterHooks).apiEndpointEnter) ||
-            void 0 === a
-              ? void 0
-              : a.call(i, o, g.name);
-          g.loaded ||
-            e(`Mod ${r} attempted to call SDK function after being unloaded`);
-          const s = t(...n);
-          return null == c || c(), s;
-        },
+          (...n) => {
+            var i, a;
+            const c =
+              null === (a = (i = m.errorReporterHooks).apiEndpointEnter) ||
+                void 0 === a
+                ? void 0
+                : a.call(i, o, g.name);
+            g.loaded ||
+              e(`Mod ${r} attempted to call SDK function after being unloaded`);
+            const s = t(...n);
+            return null == c || c(), s;
+          },
       p = {
         unload: s("unload", () => u(g)),
         hookFunction: s("hookFunction", (o, t, n) => {
@@ -249,9 +247,9 @@ var bcModSdk = (function () {
               `Mod ${r} failed to hook function '${o}': Expected priority number, got ${typeof t}`
             ),
             "function" != typeof n &&
-              e(
-                `Mod ${r} failed to hook function '${o}': Expected hook function, got ${typeof n}`
-              );
+            e(
+              `Mod ${r} failed to hook function '${o}': Expected hook function, got ${typeof n}`
+            );
           const s = { mod: g.name, priority: t, hook: n };
           return (
             a.hooks.push(s),
@@ -277,8 +275,8 @@ var bcModSdk = (function () {
             "string" == typeof i
               ? a.patches.set(n, i)
               : null === i
-              ? a.patches.delete(n)
-              : e(
+                ? a.patches.delete(n)
+                : e(
                   `Mod ${r} failed to patch function '${o}': Invalid format of patch '${n}'`
                 );
           d();
@@ -299,9 +297,9 @@ var bcModSdk = (function () {
           const i = l(o);
           return (
             Array.isArray(t) ||
-              e(
-                `Mod ${r} failed to call a function: Expected args array, got ${typeof t}`
-              ),
+            e(
+              `Mod ${r} failed to call a function: Expected args array, got ${typeof t}`
+            ),
             i.original.apply(null != n ? n : globalThis, t)
           );
         }),
@@ -340,33 +338,33 @@ var bcModSdk = (function () {
   const y =
     void 0 === window.bcModSdk
       ? (window.bcModSdk = (function () {
-          const e = {
-            version: o,
-            apiVersion: 1,
-            registerMod: g,
-            getModsInfo: h,
-            getPatchingInfo: p,
-            errorReporterHooks: Object.seal({
-              apiEndpointEnter: null,
-              hookEnter: null,
-              hookChainExit: null,
-            }),
-          };
-          return (m = e), Object.freeze(e);
-        })())
+        const e = {
+          version: o,
+          apiVersion: 1,
+          registerMod: g,
+          getModsInfo: h,
+          getPatchingInfo: p,
+          errorReporterHooks: Object.seal({
+            apiEndpointEnter: null,
+            hookEnter: null,
+            hookChainExit: null,
+          }),
+        };
+        return (m = e), Object.freeze(e);
+      })())
       : (n(window.bcModSdk) || e("Failed to init Mod SDK: Name already in use"),
         1 !== window.bcModSdk.apiVersion &&
-          e(
-            `Failed to init Mod SDK: Different version already loaded ('1.2.0' vs '${window.bcModSdk.version}')`
-          ),
+        e(
+          `Failed to init Mod SDK: Different version already loaded ('1.2.0' vs '${window.bcModSdk.version}')`
+        ),
         window.bcModSdk.version !== o &&
-          alert(
-            `Mod SDK warning: Loading different but compatible versions ('1.2.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`
-          ),
+        alert(
+          `Mod SDK warning: Loading different but compatible versions ('1.2.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`
+        ),
         window.bcModSdk);
   return (
     "undefined" != typeof exports &&
-      (Object.defineProperty(exports, "__esModule", { value: !0 }),
+    (Object.defineProperty(exports, "__esModule", { value: !0 }),
       (exports.default = y)),
     y
   );
@@ -406,9 +404,10 @@ var bcModSdk = (function () {
       value: "ShibariSenseiKnot",
       text: "Shibari / Sensei / Knot",
     },
+    PET: { value: "PetOwner", text: "Pet / Owner" },
   });
 
-  const MoonCEBCAddonName = "Moon Cards Editor BC";
+  const MoonCEBCAddonName = "Moon Cards Editor";
   const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
   const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
@@ -532,8 +531,8 @@ var bcModSdk = (function () {
     (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
   const bigCardValueFontSize =
     (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
-  
-  const movementKeys = [ 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
+
+  const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   const AddonVersion = "1.2.12";
   const Hidden = "Hidden";
 
@@ -580,7 +579,7 @@ var bcModSdk = (function () {
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Addon active Icon
-    if (C.MoonCEBC) 
+    if (C.MoonCEBC)
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
     return next(args);
@@ -592,7 +591,7 @@ var bcModSdk = (function () {
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Menu Addon Open Icon
-    if (C.MoonCEBC && C.MoonCEBC.IsMenuOpen) 
+    if (C.MoonCEBC && C.MoonCEBC.IsMenuOpen)
       DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
 
     return next(args);
@@ -601,7 +600,7 @@ var bcModSdk = (function () {
   //#endregion //------------------------------//
 
   //#region ---------------Addon work with hiden message--------------- // 
-  
+
   modApi.hookFunction("ChatRoomSync", 0, (args, next) => {
     AddonInfoMessage();
 
@@ -622,18 +621,18 @@ var bcModSdk = (function () {
     for (let arg of args) {
       const data = arg;
       if (data.Type && data.Type !== Hidden) continue;
-      if (data.Content === "MoonCEBC") { 
+      if (data.Content === "MoonCEBC") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) next(args);
         const message = ParseAddonMessage(data);
         sender.MoonCEBC = message;
-      }  
+      }
     }
-    
+
     return next(args);
   });
 
-    //#endregion //------------------------------//
+  //#endregion //------------------------------//
 
   //#endregion
 
@@ -1281,7 +1280,7 @@ var bcModSdk = (function () {
       if (movementKeys.includes(event.code))
         event.stopPropagation();
     });
-    
+
     //#endregion
 
     //#region groupButtons
@@ -1506,8 +1505,8 @@ var bcModSdk = (function () {
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
 
     const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-    
-     //Load Cards data from BC Server
+
+    //Load Cards data from BC Server
     MoonCEBCTextContent = new TextCache(TextPath);
     for (let i = 0; i < ClubCardList.length; i++) {
       let copiedCard = { ...ClubCardList[i] };
@@ -1724,7 +1723,7 @@ var bcModSdk = (function () {
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length <= 30;
-    
+
     if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length == 30) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
@@ -1753,7 +1752,7 @@ var bcModSdk = (function () {
 
     //fix null deck if player dont created them
     if (Player.Game.ClubCard.DeckName == null)
-      Player.Game.ClubCard.DeckName = ["Deck #1","Deck #2","Deck #3","Deck #4","Deck #5","Deck #6","Deck #7", "Deck #8", "Deck #9", "Deck #10"];
+      Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
 
     Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
@@ -1804,7 +1803,7 @@ var bcModSdk = (function () {
   /**
    * TODO Maybe I'll add a couple of my decks as a default deck?
    */
-  function SetCurrentDeckDefault() {}
+  function SetCurrentDeckDefault() { }
 
   //#endregion
 
@@ -1818,13 +1817,13 @@ var bcModSdk = (function () {
       AddonInfoMessage();
       isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
-      
+
       MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
       MoonCEBCBuilderSeacrhGroupList = [];
       MoonCEBCBuilderCurrentGroupsList = [];
       MoonCEBCPageMode = WindowStatus.VIEW;
       MoonCEBCCurrentCardsListPage = 0;
-      
+
       CardCells = [];
     } else {
       AddonInfoMessage(null, true);
@@ -1982,6 +1981,14 @@ var bcModSdk = (function () {
               card.Group.includes("Knot"))
         );
         break;
+      case CardTypes.PET.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("Pet") ||
+              card.Group.includes("Owner"))
+        );
+        break;
       default:
         cardGroupList = MoonCEBCClubCardList.filter(
           (card) => card.Group && card.Group.includes(MoonCEBCCurrentGroup)
@@ -2121,13 +2128,13 @@ var bcModSdk = (function () {
    */
   function ParseAddonMessage(data) {
     let moonMessage = null;
-  
+
     if (Array.isArray(data.Dictionary)) {
       moonMessage = data.Dictionary.find(entry =>
         entry && typeof entry.Version !== 'undefined' && typeof entry.IsMenuOpen !== 'undefined'
       );
     }
-  
+
     return moonMessage || null;
   }
 
