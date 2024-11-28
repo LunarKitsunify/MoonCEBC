@@ -21,20 +21,20 @@
 //   ).toFixed(0)}`
 // );
 
-import('https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js')
-  .then((module) => {
-    console.log(module);
-  })
-  .catch((err) => console.error("Failed to load module:", err));
+// import('https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js')
+//   .then((module) => {
+//     console.log(module);
+//   })
+//   .catch((err) => console.error("Failed to load module:", err));
 
 
-// (function () {
-//   "use strict";
-//   var script = document.createElement("script");
-//   script.type = 'module';
-//   script.setAttribute("crossorigin", "anonymous");
-//   script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
-//   document.head.appendChild(script);
-// })();
+(function () {
+  "use strict";
+  var script = document.createElement("script");
+  script.type = 'module';
+  script.setAttribute("crossorigin", "anonymous");
+  script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
+  document.head.appendChild(script);
+})();
 
 
