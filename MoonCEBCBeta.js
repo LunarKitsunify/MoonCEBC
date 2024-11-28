@@ -16,7 +16,7 @@
 // @run-at document-end
 // ==/UserScript==
 
-//import { card_Cover1 } from "./src/images.js";
+import { createCard } from "./RenderObjs/CardRender";
 
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
@@ -1632,7 +1632,9 @@ var bcModSdk = (function () {
           "Text " + cardsArray[i].Name
         ).replace(/<F>/g, "");
         cardsArray[i].Text = formatTextForInnerHTML(cardText);
-        CardRender(cardsArray[i], CardCells[i]);
+        //CardRender(cardsArray[i], CardCells[i]);
+        const card = createCard(cardsArray[i]);
+        CardCells[i].appendChild(card);
       }
     }
   }
