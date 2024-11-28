@@ -1637,9 +1637,9 @@ var bcModSdk = (function () {
           "Text " + cardsArray[i].Name
         ).replace(/<F>/g, "");
         cardsArray[i].Text = formatTextForInnerHTML(cardText);
-        //CardRender(cardsArray[i], CardCells[i]);
-        const card = createCard(cardsArray[i]);
-        CardCells[i].appendChild(card);
+        CardRender(cardsArray[i], CardCells[i]);
+        //const card = createCard(cardsArray[i]);
+        //CardCells[i].appendChild(card);
       }
     }
   }
