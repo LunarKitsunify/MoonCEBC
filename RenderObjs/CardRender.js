@@ -1,21 +1,21 @@
 
 /** 
  * function to draw a card
- * @param {ClubCard} Card - ClubCard from BC. 
+ * @param {ClubCard} card - ClubCard from BC. 
  * @returns {HTMLElement} The created card element. 
  */
 export function createCard(card) {
     //#region fix card null parameter
     let Level =
-        card.RequiredLevel == null || Card.RequiredLevel <= 1
+        card.RequiredLevel == null || card.RequiredLevel <= 1
             ? 1
-            : Card.RequiredLevel;
-    if (card.Type == null) Card.Type = "Member";
+            : card.RequiredLevel;
+    if (card.Type == null) card.Type = "Member";
 
     //#endregion
 
-    const imgFrameSrc = `Screens/MiniGame/ClubCard/Frame/${Card.Type}${Card.Reward ? "Reward" : ""}${Level}.png`;
-    const imgCardSrc = `Screens/MiniGame/ClubCard/${Card.Type}/${Card.Name}.png`;
+    const imgFrameSrc = `Screens/MiniGame/ClubCard/Frame/${card.Type}${card.Reward ? "Reward" : ""}${Level}.png`;
+    const imgCardSrc = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
 
     const cardButton = document.createElement('button');
     cardButton.classList.add('card-button');
