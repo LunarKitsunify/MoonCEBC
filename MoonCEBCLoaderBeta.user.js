@@ -33,7 +33,7 @@
   var script = document.createElement("script");
   script.type = 'module';
   script.setAttribute("crossorigin", "anonymous");
-  script.src = "http://127.0.0.1:5500/MoonCEBCBeta.js";
+  script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
   document.head.appendChild(script);
 })();
 
