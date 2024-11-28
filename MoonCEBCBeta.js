@@ -16,7 +16,7 @@
 // @run-at document-end
 // ==/UserScript==
 
-import { createCard } from "./RenderObjs/CardRender";
+//import { createCard } from "./RenderObjs/CardRender";
 
 // const cssLink = document.createElement('link');
 // cssLink.href = 'Style/styles.css';
