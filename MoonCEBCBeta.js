@@ -18,6 +18,11 @@
 
 import { createCard } from "./RenderObjs/CardRender";
 
+const cssLink = document.createElement('link');
+cssLink.href = '/Style/styles.css';
+cssLink.rel = 'stylesheet';
+document.head.appendChild(cssLink);
+
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
   "use strict";
