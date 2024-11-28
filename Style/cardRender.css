@@ -18,6 +18,7 @@
 
 .board-text {
     text-align: center;
+    font-size: 0.63vw;
     font-weight: bold;
     position: absolute;
     top: 50%;

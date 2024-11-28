@@ -1,3 +1,6 @@
+const requiredLevelColor = "#FF5733";
+const fameTextColor = "#3357FF";
+const moneyTextColor = "#006400";
 
 /** 
  * function to draw a card
@@ -86,7 +89,7 @@ function createCardText(card) {
    * @param {string} textFontSize - The text font size
    * @returns {HTMLElement} The created board element.
    */
-function createCardBoard(iconSrc, textContent, textColor, textFontSize) {
+function createCardBoard(iconSrc, textContent, textColor) {
     const board = document.createElement("div");
     board.classList.add("board");
 
@@ -94,7 +97,6 @@ function createCardBoard(iconSrc, textContent, textColor, textFontSize) {
     textElement.classList.add("board-text");
     textElement.textContent = textContent;
     textElement.style.color = textColor;
-    textElement.style.fontSize = textFontSize;
 
     const icon = document.createElement("img");
     icon.classList.add("board-icon");
@@ -110,10 +112,9 @@ function createCardBoard(iconSrc, textContent, textColor, textFontSize) {
  * Creates a value card panel with the specified attributes and appends it to the parent element.
  * 
  * @param {Object} card - The card object containing information for creating the panel.
- * @param {string} textFontSize - The text font size
  * @returns {HTMLElement} The created ValuesPanel element.
  */
-function createCardValuesPanel(card, textFontSize) {
+function createCardValuesPanel(card) {
     // Create the main panel
     const valueCardPanel = document.createElement("div");
     valueCardPanel.classList.add("value-card-panel");
@@ -131,8 +132,7 @@ function createCardValuesPanel(card, textFontSize) {
         const levelBoard = createCardBoard(
             "Screens/MiniGame/ClubCard/Bubble/Level.png",
             card.RequiredLevel,
-            requiredLevelTestColor,
-            textFontSize
+            requiredLevelColor
         );
         valueCardPanel.appendChild(levelBoard);
     }
@@ -142,8 +142,7 @@ function createCardValuesPanel(card, textFontSize) {
         const fameBoard = createCardBoard(
             "Screens/MiniGame/ClubCard/Bubble/Fame.png",
             card.FamePerTurn,
-            fameTextColor,
-            textFontSize
+            fameTextColor
         );
         valueCardPanel.appendChild(fameBoard);
     }
@@ -153,8 +152,7 @@ function createCardValuesPanel(card, textFontSize) {
         const moneyBoard = createCardBoard(
             "Screens/MiniGame/ClubCard/Bubble/Money.png",
             card.MoneyPerTurn,
-            moneyTextColor,
-            textFontSize
+            moneyTextColor
         );
         valueCardPanel.appendChild(moneyBoard);
     }
