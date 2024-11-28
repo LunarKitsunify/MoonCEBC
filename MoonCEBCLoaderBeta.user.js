@@ -24,6 +24,7 @@
 (function () {
   "use strict";
   var script = document.createElement("script");
+  script.setAttribute("type", "module");
   script.setAttribute("crossorigin", "anonymous");
   script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
   document.head.appendChild(script);

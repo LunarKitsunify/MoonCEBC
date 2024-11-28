@@ -16,12 +16,12 @@
 // @run-at document-end
 // ==/UserScript==
 
-//import { createCard } from "./RenderObjs/CardRender";
+import { createCard } from "./RenderObjs/CardRender";
 
-// const cssLink = document.createElement('link');
-// cssLink.href = 'Style/styles.css';
-// cssLink.rel = 'stylesheet';
-// document.head.appendChild(cssLink);
+const cssLink = document.createElement('link');
+cssLink.href = 'Style/styles.css';
+cssLink.rel = 'stylesheet';
+document.head.appendChild(cssLink);
 
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
