@@ -623,7 +623,7 @@ var bcModSdk = (function () {
       if (data.Type && data.Type !== Hidden) continue;
       if (data.Content === "MoonCEBC") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
-        if (!sender) next(args);
+        if (!sender) return next(args);
         const message = ParseAddonMessage(data);
         sender.MoonCEBC = message;
       }

@@ -14,29 +14,50 @@ export function createCard(card) {
             ? 1
             : card.RequiredLevel;
     if (card.Type == null) card.Type = "Member";
-
     //#endregion
-
-    const imgFrameSrc = `Screens/MiniGame/ClubCard/Frame/${card.Type}${card.Reward ? "Reward" : ""}${Level}.png`;
-    const imgCardSrc = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
 
     const cardButton = document.createElement('button');
     cardButton.classList.add('card-button');
+    cardButton.style.backgroundColor = ClubCardColor[Level];
+
+    if (card.Reward) cardButton.style.border = "3px solid gold";
+    else cardButton.style.border = "3px solid black";
 
     const cardImage = document.createElement('img');
     cardImage.classList.add('card-image');
-    cardImage.src = imgCardSrc;
+    cardImage.src = `Screens/MiniGame/ClubCard/${card.Type}/${card.Name}.png`;
     cardButton.appendChild(cardImage);
 
+    const imgSelected = document.createElement("img");
+    imgSelected.classList.add("img-selected");
+    imgSelected.src = "Screens/MiniGame/ClubCardBuilder/Selected.png";
+    cardButton.appendChild(imgSelected); 
 
-    const { nameElement, bottomContainer } = createCardText(card);
+    const { nameElement, bottomContainer , cardGroupTextElement , cardDescriptionTextElement } = createCardText(card);
     cardButton.appendChild(nameElement);
     cardButton.appendChild(bottomContainer);
 
     const valuePanel = createCardValuesPanel(card);
     cardButton.appendChild(valuePanel);
 
-    return cardButton;
+    const cardController = {
+        cardButton: cardButton,
+        titleName: nameElement,
+        valuePanel: valuePanel,
+        cardGroupTextElement: cardGroupTextElement,
+        cardDescriptionTextElement: cardDescriptionTextElement,
+        showSelected: () => {
+            imgSelected.style.display = "block";
+            cardButton.style.border = "3.5px solid #40E0D0";
+        },
+        hideSelected: () => {
+            imgSelected.style.display = "none";
+            if (card.Reward) cardButton.style.border = "3px solid gold";
+            else cardButton.style.border = "3px solid black";
+        },
+    }
+
+    return cardController;
 }
 
 /**
@@ -56,8 +77,7 @@ function createCardText(card) {
 
     // Group text
     let groupText = ClubCardGetGroupText(card.Group);
-    if (card.RewardMemberNumber != null)
-        groupText += " #" + card.RewardMemberNumber.toString();
+    if (card.RewardMemberNumber) groupText += " #" + card.RewardMemberNumber.toString();
 
     const cardGroupTextElement = document.createElement("div");
     cardGroupTextElement.classList.add("card-group");
@@ -75,7 +95,9 @@ function createCardText(card) {
     // Return the created elements as an object
     return {
         nameElement: cardNameTextElement,
-        bottomContainer: bottomContainer
+        bottomContainer: bottomContainer,
+        cardGroupTextElement: cardGroupTextElement,
+        cardDescriptionTextElement: cardDescriptionTextElement
     };
 }
 
@@ -89,9 +111,9 @@ function createCardText(card) {
    * @param {string} textFontSize - The text font size
    * @returns {HTMLElement} The created board element.
    */
-function createCardBoard(iconSrc, textContent, textColor) {
-    const board = document.createElement("div");
-    board.classList.add("board");
+function createCardStatBoard(iconSrc, textContent, textColor) {
+    const statBoard = document.createElement("div");
+    statBoard.classList.add("board");
 
     const textElement = document.createElement("div");
     textElement.classList.add("board-text");
@@ -102,10 +124,10 @@ function createCardBoard(iconSrc, textContent, textColor) {
     icon.classList.add("board-icon");
     icon.src = iconSrc;
 
-    board.appendChild(icon);
-    board.appendChild(textElement);
+    statBoard.appendChild(icon);
+    statBoard.appendChild(textElement);
 
-    return board;
+    return statBoard;
 }
 
 /**
@@ -118,10 +140,12 @@ function createCardValuesPanel(card) {
     // Create the main panel
     const valueCardPanel = document.createElement("div");
     valueCardPanel.classList.add("value-card-panel");
+    const basePath = new URL(".", import.meta.url).href;
 
     // Add Liability Icon if applicable
     if (card.Group && card.Group.includes("Liability")) {
         const liabilityIcon = document.createElement("img");
+        liabilityIcon.src = new URL("../src/Images/Liability.png", basePath).href;
         //liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
         liabilityIcon.classList.add("value-card-icon");
         valueCardPanel.appendChild(liabilityIcon);
@@ -129,7 +153,7 @@ function createCardValuesPanel(card) {
 
     // Add Level Board if applicable
     if (card.RequiredLevel > 1) {
-        const levelBoard = createCardBoard(
+        const levelBoard = createCardStatBoard(
             "Screens/MiniGame/ClubCard/Bubble/Level.png",
             card.RequiredLevel,
             requiredLevelColor
@@ -138,24 +162,68 @@ function createCardValuesPanel(card) {
     }
 
     // Add Fame Board if applicable
+    // "Screens/MiniGame/ClubCard/Bubble/Fame.png",
     if (card.FamePerTurn != null) {
-        const fameBoard = createCardBoard(
-            "Screens/MiniGame/ClubCard/Bubble/Fame.png",
+        const fameBoard = createCardStatBoard(
+            new URL("../src/Images/Fame.png", basePath).href,
             card.FamePerTurn,
             fameTextColor
         );
         valueCardPanel.appendChild(fameBoard);
     }
 
+    // "Screens/MiniGame/ClubCard/Bubble/Money.png",
     // Add Money Board if applicable
     if (card.MoneyPerTurn != null) {
-        const moneyBoard = createCardBoard(
-            "Screens/MiniGame/ClubCard/Bubble/Money.png",
+        const moneyBoard = createCardStatBoard(
+            new URL("../src/Images/Money.png", basePath).href,
             card.MoneyPerTurn,
             moneyTextColor
         );
         valueCardPanel.appendChild(moneyBoard);
     }
 
+    if (card.Type == "Event") {
+        const eventIcon = document.createElement("img");
+        if (card.Reward) eventIcon.src = new URL("../src/Images/GoldLightning.png", basePath).href;
+        else eventIcon.src = new URL("../src/Images/BlackLightning.png", basePath).href;
+        eventIcon.classList.add("value-card-icon");
+        valueCardPanel.appendChild(eventIcon);
+    }
+
     return valueCardPanel;
+}
+
+
+/**
+ * Creates a grid layout for a parent container, dividing it into equal parts.
+ * The grid is based on the specified number of rows and total cells.
+ * Returns an array of all created cells.
+ * 
+ * @param {HTMLElement} parent - The parent container to which the grid will be appended.
+ * @param {number} cellsCount - The total number of cells to create.
+ * @returns {Array} - An array of all created cell elements.
+ */
+export function createGridLayout(parent, cellsCount = 30) {
+    // Create the grid container
+    const gridContainer = document.createElement("div");
+    gridContainer.id = "CardsCollectionsId";
+
+    // Append the grid container to the parent
+    parent.appendChild(gridContainer);
+
+    // Array to store the created cells
+    const cellArray = [];
+
+    // Create the cells
+    for (let i = 0; i < cellsCount; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("card-cell");
+
+        gridContainer.appendChild(cell);
+        cellArray.push(cell);
+    }
+
+    // Return the array of created cells
+    return cellArray;
 }
