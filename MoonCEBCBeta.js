@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.13
+// @version 1.2.14
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -505,7 +505,7 @@ var bcModSdk = (function () {
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.13";
+  const AddonVersion = "1.2.14";
   const Hidden = "Hidden";
 
   //#endregion
@@ -1277,11 +1277,13 @@ var bcModSdk = (function () {
    */
   function UpdateCardsCells(cardsArray) {
     for (let i = 0; i < 30; i++) {
+      const cardCells = CardCells[i];
+      if (cardCells) cardCells.innerHTML = "";
+      
+      if (cardsArray == null)
+        continue;
 
       let card = cardsArray[i];
-      const cardCells = CardCells[i];
-
-      if (cardCells) cardCells.innerHTML = "";
       if (cardsArray && i < cardsArray.length) {
         const cardText = ClubCardTextCache.get("Text " + card.Name).replace(/<F>/g, "");
         card.Text = formatTextForInnerHTML(cardText);
