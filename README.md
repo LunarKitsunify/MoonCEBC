@@ -32,9 +32,19 @@ https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js
 
 ### 3. Bookmark
 
+Stable
 ```javascript
 javascript: (() => {
   fetch("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js")
+    .then((r) => r.text())
+    .then((r) => eval(r));
+})();
+```
+
+Beta
+```javascript
+javascript: (() => {
+  fetch("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js")
     .then((r) => r.text())
     .then((r) => eval(r));
 })();
