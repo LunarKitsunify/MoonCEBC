@@ -163,9 +163,10 @@ function createCardValuesPanel(card) {
 
     // Add Fame Board if applicable
     // "Screens/MiniGame/ClubCard/Bubble/Fame.png",
+    // new URL("../src/Images/Fame.png", basePath).href,
     if (card.FamePerTurn != null) {
         const fameBoard = createCardStatBoard(
-            new URL("../src/Images/Fame.png", basePath).href,
+            "Screens/MiniGame/ClubCard/Bubble/Fame.png",
             card.FamePerTurn,
             fameTextColor
         );
@@ -173,10 +174,11 @@ function createCardValuesPanel(card) {
     }
 
     // "Screens/MiniGame/ClubCard/Bubble/Money.png",
+    // new URL("../src/Images/Money.png", basePath).href,
     // Add Money Board if applicable
     if (card.MoneyPerTurn != null) {
         const moneyBoard = createCardStatBoard(
-            new URL("../src/Images/Money.png", basePath).href,
+            "Screens/MiniGame/ClubCard/Bubble/Money.png",
             card.MoneyPerTurn,
             moneyTextColor
         );

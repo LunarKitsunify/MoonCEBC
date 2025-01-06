@@ -394,7 +394,8 @@ var bcModSdk = (function () {
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
     LIABILITY: { value: "Liability", text: "Liability" },
     STAFF: { value: "Staff", text: "Staff" },
-    POLICE_CRIMINAL: { value: "PoliceCriminal", text: "Police / Criminal" },
+    POLICE: { value: "Police", text: "Police" },
+    CRIMINAL: { value: "Criminal", text: "Criminal" },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
     MAID: { value: "Maid", text: "Maid" },
@@ -1164,6 +1165,10 @@ var bcModSdk = (function () {
       }
     }
 
+    if (CurrentScreen == "ChatRoom") {
+      AddonInfoMessage();
+    }
+
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
 
@@ -1572,13 +1577,13 @@ var bcModSdk = (function () {
       case CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
         break;
-      case CardTypes.POLICE_CRIMINAL.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
-          (card) =>
-            card.Group &&
-            (card.Group.includes("Police") || card.Group.includes("Criminal"))
-        );
-        break;
+      // case CardTypes.POLICE_CRIMINAL.value:
+      //   cardGroupList = MoonCEBCClubCardList.filter(
+      //     (card) =>
+      //       card.Group &&
+      //       (card.Group.includes("Police") || card.Group.includes("Criminal"))
+      //   );
+      //   break;
       case CardTypes.ASYLUM.value:
         cardGroupList = MoonCEBCClubCardList.filter(
           (card) =>
