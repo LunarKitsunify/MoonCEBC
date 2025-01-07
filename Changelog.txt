@@ -59,6 +59,11 @@ Update 1.2.12
 2. Fix bug, with attempt save deck < 30 or > 30.
 3. Now deck cards counter reacting if cards count != 30. 
 
+Update 1.2.14
+1. Fix ChatRoomMessage not return if sender null.
+2. The part of the code responsible for card rendering has been rewritten.
+3. New icons for liability and event cards.
+4. Police and Criminals are now separate groups.
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.

@@ -556,7 +556,6 @@ var bcModSdk = (function () {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
     return next(args);
-
   });
 
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
@@ -576,7 +575,8 @@ var bcModSdk = (function () {
 
   modApi.hookFunction("ChatRoomSync", 0, (args, next) => {
     AddonInfoMessage();
-
+    //TODO This part was necessary to clear users of old data that I used in the OnlineSharedSettings.MoonCEBC
+    //At this point, you can already remove this extra code, but let it be for now.
     if (Player.OnlineSharedSettings.MoonCEBC) {
       delete Player.OnlineSharedSettings.MoonCEBC;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
@@ -1146,7 +1146,6 @@ var bcModSdk = (function () {
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   async function AddonLoad() {
-
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
 
     //Load Cards data from BC Server
@@ -1165,9 +1164,8 @@ var bcModSdk = (function () {
       }
     }
 
-    if (CurrentScreen == "ChatRoom") {
+    if (CurrentScreen == "ChatRoom")
       AddonInfoMessage();
-    }
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
@@ -1185,7 +1183,6 @@ var bcModSdk = (function () {
     }
     return true;
   }
-
 
   /**
    * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
@@ -1250,7 +1247,6 @@ var bcModSdk = (function () {
 
     GetDeckData(playerDecksSelect);
   }
-
   /**
    * Get data selected deck and update cards cells
    * @param {HTMLSelectElement} - Sources HTMLSelectElement
@@ -1342,7 +1338,6 @@ var bcModSdk = (function () {
       }
     }
   }
-
   /**
    * Track and update the current card count when editing a deck
    */
@@ -1577,13 +1572,6 @@ var bcModSdk = (function () {
       case CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
         break;
-      // case CardTypes.POLICE_CRIMINAL.value:
-      //   cardGroupList = MoonCEBCClubCardList.filter(
-      //     (card) =>
-      //       card.Group &&
-      //       (card.Group.includes("Police") || card.Group.includes("Criminal"))
-      //   );
-      //   break;
       case CardTypes.ASYLUM.value:
         cardGroupList = MoonCEBCClubCardList.filter(
           (card) =>

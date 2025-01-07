@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.12
+// @version 1.2.14
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -16,7 +16,12 @@
 // @run-at document-end
 // ==/UserScript==
 
-//import { card_Cover1 } from "./src/images.js";
+import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
+
+const cssLink = document.createElement('link');
+cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
+cssLink.rel = 'stylesheet';
+document.head.appendChild(cssLink);
 
 //#region  bcSDK Stuff
 var bcModSdk = (function () {
@@ -389,7 +394,8 @@ var bcModSdk = (function () {
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
     LIABILITY: { value: "Liability", text: "Liability" },
     STAFF: { value: "Staff", text: "Staff" },
-    POLICE_CRIMINAL: { value: "PoliceCriminal", text: "Police / Criminal" },
+    POLICE: { value: "Police", text: "Police" },
+    CRIMINAL: { value: "Criminal", text: "Criminal" },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
     MAID: { value: "Maid", text: "Maid" },
@@ -419,10 +425,6 @@ var bcModSdk = (function () {
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
   const MoonCEBCIsOpenMenuIcon = "https://i.imgur.com/nje9iy8.png";
-  /**
-   * variable for loading description for cards
-   */
-  let MoonCEBCTextContent = null;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
@@ -479,29 +481,15 @@ var bcModSdk = (function () {
    */
   let isVisibleMainWindow = false;
   /**
-   * variable to check if mainWindow is open
-   */
-  let isMainWindowLoaded = false;
-  /**
    * An array of 30 cells into which the bottom container is divided. To display 30 cards.
    * @type {HTMLDivElement[]}
    */
   let CardCells = [];
 
-  window.addEventListener("resize", function () {
-    if (isMainWindowLoaded) UpdateCardHeightWidth();
-  });
-
   /**
    * Variable for accessing  mainWindow = document.createElement("div");
    */
   let MainWindowPanel = null;
-
-  // variables to calculate the height and width of the cards.
-  let MoonCEBCCardHeight = 0;
-  let MoonCEBCCardWidth = 0;
-  let MoonCEBCBigCardHeight = 0;
-  let MoonCEBCBigCardWidth = 0;
 
   //#region Size and color customization
 
@@ -513,27 +501,12 @@ var bcModSdk = (function () {
   const TopLeftPanelWidth = "92%";
   const TopRightPanelWidth = `calc(100% - ${TopLeftPanelWidth})`;
 
-  const requiredLevelTestColor = "#FF5733";
+  //const requiredLevelTestColor = "#FF5733";
   const fameTextColor = "#3357FF";
   const moneyTextColor = "#006400";
 
-  //TODO I think you have to make a formula. Because there may be problems for widescreens.
-  const cardNameFontSize = "0.75vw";
-  const cardGroupFontSize = "0.70vw";
-  const cardTextFontSize = "0.63vw";
-  const cardValueFontSize = "0.70vw";
-
-  const bigCardNameFontSize =
-    (parseFloat(cardNameFontSize) * 3).toFixed(2) + "vw";
-  const bigCardGroupFontSize =
-    (parseFloat(cardGroupFontSize) * 3).toFixed(2) + "vw";
-  const bigCardTextFontSize =
-    (parseFloat(cardTextFontSize) * 3).toFixed(2) + "vw";
-  const bigCardValueFontSize =
-    (parseFloat(cardValueFontSize) * 3).toFixed(2) + "vw";
-
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.12";
+  const AddonVersion = "1.2.14";
   const Hidden = "Hidden";
 
   //#endregion
@@ -583,7 +556,6 @@ var bcModSdk = (function () {
       DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
     return next(args);
-
   });
 
   modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
@@ -603,7 +575,8 @@ var bcModSdk = (function () {
 
   modApi.hookFunction("ChatRoomSync", 0, (args, next) => {
     AddonInfoMessage();
-
+    //TODO This part was necessary to clear users of old data that I used in the OnlineSharedSettings.MoonCEBC
+    //At this point, you can already remove this extra code, but let it be for now.
     if (Player.OnlineSharedSettings.MoonCEBC) {
       delete Player.OnlineSharedSettings.MoonCEBC;
       ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
@@ -711,313 +684,6 @@ var bcModSdk = (function () {
     }
 
     return button;
-  }
-
-  /**
-   * Creates a board element with an icon and text, appends it to the specified parent container,
-   * and returns the created board element.
-   *
-   * @param {string} iconSrc - The source path of the icon image.
-   * @param {string|number} textContent - The text content to display in the board.
-   * @param {string} textColor - The color of the text.
-   * @param {string} textFontSize - The text font size
-   * @returns {HTMLElement} The created board element.
-   */
-  function createBoard(iconSrc, textContent, textColor, textFontSize) {
-    const board = document.createElement("div");
-    board.style.paddingTop = "15%";
-    board.style.width = "auto";
-    board.style.height = "auto";
-    board.style.position = "relative";
-    board.style.display = "flex";
-    board.style.alignItems = "center";
-    board.style.justifyContent = "center";
-
-    const textElement = document.createElement("div");
-    textElement.textContent = textContent;
-    textElement.style.textAlign = "center";
-    textElement.style.color = textColor;
-    textElement.style.fontSize = textFontSize;
-    textElement.style.fontWeight = "bold";
-    textElement.style.position = "absolute";
-    textElement.style.width = "100%";
-    textElement.style.maxWidth = "100%";
-    textElement.style.maxHeight = "100%";
-    textElement.style.top = "50%";
-    textElement.style.left = "50%";
-    textElement.style.transform = "translate(-50%, -40%)";
-
-    const icon = document.createElement("img");
-    icon.src = iconSrc;
-    icon.style.width = "100%";
-    icon.style.maxWidth = "100%";
-    icon.style.maxHeight = "100%";
-    icon.style.objectFit = "contain";
-    icon.style.display = "block";
-
-    board.appendChild(icon);
-    board.appendChild(textElement);
-
-    return board;
-  }
-
-  /**
-   * function to draw a card
-   * @param {ClubCard} Card - ClubCard from BC.
-   * @param {HTMLDivElement} cardCell fill for card data
-   * @param {String} cardNameSize text size for card Name
-   * @param {String} cardGroupSize text size for card Group
-   * @param {String} cardTextSize text size for card Text (description)
-   * @param {String} cardValueSize text size for card Value
-   * @param {boolean} isCurrentCardInfoCell property for separating logical cards from the array and for one enlarged card
-   * @returns {void} - Nothing
-   */
-  function CardRender(
-    Card,
-    cardCell,
-    cardNameSize = cardNameFontSize,
-    cardGroupSize = cardGroupFontSize,
-    cardTextSize = cardTextFontSize,
-    cardValueSize = cardValueFontSize,
-    isCurrentCardInfoCell = false
-  ) {
-    let Level =
-      Card.RequiredLevel == null || Card.RequiredLevel <= 1
-        ? 1
-        : Card.RequiredLevel;
-    if (Card.Type == null) Card.Type = "Member";
-
-    const cardButton = document.createElement("button");
-    cardButton.style.position = "relative";
-    cardButton.style.top = "50%";
-    cardButton.style.left = "50%";
-    cardButton.style.transform = "translate(-50%, -50%)";
-    cardButton.style.borderRadius = "6px";
-    cardButton.style.display = "flex";
-    cardButton.style.justifyContent = "center";
-    cardButton.style.alignItems = "center";
-    cardButton.style.userSelect = "none";
-
-    if (isCurrentCardInfoCell) {
-      cardButton.id = "BigCardId";
-      cardButton.style.height = `${MoonCEBCBigCardHeight}px`;
-      cardButton.style.width = `${MoonCEBCBigCardWidth}px`;
-    } else {
-      cardButton.style.height = `${MoonCEBCCardHeight}px`;
-      cardButton.style.width = `${MoonCEBCCardWidth}px`;
-    }
-
-    cardButton.addEventListener("click", () => {
-      const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
-      const isInfoPanel = isCurrentCardInfoCell;
-      //If it's not a big card and we're in edit mode.
-      if (!isInfoPanel && isEditMode) {
-        if (MoonCEBCEditCurrentDeck.includes(Card)) {
-          const indexToRemove = MoonCEBCEditCurrentDeck.findIndex(
-            (removedCard) => removedCard.ID === Card.ID
-          );
-          MoonCEBCEditCurrentDeck.splice(indexToRemove, 1);
-          imgSelected.style.display = "none";
-          cardButton.style.border = "none";
-          UpdateDeckCardsCounter();
-        } else {
-          MoonCEBCEditCurrentDeck.push(Card);
-          imgSelected.style.display = "block";
-          cardButton.style.border = "3px solid #40E0D0";
-          UpdateDeckCardsCounter();
-        }
-      }
-    });
-    cardButton.addEventListener("mouseover", () => {
-      const isInfoPanel = isCurrentCardInfoCell;
-
-      if (!isInfoPanel) {
-        if (MoonCEBCMouseOverCard != Card) {
-          MoonCEBCMouseOverCard = Card;
-          const cardInfoPanel =
-            MainWindowPanel.querySelector("#CardInfoPanelId");
-          if (cardInfoPanel) cardInfoPanel.innerHTML = "";
-          CardRender(
-            MoonCEBCMouseOverCard,
-            cardInfoPanel,
-            bigCardNameFontSize,
-            bigCardGroupFontSize,
-            bigCardTextFontSize,
-            bigCardValueFontSize,
-            true
-          );
-        }
-      }
-    });
-
-    //#region Images
-
-    const imgFrame = document.createElement("img");
-    imgFrame.src =
-      "Screens/MiniGame/ClubCard/Frame/" +
-      Card.Type +
-      (Card.Reward != null ? "Reward" : "") +
-      Level.toString() +
-      ".png";
-    imgFrame.style.width = "100%";
-    imgFrame.style.height = "100%";
-    imgFrame.style.position = "absolute";
-    imgFrame.style.display = "block";
-    imgFrame.style.top = "0";
-    imgFrame.style.pointerEvents = "none";
-    cardButton.appendChild(imgFrame);
-
-    const imgCard = document.createElement("img");
-    imgCard.src =
-      "Screens/MiniGame/ClubCard/" + Card.Type + "/" + Card.Name + ".png";
-    imgCard.style.height = "85%";
-    imgCard.style.position = "absolute";
-    imgCard.style.top = "15%";
-    imgCard.style.maxWidth = "100%";
-    imgCard.style.maxHeight = "100%";
-    imgCard.style.objectFit = "contain";
-    imgCard.style.display = "block";
-    imgCard.style.left = "50%";
-    imgCard.style.transform = "translateX(-50%)";
-    imgCard.style.pointerEvents = "none";
-    cardButton.appendChild(imgCard);
-
-    const imgSelected = document.createElement("img");
-    imgSelected.src = "Screens/MiniGame/ClubCardBuilder/Selected.png";
-    imgSelected.style.position = "absolute";
-    imgSelected.style.top = "13%";
-    imgSelected.style.right = "3%";
-    imgSelected.style.width = "30%";
-    imgSelected.style.maxWidth = "100%";
-    imgSelected.style.maxHeight = "100%";
-    imgSelected.style.objectFit = "contain";
-    imgSelected.style.pointerEvents = "none";
-    imgSelected.style.display = "none";
-
-    if (MoonCEBCPageMode == WindowStatus.EDIT) {
-      if (MoonCEBCEditCurrentDeck.includes(Card)) {
-        imgSelected.style.display = "block";
-        cardButton.style.border = "3px solid #40E0D0"; // #40E0D0 or orange (#FFA500):
-      }
-    }
-
-    cardButton.appendChild(imgSelected);
-
-    //#endregion
-
-    //#region Card Name
-
-    const cardNameTextElement = document.createElement("div");
-    cardNameTextElement.textContent = Card.Name;
-    cardNameTextElement.style.position = "absolute";
-    cardNameTextElement.style.top = "1%";
-    cardNameTextElement.style.left = "50%";
-    cardNameTextElement.style.transform = "translateX(-50%)";
-    cardNameTextElement.style.fontSize = cardNameSize;
-    cardNameTextElement.style.textAlign = "center";
-    cardNameTextElement.style.fontWeight = "bold";
-    cardNameTextElement.style.whiteSpace = "normal";
-    cardButton.appendChild(cardNameTextElement);
-
-    //#endregion
-
-    //#region  ValueCardPanel
-    const valueCardPanel = document.createElement("div");
-    valueCardPanel.style.position = "absolute";
-    valueCardPanel.style.top = "13%";
-    valueCardPanel.style.left = "3%";
-    valueCardPanel.style.width = "17%";
-    valueCardPanel.style.display = "flex";
-    valueCardPanel.style.flexDirection = "column";
-    valueCardPanel.style.gap = "10%";
-
-    //Liability Icon
-    if (Card.Group && Card.Group.includes("Liability")) {
-      const liabilityIcon = document.createElement("img");
-      liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
-      liabilityIcon.style.maxWidth = "100%";
-      liabilityIcon.style.maxHeight = "100%";
-      liabilityIcon.style.objectFit = "contain";
-      liabilityIcon.style.display = "block";
-      valueCardPanel.appendChild(liabilityIcon);
-    }
-
-    if (Card.RequiredLevel > 1) {
-      const levelBoard = createBoard(
-        "Screens/MiniGame/ClubCard/Bubble/Level.png",
-        Card.RequiredLevel,
-        requiredLevelTestColor,
-        cardValueSize
-      );
-      valueCardPanel.appendChild(levelBoard);
-    }
-
-    if (Card.FamePerTurn != null) {
-      const fameBoard = createBoard(
-        "Screens/MiniGame/ClubCard/Bubble/Fame.png",
-        Card.FamePerTurn,
-        fameTextColor,
-        cardValueSize
-      );
-      valueCardPanel.appendChild(fameBoard);
-    }
-
-    if (Card.MoneyPerTurn != null) {
-      const moneyBoard = createBoard(
-        "Screens/MiniGame/ClubCard/Bubble/Money.png",
-        Card.MoneyPerTurn,
-        moneyTextColor,
-        cardValueSize
-      );
-      valueCardPanel.appendChild(moneyBoard);
-    }
-
-    cardButton.appendChild(valueCardPanel);
-    //#endregion
-
-    //#region Bottom Info Panel
-    const bottomContainer = document.createElement("div");
-    bottomContainer.style.position = "absolute";
-    bottomContainer.style.bottom = "0";
-    bottomContainer.style.width = "98%";
-    bottomContainer.style.height = "45%";
-    bottomContainer.style.justifyContent = "center";
-    bottomContainer.style.display = "flex";
-    bottomContainer.style.flexDirection = "column";
-    bottomContainer.style.textAlign = "center";
-    bottomContainer.style.left = "50%";
-    bottomContainer.style.transform = "translateX(-50%)";
-    bottomContainer.style.borderRadius = "0 0 10px 10px";
-    bottomContainer.style.background = "rgba(255, 255, 255, 0.6)";
-
-    let GroupText = ClubCardGetGroupText(Card.Group);
-    if (Card.RewardMemberNumber != null)
-      GroupText = GroupText + " #" + Card.RewardMemberNumber.toString();
-    const cardGroupTextElement = document.createElement("div");
-    cardGroupTextElement.textContent = GroupText;
-    cardGroupTextElement.style.fontSize = cardGroupSize;
-    cardGroupTextElement.style.textAlign = "center";
-    cardGroupTextElement.style.fontWeight = "bold";
-    cardGroupTextElement.style.lineHeight = "0.8";
-    cardGroupTextElement.style.flex = "0 0 20%";
-    cardGroupTextElement.style.whiteSpace = "normal";
-    bottomContainer.appendChild(cardGroupTextElement);
-
-    const cardDescriptionTextElement = document.createElement("div");
-    cardDescriptionTextElement.innerHTML = Card.Text;
-    cardDescriptionTextElement.style.fontSize = cardTextSize;
-    cardDescriptionTextElement.style.fontWeight = "bold";
-    cardDescriptionTextElement.style.textAlign = "center";
-    cardDescriptionTextElement.style.lineHeight = "1";
-    cardDescriptionTextElement.style.whiteSpace = "normal";
-    cardDescriptionTextElement.style.flex = "1";
-    cardDescriptionTextElement.style.margin = "2%";
-    bottomContainer.appendChild(cardDescriptionTextElement);
-
-    cardButton.appendChild(bottomContainer);
-    //#endregion
-
-    cardCell.appendChild(cardButton);
   }
 
   //#endregion
@@ -1450,30 +1116,10 @@ var bcModSdk = (function () {
     bottomPanel.style.alignItems = "center";
     bottomPanel.style.width = "100%";
     bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
+    bottomPanel.style.boxSizing = "border-box";
     mainWindow.appendChild(bottomPanel);
 
-    const cardsCollectionPanel = document.createElement("div");
-    cardsCollectionPanel.id = "CardsCollectionsId";
-    cardsCollectionPanel.style.display = "grid";
-    cardsCollectionPanel.style.gridTemplateColumns = "repeat(10, 1fr)";
-    cardsCollectionPanel.style.gridTemplateRows = "repeat(3, 1fr)";
-    cardsCollectionPanel.style.gridAutoRows = "1fr";
-    cardsCollectionPanel.style.height = "100%";
-    cardsCollectionPanel.style.width = "80%";
-    cardsCollectionPanel.style.overflow = "hidden";
-    bottomPanel.appendChild(cardsCollectionPanel);
-
-    for (let i = 0; i < 30; i++) {
-      const cardCell = document.createElement("div");
-      cardCell.style.boxSizing = "border-box";
-      cardCell.style.margin = "2%";
-      cardCell.style.position = "relative";
-      cardCell.style.justifyContent = "center";
-      cardCell.style.alignItems = "center";
-      cardCell.style.display = "inline-block";
-      CardCells.push(cardCell);
-      cardsCollectionPanel.appendChild(cardCell);
-    }
+    CardCells = createGridLayout(bottomPanel);
 
     const cardInfoPanel = document.createElement("div");
     cardInfoPanel.id = "CardInfoPanelId";
@@ -1485,11 +1131,10 @@ var bcModSdk = (function () {
     cardInfoPanel.style.position = "relative";
     cardInfoPanel.style.justifyContent = "center";
     cardInfoPanel.style.alignItems = "center";
-    cardInfoPanel.style.display = "inline-block";
+    cardInfoPanel.style.display = "flex";
     bottomPanel.appendChild(cardInfoPanel);
     //#endregion
 
-    UpdateCardHeightWidth();
     //load decks data
     LoadPlayerDecksSelectData();
   }
@@ -1501,17 +1146,26 @@ var bcModSdk = (function () {
    * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   async function AddonLoad() {
-
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
 
-    const TextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-
     //Load Cards data from BC Server
-    MoonCEBCTextContent = new TextCache(TextPath);
-    for (let i = 0; i < ClubCardList.length; i++) {
-      let copiedCard = { ...ClubCardList[i] };
-      MoonCEBCClubCardList.push(copiedCard);
+    if (!ClubCardTextCache) {
+      const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
+      ClubCardTextCache = TextAllScreenCache.get(CardTextPath);
+      if (!ClubCardTextCache) {
+        ClubCardTextCache = new TextCache(CardTextPath);
+        TextAllScreenCache.set(CardTextPath, ClubCardTextCache);
+      }
     }
+    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length == 0) {
+      for (let i = 0; i < ClubCardList.length; i++) {
+        let copiedCard = { ...ClubCardList[i] };
+        MoonCEBCClubCardList.push(copiedCard);
+      }
+    }
+
+    if (CurrentScreen == "ChatRoom")
+      AddonInfoMessage();
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
@@ -1529,7 +1183,6 @@ var bcModSdk = (function () {
     }
     return true;
   }
-
 
   /**
    * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
@@ -1594,7 +1247,6 @@ var bcModSdk = (function () {
 
     GetDeckData(playerDecksSelect);
   }
-
   /**
    * Get data selected deck and update cards cells
    * @param {HTMLSelectElement} - Sources HTMLSelectElement
@@ -1626,17 +1278,66 @@ var bcModSdk = (function () {
    */
   function UpdateCardsCells(cardsArray) {
     for (let i = 0; i < 30; i++) {
-      if (CardCells[i]) CardCells[i].innerHTML = "";
+      const cardCells = CardCells[i];
+      if (cardCells) cardCells.innerHTML = "";
+      
+      if (cardsArray == null)
+        continue;
+
+      let card = cardsArray[i];
       if (cardsArray && i < cardsArray.length) {
-        const cardText = MoonCEBCTextContent.get(
-          "Text " + cardsArray[i].Name
-        ).replace(/<F>/g, "");
-        cardsArray[i].Text = formatTextForInnerHTML(cardText);
-        CardRender(cardsArray[i], CardCells[i]);
+        const cardText = ClubCardTextCache.get("Text " + card.Name).replace(/<F>/g, "");
+        card.Text = formatTextForInnerHTML(cardText);
+        //CardRender(cardsArray[i], CardCells[i]);
+        const cardController = createCard(card);
+
+        //Update border selected cards
+        if (MoonCEBCPageMode == WindowStatus.EDIT)
+          if (MoonCEBCEditCurrentDeck.includes(card))
+            cardController.showSelected();
+
+        cardController.cardButton.addEventListener("click", () => {
+          const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
+          if (isEditMode) {
+            if (MoonCEBCEditCurrentDeck.includes(card)) {
+              const indexToRemove = MoonCEBCEditCurrentDeck.findIndex(
+                (removedCard) => removedCard.ID === card.ID
+              );
+              MoonCEBCEditCurrentDeck.splice(indexToRemove, 1);
+              cardController.hideSelected();
+
+              UpdateDeckCardsCounter();
+            } else {
+              MoonCEBCEditCurrentDeck.push(card);
+              cardController.showSelected();
+              UpdateDeckCardsCounter();
+            }
+          }
+        });
+
+        cardController.cardButton.addEventListener("mouseover", () => { 
+          if (MoonCEBCMouseOverCard != card) {
+            MoonCEBCMouseOverCard = card;
+            const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
+            if (cardInfoPanel) cardInfoPanel.innerHTML = "";
+            const cardControllerInfoPanel = createCard(card);
+
+            if (card.Reward) cardControllerInfoPanel.cardButton.style.border = "4.5px solid gold";
+            else cardControllerInfoPanel.cardButton.style.border = "4.5px solid black";
+
+            cardControllerInfoPanel.titleName.classList.add("card-name-info-panel");
+            cardControllerInfoPanel.cardGroupTextElement.classList.add("card-group-info-panel");
+            cardControllerInfoPanel.cardDescriptionTextElement.classList.add("card-description-info-panel");
+            cardControllerInfoPanel.valuePanel.classList.add("value-card-panel-info-panel");
+
+            cardInfoPanel.appendChild(cardControllerInfoPanel.cardButton);
+          }
+        });
+
+        cardCells.appendChild(cardController.cardButton);
       }
     }
   }
-
   /**
    * Track and update the current card count when editing a deck
    */
@@ -1815,7 +1516,6 @@ var bcModSdk = (function () {
   function OpenExitAddonWindow() {
     if (isVisibleMainWindow) {
       AddonInfoMessage();
-      isMainWindowLoaded = false;
       if (MainWindowPanel) MainWindowPanel.remove();
 
       MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
@@ -1827,7 +1527,6 @@ var bcModSdk = (function () {
       CardCells = [];
     } else {
       AddonInfoMessage(null, true);
-      isMainWindowLoaded = true;
       LoadMainWindow();
     }
 
@@ -1838,68 +1537,7 @@ var bcModSdk = (function () {
   //#endregion
 
   //#endregion
-
-  /**
-   * Function to update the size of cards in 30 cells when the window size changes.
-   */
-  function UpdateCardHeightWidth() {
-    const cardsCollectionPanel = MainWindowPanel.querySelector(
-      "#CardsCollectionsId"
-    );
-    const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
-
-    const reservedSpace = 15;
-
-    let cardsCollectionPanelWidth =
-      cardsCollectionPanel.offsetWidth - reservedSpace;
-    let cardsCollectionPanelHeight =
-      cardsCollectionPanel.offsetHeight - reservedSpace;
-
-    let cardInfoPanelWidth = cardInfoPanel.offsetWidth;
-    let cardInfoPanelHeight = cardInfoPanel.offsetHeight;
-
-    if (cardsCollectionPanelWidth == 0 || cardsCollectionPanelHeight == 0)
-      return;
-
-    let cardHeight = cardsCollectionPanelHeight / 3;
-    let cardWidth = cardHeight / 2;
-
-    let bigCardHeight = cardInfoPanelHeight;
-    let bigCardWidth = cardInfoPanelHeight / 2;
-
-    let maxCardWidth = cardsCollectionPanelWidth / 10;
-    let maxBigCardWidth = cardInfoPanelWidth;
-
-    while (cardWidth > maxCardWidth) {
-      cardWidth -= 1;
-      cardHeight = cardWidth * 2;
-    }
-
-    while (bigCardWidth > maxBigCardWidth) {
-      bigCardWidth -= 1;
-      bigCardHeight = bigCardWidth * 2;
-    }
-
-    MoonCEBCCardHeight = cardHeight;
-    MoonCEBCCardWidth = cardWidth;
-
-    MoonCEBCBigCardHeight = bigCardHeight;
-    MoonCEBCBigCardWidth = bigCardWidth;
-
-    const bigCard = MainWindowPanel.querySelector("#BigCardId");
-    if (bigCard) {
-      bigCard.style.height = `${MoonCEBCBigCardHeight}px`;
-      bigCard.style.width = `${MoonCEBCBigCardWidth}px`;
-    }
-
-    for (let i = 0; i < 30; i++) {
-      const childButton = CardCells[i].querySelector("button");
-      if (childButton) {
-        childButton.style.height = `${MoonCEBCCardHeight}px`;
-        childButton.style.width = `${MoonCEBCCardWidth}px`;
-      }
-    }
-  }
+  
   /**
    * Function for sorting from the general list of cards,
    * the selected group of cards by the current value from the drop-down list.
@@ -1933,13 +1571,6 @@ var bcModSdk = (function () {
         break;
       case CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
-        break;
-      case CardTypes.POLICE_CRIMINAL.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
-          (card) =>
-            card.Group &&
-            (card.Group.includes("Police") || card.Group.includes("Criminal"))
-        );
         break;
       case CardTypes.ASYLUM.value:
         cardGroupList = MoonCEBCClubCardList.filter(
