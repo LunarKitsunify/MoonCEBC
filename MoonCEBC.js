@@ -417,18 +417,18 @@ var bcModSdk = (function () {
   const MoonCEBCAddonName = "Moon Cards Editor";
 
   const basePath = new URL(".", import.meta.url).href;
-  const MoonCEBCTopPanelBackground = new URL("/src/Images/MoonCETopPanelBackground.jpg", basePath).href;
+  const MoonCEBCTopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
 
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
-  const CardGameCardCoverBackground  = new URL("/src/Images/MoonCECardCover.png", basePath).href;
+  const CardGameCardCoverBackground  = new URL("src/Images/MoonCECardCover.png", basePath).href;
   /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
-  const MoonCEBCStatusIsAddonIcon = new URL("/src/Images/IsAddon.png", basePath).href;
+  const MoonCEBCStatusIsAddonIcon = new URL("src/Images/IsAddon.png", basePath).href;
   /**
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
-  const MoonCEBCIsOpenMenuIcon = new URL("/src/Images/IsOpenMenu.png", basePath).href;
+  const MoonCEBCIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
