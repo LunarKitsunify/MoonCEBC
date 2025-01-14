@@ -65,6 +65,9 @@ Update 1.2.14
 3. New icons for liability and event cards.
 4. Police and Criminals are now separate groups.
 
+Update 1.2.15
+1. Stop using imgur.com for image storage and upload images to github.
+
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
 2. Instead of a large card, display a list of all currently selected cards.

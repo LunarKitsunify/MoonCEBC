@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.14
+// @version 1.2.15
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -17,6 +17,7 @@
 // ==/UserScript==
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
+import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 
 const cssLink = document.createElement('link');
 cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
@@ -414,17 +415,20 @@ var bcModSdk = (function () {
   });
 
   const MoonCEBCAddonName = "Moon Cards Editor";
-  const MoonCEBCTopPanelBackground = "url('https://i.imgur.com/nO4qB3m.jpeg')";
-  const CardGameCardCoverBackground = "https://i.imgur.com/rGuMjPS.jpeg";
+
+  const basePath = new URL(".", import.meta.url).href;
+  const MoonCEBCTopPanelBackground = new URL("/src/Images/MoonCETopPanelBackground.jpg", basePath).href;
+
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
+  const CardGameCardCoverBackground  = new URL("/src/Images/MoonCECardCover.png", basePath).href;
   /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
-  const MoonCEBCStatusIsAddonIcon = "https://i.imgur.com/SXAG27j.png";
+  const MoonCEBCStatusIsAddonIcon = new URL("/src/Images/IsAddon.png", basePath).href;
   /**
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
-  const MoonCEBCIsOpenMenuIcon = "https://i.imgur.com/nje9iy8.png";
+  const MoonCEBCIsOpenMenuIcon = new URL("/src/Images/IsOpenMenu.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
@@ -522,18 +526,18 @@ var bcModSdk = (function () {
     repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
 
-  /*modApi.hookFunction("DrawImageEx", 0, (args, next) => {
-    if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
-      const newImage = CardGameCardCoverBackground;
-      args[0] = newImage;
-    }
+  // modApi.hookFunction("DrawImageEx", 0, (args, next) => {
+  //   if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
+  //     const newImage = CardGameCardCoverBackground;
+  //     args[0] = newImage;
+  //   }
 
-    if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
-      const newImage = CardGameBoardBackground;
-      args[0] = newImage;
-    }
-    next(args);
-  });*/
+  //   // if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
+  //   //   const newImage = CardGameBoardBackground;
+  //   //   args[0] = newImage;
+  //   // }
+  //   next(args);
+  // });
 
   modApi.hookFunction("MainRun", 0, (args, next) => {
     //TODO Hook ChatRoomRun and do it with a DrawButton?
@@ -737,9 +741,8 @@ var bcModSdk = (function () {
     topSettingsPanel.style.alignItems = "center";
     topSettingsPanel.style.height = TopPanelHeight;
     topSettingsPanel.style.width = "100%";
-    topSettingsPanel.style.backgroundImage = MoonCEBCTopPanelBackground;
-    topSettingsPanel.style.backgroundSize = "cover";
-    topSettingsPanel.style.backgroundPosition = "center";
+    topSettingsPanel.style.backgroundImage = `url(${MoonCEBCTopPanelBackground})`;
+    topSettingsPanel.style.backgroundRepeat = "repeat";
     mainWindow.appendChild(topSettingsPanel);
 
     //#region topSettingsLeftViewPanel
@@ -1079,7 +1082,7 @@ var bcModSdk = (function () {
     const settingsButton = createButton(
       null,
       "Icons/General.png",
-      null,
+      OpenSettingsMenu,
       "50%",
       "80%",
       "0",
@@ -1533,6 +1536,65 @@ var bcModSdk = (function () {
     MoonCEBCPageMode = WindowStatus.VIEW;
     isVisibleMainWindow = !isVisibleMainWindow;
   }
+
+  function OpenSettingsMenu() {
+    const settingsModal = createModal('settings-modal', MainWindowPanel, 'Moon Cards Editor Settings');
+     const menuContainer1 = settingsModal.addMenuContainer('row');
+    // const menuContainer2 = settingsModal.addMenuContainer('row');
+    // const menuContainer3 = settingsModal.addMenuContainer('row');
+     createSettingsMenu(menuContainer1, settingsData);
+    // createSettingsMenu(menuContainer2, settingsData);
+    // createSettingsMenu(menuContainer3, settingsData);
+    settingsModal.open();
+  }
+
+  const settingsData = [
+    {
+        groupName: 'General Settings',
+        settings: [
+            {
+                name: 'Enable Notifications',
+                shortDescription: 'Receive alerts',
+                fullDescription: 'Enables notifications for all important updates.',
+                type: 'checkbox',
+                defaultValue: true,
+                onChange: (newValue) => {
+                    console.log(`Notifications: ${newValue}`);
+                }
+            },
+            {
+                name: 'Username',
+                shortDescription: 'Enter your username',
+                fullDescription: 'Your unique username for the system.',
+                type: 'text',
+                defaultValue: 'User123',
+                onChange: (newValue) => {
+                    console.log(`Username updated to: ${newValue}`);
+                }
+            },
+            {
+                name: 'Theme',
+                shortDescription: 'Select a theme',
+                fullDescription: 'Choose between Light and Dark themes.',
+                type: 'dropdown',
+                options: ['Light', 'Dark'],
+                defaultValue: 'Light',
+                onChange: (newValue) => {
+                    console.log(`Theme changed to: ${newValue}`);
+                }
+            },
+            {
+                name: 'Reset Settings',
+                shortDescription: 'Reset all settings to default',
+                fullDescription: 'Click this button to reset all settings to their default values.',
+                type: 'button',
+                onClick: () => {
+                    console.log('Settings have been reset to default!');
+                }
+            }
+        ]
+    }
+];
 
   //#endregion
 
