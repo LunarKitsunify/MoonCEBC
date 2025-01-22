@@ -1348,11 +1348,17 @@ var bcModSdk = (function () {
     const deckCardsCounter = MainWindowPanel.querySelector(
       "#DeckCardsCounterId"
     );
-    const countCards = MoonCEBCEditCurrentDeck.length;
-    deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
 
-    if (countCards != 30) deckCardsCounter.style.color = "red";
-    else deckCardsCounter.style.color = "white";
+    const isTestServer = window.location.href.includes("test");
+    const countCards = MoonCEBCEditCurrentDeck.length;
+
+    deckCardsCounter.textContent = `Select the cards (${countCards}/${isTestServer ? "30 - 40" : "30"})`;
+
+    const isValidDeckSize = isTestServer 
+    ? countCards >= 30 && countCards <= 40 
+    : countCards === 30;
+
+    deckCardsCounter.style.color = isValidDeckSize ? "white" : "red";
   }
 
   //#region Top Panel Button Logic
@@ -1427,8 +1433,11 @@ var bcModSdk = (function () {
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length <= 30;
+    
+    const isTestServer = window.location.href.includes("test");
+    const isTestServerDeckLength = MoonCEBCEditCurrentDeck.length >= 30 && MoonCEBCEditCurrentDeck.length <= 40;
 
-    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length == 30) {
+    if (isDeckNameValidation && (isTestServer && isTestServerDeckLength) || ( MoonCEBCEditCurrentDeck.length == 30)) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
       MoonCEBCPageMode = WindowStatus.VIEW;
