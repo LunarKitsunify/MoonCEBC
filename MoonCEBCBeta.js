@@ -18,7 +18,7 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
-import { bcModSdk } from './BCModSdk.js';
+import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
 cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
@@ -793,7 +793,6 @@ document.head.appendChild(cssLink);
 
   /**
    * Loads and stores card data.  Text_ClubCard.csv
-   * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   async function AddonLoad() {
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
