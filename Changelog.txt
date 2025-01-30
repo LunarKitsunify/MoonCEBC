@@ -68,6 +68,9 @@ Update 1.2.14
 Update 1.2.15
 1. Stop using imgur.com for image storage and upload images to github.
 
+Update 1.2.16
+1. Update searcher. Now work by Name, Text and Group.
+
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.
 2. Instead of a large card, display a list of all currently selected cards.

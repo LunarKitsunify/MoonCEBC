@@ -581,14 +581,20 @@ document.head.appendChild(cssLink);
     searchCardInput.placeholder = "Search Card";
     searchCardInput.addEventListener("input", (event) => {
       const newValue = event.target.value;
-      if (newValue == "" || newValue == undefined)
-        MoonCEBCBuilderSeacrhGroupList = [];
+      
+      if (newValue && newValue != "") {
+        const lowerSearch = newValue.toLowerCase();
+    
+        MoonCEBCBuilderSeacrhGroupList = MoonCEBCBuilderCurrentGroupsList.filter(card => 
+            card.Name.toLowerCase().includes(lowerSearch) ||
+            (card.Text && card.Text.toLowerCase().includes(lowerSearch)) ||
+            (card.Group && card.Group.some(group => group.toLowerCase().includes(lowerSearch)))
+        );
+      }
       else
-        MoonCEBCBuilderSeacrhGroupList =
-          MoonCEBCBuilderCurrentGroupsList.filter((card) =>
-            card.Name.toLowerCase().includes(newValue.toLowerCase())
-          );
+        MoonCEBCBuilderSeacrhGroupList = [];
 
+      MoonCEBCCurrentCardsListPage = 0;
       MoonCEBCCurrent30Cards = Get30CardsGroup();
       UpdateCardsCells(MoonCEBCCurrent30Cards);
     });
