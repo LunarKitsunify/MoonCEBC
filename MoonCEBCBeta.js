@@ -533,8 +533,11 @@ document.head.appendChild(cssLink);
     groupSelect.style.textAlign = "center";
     groupSelect.style.fontSize = TopPanelTextSize;
     groupSelect.addEventListener("change", function () {
-      MoonCEBCCurrentGroup = groupSelect.value;
-      UpdateCardsListSetNewGroup();
+      if (MoonCEBCCurrentGroup != groupSelect.value) {
+        MoonCEBCCurrentGroup = groupSelect.value;
+        searchCardInput.value = "";
+        UpdateCardsListSetNewGroup();
+      }
     });
 
     if (Player.Themed) {
@@ -585,11 +588,17 @@ document.head.appendChild(cssLink);
       if (newValue && newValue != "") {
         const lowerSearch = newValue.toLowerCase();
     
-        MoonCEBCBuilderSeacrhGroupList = MoonCEBCBuilderCurrentGroupsList.filter(card => 
-            card.Name.toLowerCase().includes(lowerSearch) ||
-            (card.Text && card.Text.toLowerCase().includes(lowerSearch)) ||
-            (card.Group && card.Group.some(group => group.toLowerCase().includes(lowerSearch)))
-        );
+        const searchResult = MoonCEBCBuilderCurrentGroupsList.filter(card => {
+          const cleanedText = card.Text?.replaceAll(fameTextColor, "").replaceAll(moneyTextColor, "");
+
+          const inName = card.Name.toLowerCase().includes(lowerSearch);
+          const inText = cleanedText && cleanedText.toLowerCase().includes(lowerSearch);
+          const inGroup = card.Group && card.Group.some(group => group.toLowerCase().includes(lowerSearch));
+      
+          return inName || inText || inGroup;
+        });
+      
+      MoonCEBCBuilderSeacrhGroupList = searchResult;
       }
       else
         MoonCEBCBuilderSeacrhGroupList = [];
@@ -798,6 +807,30 @@ document.head.appendChild(cssLink);
   //#endregion
 
   /**
+   * Loads the club card list and ensures each card has its associated text.
+   */
+  function LoadClubCardList() {
+    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length === 0 || MoonCEBCClubCardList[0].Text === "") {
+      MoonCEBCClubCardList = [];
+          for (const card of ClubCardList) {
+              const copiedCard = { ...card };
+              let attemptsLeft = 2;
+
+              while (attemptsLeft-- > 0) {
+                  const text = ClubCardTextGet("Text " + copiedCard.Name);
+
+                if (text && text != '') {
+                  copiedCard.Text = text;
+                  break;
+                }
+            }
+            
+              MoonCEBCClubCardList.push(copiedCard);
+          }
+      }
+  }
+
+  /**
    * Loads and stores card data.  Text_ClubCard.csv
    */
   async function AddonLoad() {
@@ -810,12 +843,6 @@ document.head.appendChild(cssLink);
       if (!ClubCardTextCache) {
         ClubCardTextCache = new TextCache(CardTextPath);
         TextAllScreenCache.set(CardTextPath, ClubCardTextCache);
-      }
-    }
-    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length == 0) {
-      for (let i = 0; i < ClubCardList.length; i++) {
-        let copiedCard = { ...ClubCardList[i] };
-        MoonCEBCClubCardList.push(copiedCard);
       }
     }
 
@@ -1190,6 +1217,7 @@ document.head.appendChild(cssLink);
 
       CardCells = [];
     } else {
+      LoadClubCardList();
       AddonInfoMessage(null, true);
       LoadMainWindow();
     }
