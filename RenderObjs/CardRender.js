@@ -77,7 +77,12 @@ function createCardText(card) {
 
     // Group text
     let groupText = ClubCardGetGroupText(card.Group);
-    if (card.RewardMemberNumber) groupText += " #" + card.RewardMemberNumber.toString();
+    if (groupText != "") {
+        if (card.RewardMemberNumber && groupText.includes(ClubCardTextGet("GroupPlayer"))) {
+            var playerText = ClubCardTextGet("GroupPlayer");
+            groupText = groupText.replace(playerText, `${playerText} #${card.RewardMemberNumber}`);
+        }
+    }
 
     const cardGroupTextElement = document.createElement("div");
     cardGroupTextElement.classList.add("card-group");
