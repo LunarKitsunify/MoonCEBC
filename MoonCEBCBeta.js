@@ -1133,20 +1133,24 @@ document.head.appendChild(cssLink);
 
   /**
    * Save new Deck  :)
+   * @param {boolean} [isSaveName=true] - variable that controls whether a new name for the deck will be stored.
    */
-  function SaveNewDeck() {
+  function SaveNewDeck(isSaveName = true) {
     const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
-    const newDeckName = deckNameInput.value;
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
+ 
+    if (isSaveName) {
+      //fix null deck if player dont created them
+      if (Player.Game.ClubCard.DeckName == null)
+        Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
+      
+      const newDeckName = deckNameInput.value;
+      Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+    }
 
-    //fix null deck if player dont created them
-    if (Player.Game.ClubCard.DeckName == null)
-      Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-
-    Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
 
     ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
@@ -1239,13 +1243,13 @@ document.head.appendChild(cssLink);
   }
   function SaveImportDeck(stringDeck) {
     const deckData = [];
-    const decodedDeck = decodeEIDeck(stringDeck);
+    const decodedDeck = decodeEIDeck(stringDeck.trim());
     if (decodedDeck == null) return false;
 
     for (let id of decodedDeck)
       deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
     MoonCEBCEditCurrentDeck = deckData
-    SaveNewDeck();
+    SaveNewDeck(false);
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
     GetDeckData(playerDecksSelect);
     return true;
