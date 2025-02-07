@@ -61,8 +61,10 @@ document.head.appendChild(cssLink);
     PET: { value: "PetOwner", text: "Pet / Owner" },
   });
 
+  
   const MoonCEBCAddonName = "Moon Cards Editor";
-
+  const meow_key = 42;
+  
   const basePath = new URL(".", import.meta.url).href;
   const MoonCEBCTopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
 
@@ -157,7 +159,7 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.14";
+  const AddonVersion = "1.2.16";
   const Hidden = "Hidden";
 
   //#endregion
@@ -450,8 +452,8 @@ document.head.appendChild(cssLink);
     const exportButton = createButton(
       "Export",
       null,
-      null,
-      "auto",
+      ExportDeck,
+      "15%",
       "80%",
       "0",
       "0",
@@ -462,10 +464,8 @@ document.head.appendChild(cssLink);
     const importButton = createButton(
       "Import",
       null,
-      () => {
-        console.log("Centered button clicked!");
-      },
-      "auto",
+      ImportDeck,
+      "15%",
       "80%",
       "0",
       "0",
@@ -473,8 +473,8 @@ document.head.appendChild(cssLink);
       "right"
     );
 
-    //topSettingsLeftViewPanel.appendChild(exportButton);
-    //topSettingsLeftViewPanel.appendChild(importButton);
+    topSettingsLeftViewPanel.appendChild(exportButton);
+    topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
 
     //#region topSettingsLeftEditPanel
@@ -1226,6 +1226,227 @@ document.head.appendChild(cssLink);
     isVisibleMainWindow = !isVisibleMainWindow;
   }
 
+  //#region Export / Import Deck
+
+  function ExportDeck() {
+    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const encodeDeck = encodeEIDeck(cardIDs);
+    CreateInputWindow("Export Deck", encodeDeck, null);
+  }
+
+  function ImportDeck() {
+    CreateInputWindow("Import Deck", "", SaveImportDeck);
+  }
+  function SaveImportDeck(stringDeck) {
+    const deckData = [];
+    const decodedDeck = decodeEIDeck(stringDeck);
+    if (decodedDeck == null) return false;
+
+    for (let id of decodedDeck)
+      deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
+    MoonCEBCEditCurrentDeck = deckData
+    SaveNewDeck();
+    const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
+    GetDeckData(playerDecksSelect);
+    return true;
+  }
+
+  function CreateInputWindow(title, textAreaText, onOkCallback) {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    const windowContainer = document.createElement("div");
+    windowContainer.style.cssText = `
+        position: relative;
+        width: min(90vw, 400px);
+        height: min(80vh, 250px);
+        background: white;
+        border-radius: 8px;
+        border: 1px solid black;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        overflow: auto;
+    `;
+    windowContainer.style.backgroundImage = "url('Backgrounds/ClubCardPlayBoard1.jpg')";
+
+    const header = document.createElement("div");
+    header.style.cssText = `
+        height: 20%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5%;
+        font-size: 1.2vw;
+        font-weight: bold;
+        border-bottom: 1px solid #ccc;
+    `;
+    header.style.backgroundImage = `url(${MoonCEBCTopPanelBackground})`;
+
+    const titleLabel = document.createElement("span");
+    titleLabel.textContent = title || "Enter data";
+    titleLabel.style.cssText = `
+        color: white;
+        font-size: min(1.5vw, 18px);
+        font-weight: bold;
+        text-align: left;
+        flex-grow: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    `;
+
+    const buttonGroup = document.createElement("div");
+    buttonGroup.style.display = "flex";
+    buttonGroup.style.gap = "10px";
+
+    const inputField = document.createElement("textarea");
+    inputField.value = textAreaText;
+    inputField.style.cssText = `
+        width: 95%;
+        height: 95%;
+        padding: 2%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1vw;
+        text-align: left;
+    `;
+
+    let copyButton = null;
+    if (textAreaText && textAreaText != "") {
+      copyButton = createIconButton("📋", "Copy", () => {
+          navigator.clipboard.writeText(inputField.value)
+              .then(() => toggleIcon(copyButton, "✅"))
+              .catch(() => toggleIcon(copyButton, "❌"));
+      });
+    }
+
+    const closeButton = createIconButton("✖", "Close", () => MainWindowPanel.removeChild(overlay));
+    if (textAreaText && textAreaText != "") buttonGroup.append(copyButton, closeButton);
+    else buttonGroup.append(closeButton);
+    header.append(titleLabel, buttonGroup);
+
+    const content = document.createElement("div");
+    content.style.cssText = `
+        height: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10%;
+    `;
+
+    const inputContainer = document.createElement("div");
+    inputContainer.style.cssText = `
+        height: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    inputContainer.appendChild(inputField);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+        height: 25%;
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    const okButton = document.createElement("button");
+    okButton.textContent = "ОК";
+    okButton.style.cssText = `
+        width: 90%;
+        height: 80%;
+        font-size: 1vw;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    `;
+    okButton.onclick = () => {
+      if (typeof onOkCallback === "function") {
+        const result = onOkCallback(inputField.value);
+        if(result) MainWindowPanel.removeChild(overlay);
+      }
+      else {
+        MainWindowPanel.removeChild(overlay);
+      }
+
+    };
+
+    buttonContainer.appendChild(okButton);
+    content.append(inputContainer, buttonContainer);
+
+    overlay.onclick = (event) => {
+        if (event.target === overlay) MainWindowPanel.removeChild(overlay);
+    };
+
+    windowContainer.append(header, content);
+    overlay.appendChild(windowContainer);
+    MainWindowPanel.appendChild(overlay);
+  }
+  
+  /**
+ * Changes the button icon for a short time.
+ * @param {HTMLButtonElement} button - Button to change.
+ * @param {string} newIcon - New Icon.
+ */
+  function toggleIcon(button, newIcon) {
+    const oldIcon = button.innerHTML;
+    button.innerHTML = newIcon;
+    setTimeout(() => button.innerHTML = oldIcon, 1000);
+  }
+
+  function createIconButton(iconText, tooltip, onClick) {
+    const button = document.createElement("button");
+    button.style.cssText = `
+        width: 2vw;
+        height: 2vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        padding: 0;
+        overflow: hidden;
+    `;
+    
+    const icon = document.createElement("span");
+    icon.innerHTML = iconText;
+    icon.style.cssText = `
+        width: 80%;
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    button.appendChild(icon);
+
+    button.title = tooltip;
+    button.onclick = onClick;
+
+    return button;
+}
+
+
+
+  //#endregion Export / Import Deck
+  
+  
   function OpenSettingsMenu() {
     const settingsModal = createModal('settings-modal', MainWindowPanel, 'Moon Cards Editor Settings');
      const menuContainer1 = settingsModal.addMenuContainer('row');
@@ -1571,6 +1792,62 @@ document.head.appendChild(cssLink);
     }
     return decodedNumbers;
   }
+
+
+
+/**
+ * Encodes an array of numbers into a Base64 string. For Export/Import Deck
+ * @param {number[]} IdArrayDeck - The array of numerical IDs to encode.
+ * @returns {string} - The encoded string.
+ */
+function encodeEIDeck(IdArrayDeck) {
+    let encrypted = IdArrayDeck.map(id => id ^ meow_key);
+    let stringified = encrypted.join(",");
+    return btoa(stringified);
+}
+
+/**
+ * Decodes a Base64 string back into an array of numbers with validation.
+ * @param {string} encodedString - The encoded Base64 string.
+ * @returns {number[]} - The decoded and validated array of IDs.
+ */
+function decodeEIDeck(encodedString) {
+  try {
+      if (!encodedString || typeof encodedString !== "string") {
+          throw new Error("Invalid input: Not a string");
+      }
+
+      let decryptedString;
+      try {
+          decryptedString = atob(encodedString);
+      } catch (e) {
+          throw new Error("Invalid input: Not a valid Base64 string");
+      }
+
+      let numbers = decryptedString
+          .split(",")
+          .map(num => parseInt(num, 10))
+          .filter(num => !isNaN(num));
+
+      if (numbers.length < 30 || numbers.length > 40) {
+          throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
+      }
+
+      let decodedIds = numbers.map(id => id ^ meow_key);
+
+      let allIdsExist = decodedIds.every(id => MoonCEBCClubCardList.some(card => card.ID === id));
+      if (!allIdsExist) {
+          throw new Error("Invalid deck: Some IDs do not exist in the card database");
+      }
+
+      return decodedIds;
+
+  } catch (error) {
+      console.error("decodeEIDeck Error:", error.message);
+      return null;
+  }
+}
+
 
   //#endregion
 })();
