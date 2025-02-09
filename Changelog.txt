@@ -71,6 +71,7 @@ Update 1.2.15
 Update 1.2.16
 1. Update searcher. Now work by Name, Text and Group.
 2. Add Export/Import buttons and logic.
+3. Add italic and bold styles in cards description 
 
 Plans
 1. Show all reward card, but block acess if player dont have it. And show info how find.

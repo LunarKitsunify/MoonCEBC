@@ -89,9 +89,12 @@ function createCardText(card) {
     cardGroupTextElement.textContent = groupText;
 
     // Card description text
+    const isItalic = card.Text.includes("<F>");
     const cardDescriptionTextElement = document.createElement("div");
     cardDescriptionTextElement.classList.add("card-description");
-    cardDescriptionTextElement.innerHTML = card.Text;
+    cardDescriptionTextElement.innerHTML = card.Text.replace("<F>", "");
+    cardDescriptionTextElement.style.fontStyle = isItalic ? "italic" : "normal";
+    cardDescriptionTextElement.style.fontWeight = isItalic ? "normal" : "bold";
 
     // Append group and description to the bottom container
     bottomContainer.appendChild(cardGroupTextElement);

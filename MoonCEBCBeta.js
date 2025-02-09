@@ -968,9 +968,8 @@ document.head.appendChild(cssLink);
 
       let card = cardsArray[i];
       if (cardsArray && i < cardsArray.length) {
-        const cardText = ClubCardTextCache.get("Text " + card.Name).replace(/<F>/g, "");
+        const cardText = ClubCardTextCache.get("Text " + card.Name);
         card.Text = formatTextForInnerHTML(cardText);
-        //CardRender(cardsArray[i], CardCells[i]);
         const cardController = createCard(card);
 
         //Update border selected cards
