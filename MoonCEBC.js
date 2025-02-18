@@ -18,365 +18,12 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
+import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
 cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
 cssLink.rel = 'stylesheet';
 document.head.appendChild(cssLink);
-
-//#region  bcSDK Stuff
-var bcModSdk = (function () {
-  "use strict";
-  const o = "1.2.0";
-  function e(o) {
-    alert("Mod ERROR:\n" + o);
-    const e = new Error(o);
-    throw (console.error(e), e);
-  }
-  const t = new TextEncoder();
-  function n(o) {
-    return !!o && "object" == typeof o && !Array.isArray(o);
-  }
-  function r(o) {
-    const e = new Set();
-    return o.filter((o) => !e.has(o) && e.add(o));
-  }
-  const i = new Map(),
-    a = new Set();
-  function c(o) {
-    a.has(o) || (a.add(o), console.warn(o));
-  }
-  function s(o) {
-    const e = [],
-      t = new Map(),
-      n = new Set();
-    for (const r of f.values()) {
-      const i = r.patching.get(o.name);
-      if (i) {
-        e.push(...i.hooks);
-        for (const [e, a] of i.patches.entries())
-          t.has(e) &&
-            t.get(e) !== a &&
-            c(
-              `ModSDK: Mod '${r.name}' is patching function ${o.name
-              } with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${e}\nPatch1:\n${t.get(e) || ""
-              }\nPatch2:\n${a}`
-            ),
-            t.set(e, a),
-            n.add(r.name);
-      }
-    }
-    e.sort((o, e) => e.priority - o.priority);
-    const r = (function (o, e) {
-      if (0 === e.size) return o;
-      let t = o.toString().replaceAll("\r\n", "\n");
-      for (const [n, r] of e.entries())
-        t.includes(n) ||
-          c(`ModSDK: Patching ${o.name}: Patch ${n} not applied`),
-          (t = t.replaceAll(n, r));
-      return (0, eval)(`(${t})`);
-    })(o.original, t);
-    let i = function (e) {
-      var t, i;
-      const a =
-        null === (i = (t = m.errorReporterHooks).hookChainExit) ||
-          void 0 === i
-          ? void 0
-          : i.call(t, o.name, n),
-        c = r.apply(this, e);
-      return null == a || a(), c;
-    };
-    for (let t = e.length - 1; t >= 0; t--) {
-      const n = e[t],
-        r = i;
-      i = function (e) {
-        var t, i;
-        const a =
-          null === (i = (t = m.errorReporterHooks).hookEnter) || void 0 === i
-            ? void 0
-            : i.call(t, o.name, n.mod),
-          c = n.hook.apply(this, [
-            e,
-            (o) => {
-              if (1 !== arguments.length || !Array.isArray(e))
-                throw new Error(
-                  `Mod ${n.mod
-                  } failed to call next hook: Expected args to be array, got ${typeof o}`
-                );
-              return r.call(this, o);
-            },
-          ]);
-        return null == a || a(), c;
-      };
-    }
-    return { hooks: e, patches: t, patchesSources: n, enter: i, final: r };
-  }
-  function l(o, e = !1) {
-    let r = i.get(o);
-    if (r) e && (r.precomputed = s(r));
-    else {
-      let e = window;
-      const a = o.split(".");
-      for (let t = 0; t < a.length - 1; t++)
-        if (((e = e[a[t]]), !n(e)))
-          throw new Error(
-            `ModSDK: Function ${o} to be patched not found; ${a
-              .slice(0, t + 1)
-              .join(".")} is not object`
-          );
-      const c = e[a[a.length - 1]];
-      if ("function" != typeof c)
-        throw new Error(`ModSDK: Function ${o} to be patched not found`);
-      const l = (function (o) {
-        let e = -1;
-        for (const n of t.encode(o)) {
-          let o = 255 & (e ^ n);
-          for (let e = 0; e < 8; e++)
-            o = 1 & o ? -306674912 ^ (o >>> 1) : o >>> 1;
-          e = (e >>> 8) ^ o;
-        }
-        return ((-1 ^ e) >>> 0).toString(16).padStart(8, "0").toUpperCase();
-      })(c.toString().replaceAll("\r\n", "\n")),
-        d = { name: o, original: c, originalHash: l };
-      (r = Object.assign(Object.assign({}, d), {
-        precomputed: s(d),
-        router: () => { },
-        context: e,
-        contextProperty: a[a.length - 1],
-      })),
-        (r.router = (function (o) {
-          return function (...e) {
-            return o.precomputed.enter.apply(this, [e]);
-          };
-        })(r)),
-        i.set(o, r),
-        (e[r.contextProperty] = r.router);
-    }
-    return r;
-  }
-  function d() {
-    for (const o of i.values()) o.precomputed = s(o);
-  }
-  function p() {
-    const o = new Map();
-    for (const [e, t] of i)
-      o.set(e, {
-        name: e,
-        original: t.original,
-        originalHash: t.originalHash,
-        sdkEntrypoint: t.router,
-        currentEntrypoint: t.context[t.contextProperty],
-        hookedByMods: r(t.precomputed.hooks.map((o) => o.mod)),
-        patchedByMods: Array.from(t.precomputed.patchesSources),
-      });
-    return o;
-  }
-  const f = new Map();
-  function u(o) {
-    f.get(o.name) !== o &&
-      e(`Failed to unload mod '${o.name}': Not registered`),
-      f.delete(o.name),
-      (o.loaded = !1),
-      d();
-  }
-  function g(o, t) {
-    (o && "object" == typeof o) ||
-      e("Failed to register mod: Expected info object, got " + typeof o),
-      ("string" == typeof o.name && o.name) ||
-      e(
-        "Failed to register mod: Expected name to be non-empty string, got " +
-        typeof o.name
-      );
-    let r = `'${o.name}'`;
-    ("string" == typeof o.fullName && o.fullName) ||
-      e(
-        `Failed to register mod ${r}: Expected fullName to be non-empty string, got ${typeof o.fullName}`
-      ),
-      (r = `'${o.fullName} (${o.name})'`),
-      "string" != typeof o.version &&
-      e(
-        `Failed to register mod ${r}: Expected version to be string, got ${typeof o.version}`
-      ),
-      o.repository || (o.repository = void 0),
-      void 0 !== o.repository &&
-      "string" != typeof o.repository &&
-      e(
-        `Failed to register mod ${r}: Expected repository to be undefined or string, got ${typeof o.version}`
-      ),
-      null == t && (t = {}),
-      (t && "object" == typeof t) ||
-      e(
-        `Failed to register mod ${r}: Expected options to be undefined or object, got ${typeof t}`
-      );
-    const i = !0 === t.allowReplace,
-      a = f.get(o.name);
-    a &&
-      ((a.allowReplace && i) ||
-        e(
-          `Refusing to load mod ${r}: it is already loaded and doesn't allow being replaced.\nWas the mod loaded multiple times?`
-        ),
-        u(a));
-    const c = (o) => {
-      let e = g.patching.get(o.name);
-      return (
-        e ||
-        ((e = { hooks: [], patches: new Map() }),
-          g.patching.set(o.name, e)),
-        e
-      );
-    },
-      s =
-        (o, t) =>
-          (...n) => {
-            var i, a;
-            const c =
-              null === (a = (i = m.errorReporterHooks).apiEndpointEnter) ||
-                void 0 === a
-                ? void 0
-                : a.call(i, o, g.name);
-            g.loaded ||
-              e(`Mod ${r} attempted to call SDK function after being unloaded`);
-            const s = t(...n);
-            return null == c || c(), s;
-          },
-      p = {
-        unload: s("unload", () => u(g)),
-        hookFunction: s("hookFunction", (o, t, n) => {
-          ("string" == typeof o && o) ||
-            e(
-              `Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`
-            );
-          const i = l(o),
-            a = c(i);
-          "number" != typeof t &&
-            e(
-              `Mod ${r} failed to hook function '${o}': Expected priority number, got ${typeof t}`
-            ),
-            "function" != typeof n &&
-            e(
-              `Mod ${r} failed to hook function '${o}': Expected hook function, got ${typeof n}`
-            );
-          const s = { mod: g.name, priority: t, hook: n };
-          return (
-            a.hooks.push(s),
-            d(),
-            () => {
-              const o = a.hooks.indexOf(s);
-              o >= 0 && (a.hooks.splice(o, 1), d());
-            }
-          );
-        }),
-        patchFunction: s("patchFunction", (o, t) => {
-          ("string" == typeof o && o) ||
-            e(
-              `Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`
-            );
-          const i = l(o),
-            a = c(i);
-          n(t) ||
-            e(
-              `Mod ${r} failed to patch function '${o}': Expected patches object, got ${typeof t}`
-            );
-          for (const [n, i] of Object.entries(t))
-            "string" == typeof i
-              ? a.patches.set(n, i)
-              : null === i
-                ? a.patches.delete(n)
-                : e(
-                  `Mod ${r} failed to patch function '${o}': Invalid format of patch '${n}'`
-                );
-          d();
-        }),
-        removePatches: s("removePatches", (o) => {
-          ("string" == typeof o && o) ||
-            e(
-              `Mod ${r} failed to patch a function: Expected function name string, got ${typeof o}`
-            );
-          const t = l(o);
-          c(t).patches.clear(), d();
-        }),
-        callOriginal: s("callOriginal", (o, t, n) => {
-          ("string" == typeof o && o) ||
-            e(
-              `Mod ${r} failed to call a function: Expected function name string, got ${typeof o}`
-            );
-          const i = l(o);
-          return (
-            Array.isArray(t) ||
-            e(
-              `Mod ${r} failed to call a function: Expected args array, got ${typeof t}`
-            ),
-            i.original.apply(null != n ? n : globalThis, t)
-          );
-        }),
-        getOriginalHash: s("getOriginalHash", (o) => {
-          ("string" == typeof o && o) ||
-            e(
-              `Mod ${r} failed to get hash: Expected function name string, got ${typeof o}`
-            );
-          return l(o).originalHash;
-        }),
-      },
-      g = {
-        name: o.name,
-        fullName: o.fullName,
-        version: o.version,
-        repository: o.repository,
-        allowReplace: i,
-        api: p,
-        loaded: !0,
-        patching: new Map(),
-      };
-    return f.set(o.name, g), Object.freeze(p);
-  }
-  function h() {
-    const o = [];
-    for (const e of f.values())
-      o.push({
-        name: e.name,
-        fullName: e.fullName,
-        version: e.version,
-        repository: e.repository,
-      });
-    return o;
-  }
-  let m;
-  const y =
-    void 0 === window.bcModSdk
-      ? (window.bcModSdk = (function () {
-        const e = {
-          version: o,
-          apiVersion: 1,
-          registerMod: g,
-          getModsInfo: h,
-          getPatchingInfo: p,
-          errorReporterHooks: Object.seal({
-            apiEndpointEnter: null,
-            hookEnter: null,
-            hookChainExit: null,
-          }),
-        };
-        return (m = e), Object.freeze(e);
-      })())
-      : (n(window.bcModSdk) || e("Failed to init Mod SDK: Name already in use"),
-        1 !== window.bcModSdk.apiVersion &&
-        e(
-          `Failed to init Mod SDK: Different version already loaded ('1.2.0' vs '${window.bcModSdk.version}')`
-        ),
-        window.bcModSdk.version !== o &&
-        alert(
-          `Mod SDK warning: Loading different but compatible versions ('1.2.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`
-        ),
-        window.bcModSdk);
-  return (
-    "undefined" != typeof exports &&
-    (Object.defineProperty(exports, "__esModule", { value: !0 }),
-      (exports.default = y)),
-    y
-  );
-})();
-
-//#endregion
 
 (function () {
   "use strict";
@@ -414,8 +61,10 @@ var bcModSdk = (function () {
     PET: { value: "PetOwner", text: "Pet / Owner" },
   });
 
+  
   const MoonCEBCAddonName = "Moon Cards Editor";
-
+  const meow_key = 42;
+  
   const basePath = new URL(".", import.meta.url).href;
   const MoonCEBCTopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
 
@@ -510,7 +159,7 @@ var bcModSdk = (function () {
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.14";
+  const AddonVersion = "1.2.16";
   const Hidden = "Hidden";
 
   //#endregion
@@ -803,8 +452,8 @@ var bcModSdk = (function () {
     const exportButton = createButton(
       "Export",
       null,
-      null,
-      "auto",
+      ExportDeck,
+      "15%",
       "80%",
       "0",
       "0",
@@ -815,10 +464,8 @@ var bcModSdk = (function () {
     const importButton = createButton(
       "Import",
       null,
-      () => {
-        console.log("Centered button clicked!");
-      },
-      "auto",
+      ImportDeck,
+      "15%",
       "80%",
       "0",
       "0",
@@ -826,8 +473,8 @@ var bcModSdk = (function () {
       "right"
     );
 
-    //topSettingsLeftViewPanel.appendChild(exportButton);
-    //topSettingsLeftViewPanel.appendChild(importButton);
+    topSettingsLeftViewPanel.appendChild(exportButton);
+    topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
 
     //#region topSettingsLeftEditPanel
@@ -886,8 +533,11 @@ var bcModSdk = (function () {
     groupSelect.style.textAlign = "center";
     groupSelect.style.fontSize = TopPanelTextSize;
     groupSelect.addEventListener("change", function () {
-      MoonCEBCCurrentGroup = groupSelect.value;
-      UpdateCardsListSetNewGroup();
+      if (MoonCEBCCurrentGroup != groupSelect.value) {
+        MoonCEBCCurrentGroup = groupSelect.value;
+        searchCardInput.value = "";
+        UpdateCardsListSetNewGroup();
+      }
     });
 
     if (Player.Themed) {
@@ -934,14 +584,26 @@ var bcModSdk = (function () {
     searchCardInput.placeholder = "Search Card";
     searchCardInput.addEventListener("input", (event) => {
       const newValue = event.target.value;
-      if (newValue == "" || newValue == undefined)
-        MoonCEBCBuilderSeacrhGroupList = [];
-      else
-        MoonCEBCBuilderSeacrhGroupList =
-          MoonCEBCBuilderCurrentGroupsList.filter((card) =>
-            card.Name.toLowerCase().includes(newValue.toLowerCase())
-          );
+      
+      if (newValue && newValue != "") {
+        const lowerSearch = newValue.toLowerCase();
+    
+        const searchResult = MoonCEBCBuilderCurrentGroupsList.filter(card => {
+          const cleanedText = card.Text?.replaceAll(fameTextColor, "").replaceAll(moneyTextColor, "");
 
+          const inName = card.Name.toLowerCase().includes(lowerSearch);
+          const inText = cleanedText && cleanedText.toLowerCase().includes(lowerSearch);
+          const inGroup = card.Group && card.Group.some(group => group.toLowerCase().includes(lowerSearch));
+      
+          return inName || inText || inGroup;
+        });
+      
+      MoonCEBCBuilderSeacrhGroupList = searchResult;
+      }
+      else
+        MoonCEBCBuilderSeacrhGroupList = [];
+
+      MoonCEBCCurrentCardsListPage = 0;
       MoonCEBCCurrent30Cards = Get30CardsGroup();
       UpdateCardsCells(MoonCEBCCurrent30Cards);
     });
@@ -1145,8 +807,31 @@ var bcModSdk = (function () {
   //#endregion
 
   /**
+   * Loads the club card list and ensures each card has its associated text.
+   */
+  function LoadClubCardList() {
+    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length === 0 || MoonCEBCClubCardList[0].Text === "") {
+      MoonCEBCClubCardList = [];
+          for (const card of ClubCardList) {
+              const copiedCard = { ...card };
+              let attemptsLeft = 2;
+
+              while (attemptsLeft-- > 0) {
+                  const text = ClubCardTextGet("Text " + copiedCard.Name);
+
+                if (text && text != '') {
+                  copiedCard.Text = text;
+                  break;
+                }
+            }
+            
+              MoonCEBCClubCardList.push(copiedCard);
+          }
+      }
+  }
+
+  /**
    * Loads and stores card data.  Text_ClubCard.csv
-   * TODO make variant loading for different interface languages  ( Text_ClubCard_CN.txt, Text_ClubCard_RU.txt )
    */
   async function AddonLoad() {
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
@@ -1158,12 +843,6 @@ var bcModSdk = (function () {
       if (!ClubCardTextCache) {
         ClubCardTextCache = new TextCache(CardTextPath);
         TextAllScreenCache.set(CardTextPath, ClubCardTextCache);
-      }
-    }
-    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length == 0) {
-      for (let i = 0; i < ClubCardList.length; i++) {
-        let copiedCard = { ...ClubCardList[i] };
-        MoonCEBCClubCardList.push(copiedCard);
       }
     }
 
@@ -1289,9 +968,8 @@ var bcModSdk = (function () {
 
       let card = cardsArray[i];
       if (cardsArray && i < cardsArray.length) {
-        const cardText = ClubCardTextCache.get("Text " + card.Name).replace(/<F>/g, "");
+        const cardText = ClubCardTextCache.get("Text " + card.Name);
         card.Text = formatTextForInnerHTML(cardText);
-        //CardRender(cardsArray[i], CardCells[i]);
         const cardController = createCard(card);
 
         //Update border selected cards
@@ -1348,11 +1026,14 @@ var bcModSdk = (function () {
     const deckCardsCounter = MainWindowPanel.querySelector(
       "#DeckCardsCounterId"
     );
-    const countCards = MoonCEBCEditCurrentDeck.length;
-    deckCardsCounter.textContent = `Select the cards (${countCards}/30)`;
 
-    if (countCards != 30) deckCardsCounter.style.color = "red";
-    else deckCardsCounter.style.color = "white";
+    const countCards = MoonCEBCEditCurrentDeck.length;
+
+    deckCardsCounter.textContent = `Select the cards (${countCards}/${"30 - 40"})`;
+
+    const isValidDeckSize = countCards >= 30 && countCards <= 40;
+
+    deckCardsCounter.style.color = isValidDeckSize ? "white" : "red";
   }
 
   //#region Top Panel Button Logic
@@ -1427,8 +1108,8 @@ var bcModSdk = (function () {
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length <= 30;
-
-    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length == 30) {
+    
+    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length >= 30 && MoonCEBCEditCurrentDeck.length <= 40) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
       MoonCEBCPageMode = WindowStatus.VIEW;
@@ -1445,20 +1126,24 @@ var bcModSdk = (function () {
 
   /**
    * Save new Deck  :)
+   * @param {boolean} [isSaveName=true] - variable that controls whether a new name for the deck will be stored.
    */
-  function SaveNewDeck() {
+  function SaveNewDeck(isSaveName = true) {
     const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
-    const newDeckName = deckNameInput.value;
     const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
+ 
+    if (isSaveName) {
+      //fix null deck if player dont created them
+      if (Player.Game.ClubCard.DeckName == null)
+        Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
+      
+      const newDeckName = deckNameInput.value;
+      Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+    }
 
-    //fix null deck if player dont created them
-    if (Player.Game.ClubCard.DeckName == null)
-      Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-
-    Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
 
     ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
@@ -1529,6 +1214,7 @@ var bcModSdk = (function () {
 
       CardCells = [];
     } else {
+      LoadClubCardList();
       AddonInfoMessage(null, true);
       LoadMainWindow();
     }
@@ -1537,6 +1223,227 @@ var bcModSdk = (function () {
     isVisibleMainWindow = !isVisibleMainWindow;
   }
 
+  //#region Export / Import Deck
+
+  function ExportDeck() {
+    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const encodeDeck = encodeEIDeck(cardIDs);
+    CreateInputWindow("Export Deck", encodeDeck, null);
+  }
+
+  function ImportDeck() {
+    CreateInputWindow("Import Deck", "", SaveImportDeck);
+  }
+  function SaveImportDeck(stringDeck) {
+    const deckData = [];
+    const decodedDeck = decodeEIDeck(stringDeck.trim());
+    if (decodedDeck == null) return false;
+
+    for (let id of decodedDeck)
+      deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
+    MoonCEBCEditCurrentDeck = deckData
+    SaveNewDeck(false);
+    const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
+    GetDeckData(playerDecksSelect);
+    return true;
+  }
+
+  function CreateInputWindow(title, textAreaText, onOkCallback) {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    const windowContainer = document.createElement("div");
+    windowContainer.style.cssText = `
+        position: relative;
+        width: min(90vw, 400px);
+        height: min(80vh, 250px);
+        background: white;
+        border-radius: 8px;
+        border: 1px solid black;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        overflow: auto;
+    `;
+    windowContainer.style.backgroundImage = "url('Backgrounds/ClubCardPlayBoard1.jpg')";
+
+    const header = document.createElement("div");
+    header.style.cssText = `
+        height: 20%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5%;
+        font-size: 1.2vw;
+        font-weight: bold;
+        border-bottom: 1px solid #ccc;
+    `;
+    header.style.backgroundImage = `url(${MoonCEBCTopPanelBackground})`;
+
+    const titleLabel = document.createElement("span");
+    titleLabel.textContent = title || "Enter data";
+    titleLabel.style.cssText = `
+        color: white;
+        font-size: min(1.5vw, 18px);
+        font-weight: bold;
+        text-align: left;
+        flex-grow: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    `;
+
+    const buttonGroup = document.createElement("div");
+    buttonGroup.style.display = "flex";
+    buttonGroup.style.gap = "10px";
+
+    const inputField = document.createElement("textarea");
+    inputField.value = textAreaText;
+    inputField.style.cssText = `
+        width: 95%;
+        height: 95%;
+        padding: 2%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1vw;
+        text-align: left;
+    `;
+
+    let copyButton = null;
+    if (textAreaText && textAreaText != "") {
+      copyButton = createIconButton("📋", "Copy", () => {
+          navigator.clipboard.writeText(inputField.value)
+              .then(() => toggleIcon(copyButton, "✅"))
+              .catch(() => toggleIcon(copyButton, "❌"));
+      });
+    }
+
+    const closeButton = createIconButton("✖", "Close", () => MainWindowPanel.removeChild(overlay));
+    if (textAreaText && textAreaText != "") buttonGroup.append(copyButton, closeButton);
+    else buttonGroup.append(closeButton);
+    header.append(titleLabel, buttonGroup);
+
+    const content = document.createElement("div");
+    content.style.cssText = `
+        height: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10%;
+    `;
+
+    const inputContainer = document.createElement("div");
+    inputContainer.style.cssText = `
+        height: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    inputContainer.appendChild(inputField);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+        height: 25%;
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    const okButton = document.createElement("button");
+    okButton.textContent = "ОК";
+    okButton.style.cssText = `
+        width: 90%;
+        height: 80%;
+        font-size: 1vw;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    `;
+    okButton.onclick = () => {
+      if (typeof onOkCallback === "function") {
+        const result = onOkCallback(inputField.value);
+        if(result) MainWindowPanel.removeChild(overlay);
+      }
+      else {
+        MainWindowPanel.removeChild(overlay);
+      }
+
+    };
+
+    buttonContainer.appendChild(okButton);
+    content.append(inputContainer, buttonContainer);
+
+    overlay.onclick = (event) => {
+        if (event.target === overlay) MainWindowPanel.removeChild(overlay);
+    };
+
+    windowContainer.append(header, content);
+    overlay.appendChild(windowContainer);
+    MainWindowPanel.appendChild(overlay);
+  }
+  
+  /**
+ * Changes the button icon for a short time.
+ * @param {HTMLButtonElement} button - Button to change.
+ * @param {string} newIcon - New Icon.
+ */
+  function toggleIcon(button, newIcon) {
+    const oldIcon = button.innerHTML;
+    button.innerHTML = newIcon;
+    setTimeout(() => button.innerHTML = oldIcon, 1000);
+  }
+
+  function createIconButton(iconText, tooltip, onClick) {
+    const button = document.createElement("button");
+    button.style.cssText = `
+        width: 2vw;
+        height: 2vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        padding: 0;
+        overflow: hidden;
+    `;
+    
+    const icon = document.createElement("span");
+    icon.innerHTML = iconText;
+    icon.style.cssText = `
+        width: 80%;
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    button.appendChild(icon);
+
+    button.title = tooltip;
+    button.onclick = onClick;
+
+    return button;
+}
+
+
+
+  //#endregion Export / Import Deck
+  
+  
   function OpenSettingsMenu() {
     const settingsModal = createModal('settings-modal', MainWindowPanel, 'Moon Cards Editor Settings');
      const menuContainer1 = settingsModal.addMenuContainer('row');
@@ -1882,6 +1789,62 @@ var bcModSdk = (function () {
     }
     return decodedNumbers;
   }
+
+
+
+/**
+ * Encodes an array of numbers into a Base64 string. For Export/Import Deck
+ * @param {number[]} IdArrayDeck - The array of numerical IDs to encode.
+ * @returns {string} - The encoded string.
+ */
+function encodeEIDeck(IdArrayDeck) {
+    let encrypted = IdArrayDeck.map(id => id ^ meow_key);
+    let stringified = encrypted.join(",");
+    return btoa(stringified);
+}
+
+/**
+ * Decodes a Base64 string back into an array of numbers with validation.
+ * @param {string} encodedString - The encoded Base64 string.
+ * @returns {number[]} - The decoded and validated array of IDs.
+ */
+function decodeEIDeck(encodedString) {
+  try {
+      if (!encodedString || typeof encodedString !== "string") {
+          throw new Error("Invalid input: Not a string");
+      }
+
+      let decryptedString;
+      try {
+          decryptedString = atob(encodedString);
+      } catch (e) {
+          throw new Error("Invalid input: Not a valid Base64 string");
+      }
+
+      let numbers = decryptedString
+          .split(",")
+          .map(num => parseInt(num, 10))
+          .filter(num => !isNaN(num));
+
+      if (numbers.length < 30 || numbers.length > 40) {
+          throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
+      }
+
+      let decodedIds = numbers.map(id => id ^ meow_key);
+
+      let allIdsExist = decodedIds.every(id => MoonCEBCClubCardList.some(card => card.ID === id));
+      if (!allIdsExist) {
+          throw new Error("Invalid deck: Some IDs do not exist in the card database");
+      }
+
+      return decodedIds;
+
+  } catch (error) {
+      console.error("decodeEIDeck Error:", error.message);
+      return null;
+  }
+}
+
 
   //#endregion
 })();

@@ -1027,14 +1027,11 @@ document.head.appendChild(cssLink);
       "#DeckCardsCounterId"
     );
 
-    const isTestServer = window.location.href.includes("test");
     const countCards = MoonCEBCEditCurrentDeck.length;
 
-    deckCardsCounter.textContent = `Select the cards (${countCards}/${isTestServer ? "30 - 40" : "30"})`;
+    deckCardsCounter.textContent = `Select the cards (${countCards}/${"30 - 40"})`;
 
-    const isValidDeckSize = isTestServer 
-    ? countCards >= 30 && countCards <= 40 
-    : countCards === 30;
+    const isValidDeckSize = countCards >= 30 && countCards <= 40;
 
     deckCardsCounter.style.color = isValidDeckSize ? "white" : "red";
   }
@@ -1112,10 +1109,7 @@ document.head.appendChild(cssLink);
       deckNameInput.value != null &&
       deckNameInput.value.length <= 30;
     
-    const isTestServer = window.location.href.includes("test");
-    const isTestServerDeckLength = MoonCEBCEditCurrentDeck.length >= 30 && MoonCEBCEditCurrentDeck.length <= 40;
-
-    if (isDeckNameValidation && (isTestServer && isTestServerDeckLength) || ( MoonCEBCEditCurrentDeck.length == 30)) {
+    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length >= 30 && MoonCEBCEditCurrentDeck.length <= 40) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
       MoonCEBCPageMode = WindowStatus.VIEW;
