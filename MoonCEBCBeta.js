@@ -200,26 +200,28 @@ document.head.appendChild(cssLink);
 
   //#region ---------------Draw Addon Icons--------------- //
 
-  modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 3, (args, next) => {
-    if (ChatRoomHideIconState != 0) return next(args);
-    const [C, CharX, CharY, Zoom] = args;
+  // modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 0, (args, next) => {
+  //   if (ChatRoomHideIconState != 0) return next(args);
+  //   const [C, CharX, CharY, Zoom] = args;
 
-    //Is Addon active Icon
-    if (C.MoonCEBC)
-      DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+  //   //Is Addon active Icon
+  //   if (C.MoonCEBC)
+  //     DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
-    return next(args);
-  });
+  //   return next(args);
+  // });
 
-  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
-    if (ChatRoomHideIconState != 0) return next(args);
+  modApi.hookFunction("ChatRoomCharacterViewDrawOverlay", 3, (args, next) => {
+    next(args);
+    if (ChatRoomHideIconState != 0) return;
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Menu Addon Open Icon
     if (C.MoonCEBC && C.MoonCEBC.IsMenuOpen)
       DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
-
-    return next(args);
+    
+    if (C.MoonCEBC)
+      DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 350 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
   });
 
   //#endregion //------------------------------//
