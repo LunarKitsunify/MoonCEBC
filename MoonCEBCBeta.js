@@ -200,7 +200,7 @@ document.head.appendChild(cssLink);
 
   //#region ---------------Draw Addon Icons--------------- //
 
-  modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 0, (args, next) => {
+  modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 3, (args, next) => {
     if (ChatRoomHideIconState != 0) return next(args);
     const [C, CharX, CharY, Zoom] = args;
 
