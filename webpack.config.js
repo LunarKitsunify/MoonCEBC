@@ -1,7 +1,11 @@
-const path = require('path');
+// webpack.config.js
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-module.exports = {
-  mode: 'production', // ← сюда!
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default {
+  mode: 'production',
   entry: './MoonCEBC.js',
   output: {
     filename: 'bundle.js',
@@ -13,8 +17,11 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.(png|jpg|jpeg|gif)$/i, type: 'asset/resource' },
+      // CSS обработка отключена — ты сам подключаешь <link>
+      {
+        test: /\.(png|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
     ],
   },
   target: ['web'],

@@ -47,6 +47,7 @@ document.head.appendChild(cssLink);
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
     MAID: { value: "Maid", text: "Maid" },
+    PLAYER:{ value: "Player", text: "Player" },
     ASYLUM: { value: "Asylum", text: "Asylum" },
     DOMINANT_MISTRESS: {
       value: "DominantMistress",
