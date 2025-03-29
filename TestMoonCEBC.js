@@ -173,13 +173,13 @@ function createCardValuesPanel(card) {
     // Create the main panel
     const valueCardPanel = document.createElement("div");
     valueCardPanel.classList.add("value-card-panel");
-    const basePath = new URL(".", import.meta.url).href;
+    //const basePath = new URL(".", import.meta.url).href;
 
     // Add Liability Icon if applicable
     if (card.Group && card.Group.includes("Liability")) {
         const liabilityIcon = document.createElement("img");
-        liabilityIcon.src = new URL("../src/Images/Liability.png", basePath).href;
-        //liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
+        //liabilityIcon.src = new URL("../src/Images/Liability.png", basePath).href;
+        liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
         liabilityIcon.classList.add("value-card-icon");
         valueCardPanel.appendChild(liabilityIcon);
     }
