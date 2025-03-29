@@ -16,10 +16,9 @@
 // ==/UserScript==
 
 (function () {
-    "use strict";
-    var script = document.createElement("script");
-    script.setAttribute("crossorigin", "anonymous");
-    script.src = "https://lunarkitsunify.github.io/MoonCEBC/TestMoonCEBC.js";
-    document.head.appendChild(script);
-  })();
+  const script = document.createElement('script');
+  script.src = 'https://lunarkitsunify.github.io/MoonCEBC/dist/bundle.js';
+  script.type = 'module';
+  document.head.appendChild(script);
+})();
   

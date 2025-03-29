@@ -148,7 +148,12 @@ function createCardValuesPanel(card) {
     // Create the main panel
     const valueCardPanel = document.createElement("div");
     valueCardPanel.classList.add("value-card-panel");
-    const basePath = new URL(".", import.meta.url).href;
+
+    //const basePath = new URL(".", import.meta.url).href;
+    const metaUrl = typeof import.meta !== 'undefined' ? import.meta.url : document.currentScript?.src || window.location.href;
+    const basePath = new URL('.', metaUrl).href;
+
+
 
     // Add Liability Icon if applicable
     if (card.Group && card.Group.includes("Liability")) {
