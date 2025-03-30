@@ -37,6 +37,7 @@ document.head.appendChild(cssLink);
   const CardTypes = Object.freeze({
     ALL_CARDS: { value: "All Cards", text: "All Cards" },
     SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
+    PLAYER:{ value: "Player", text: "Player" },
     EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
     UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
@@ -47,7 +48,6 @@ document.head.appendChild(cssLink);
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
     MAID: { value: "Maid", text: "Maid" },
-    PLAYER:{ value: "Player", text: "Player" },
     ASYLUM: { value: "Asylum", text: "Asylum" },
     DOMINANT_MISTRESS: {
       value: "DominantMistress",
