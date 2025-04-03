@@ -46,7 +46,7 @@ document.head.appendChild(cssLink);
     POLICE: { value: "Police", text: "Police" },
     CRIMINAL: { value: "Criminal", text: "Criminal" },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
-    PORN_ACTRESS: { value: "PornActress", text: "Porn Actress" },
+    PORN: { value: "Porn", text: "Porn" },
     MAID: { value: "Maid", text: "Maid" },
     ASYLUM: { value: "Asylum", text: "Asylum" },
     DOMINANT_MISTRESS: {
@@ -1591,6 +1591,14 @@ document.head.appendChild(cssLink);
             card.Group &&
             (card.Group.includes("Pet") ||
               card.Group.includes("Owner"))
+        );
+        break;
+      case CardTypes.PORN.value:
+        cardGroupList = MoonCEBCClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("PornActress") ||
+              card.Group.includes("Porn"))
         );
         break;
       default:
