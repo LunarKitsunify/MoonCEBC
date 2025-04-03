@@ -1598,7 +1598,8 @@ document.head.appendChild(cssLink);
           (card) =>
             card.Group &&
             (card.Group.includes("PornActress") ||
-              card.Group.includes("Porn"))
+              card.Group.includes("Porn") ||
+              card.Group.includes("Video"))
         );
         break;
       default:
