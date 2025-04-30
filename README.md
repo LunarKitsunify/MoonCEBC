@@ -36,20 +36,12 @@ https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoaderBeta.user.js
 
 ### 3. Bookmark
 
-Stable
+Stable - Updated 30.04.2025
 ```javascript
-javascript: (() => {
-  fetch("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js")
-    .then((r) => r.text())
-    .then((r) => eval(r));
-})();
+javascript:(()=>{import("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js")})();
 ```
 
-Beta
+Beta - Updated 30.04.2025
 ```javascript
-javascript: (() => {
-  fetch("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js")
-    .then((r) => r.text())
-    .then((r) => eval(r));
-})();
+javascript:(()=>{import("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js")})();
 ```
