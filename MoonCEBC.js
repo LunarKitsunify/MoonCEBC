@@ -34,34 +34,34 @@ document.head.appendChild(cssLink);
     EDIT: "EditDeck",
     SETTINGS: "Settings",
   });
+  
   const CardTypes = Object.freeze({
-    ALL_CARDS: { value: "All Cards", text: "All Cards" },
-    SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
-    PLAYER:{ value: "Player", text: "Player" },
-    EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
-    UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
-    REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
-    LIABILITY: { value: "Liability", text: "Liability" },
-    STAFF: { value: "Staff", text: "Staff" },
-    POLICE: { value: "Police", text: "Police" },
-    CRIMINAL: { value: "Criminal", text: "Criminal" },
-    FETISHIST: { value: "Fetishist", text: "Fetishist" },
-    PORN: { value: "Porn", text: "Porn" },
-    MAID: { value: "Maid", text: "Maid" },
-    ASYLUM: { value: "Asylum", text: "Asylum" },
-    DOMINANT_MISTRESS: {
-      value: "DominantMistress",
-      text: "Dominant / Mistress",
-    },
-    ABDL: { value: "ABDL", text: "ABDL" },
-    COLLEGE: { value: "College", text: "College" },
-    SHIBARI_SENSEI_KNOT: {
-      value: "ShibariSenseiKnot",
-      text: "Shibari / Sensei / Knot",
-    },
-    PET: { value: "PetOwner", text: "Pet / Owner" },
+  ALL_CARDS: { value: "All Cards", text: "All Cards" },
+  SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
+  EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
+  REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
+  ABDL: { value: "ABDL", text: "ABDL" },
+  ASYLUM: { value: "Asylum", text: "Asylum" },
+  COLLEGE: { value: "College", text: "College" },
+  CRIMINAL: { value: "Criminal", text: "Criminal" },
+  DOMINANT_MISTRESS: {
+    value: "DominantMistress",
+    text: "Dominant / Mistress",
+  },
+  FETISHIST: { value: "Fetishist", text: "Fetishist" },
+  LIABILITY: { value: "Liability", text: "Liability" },
+  MAID: { value: "Maid", text: "Maid" },
+  PET: { value: "PetOwner", text: "Pet / Owner" },
+  PLAYER: { value: "Player", text: "Player" },
+  POLICE: { value: "Police", text: "Police" },
+  PORN: { value: "Porn", text: "Porn" },
+  SHIBARI_SENSEI_KNOT: {
+    value: "ShibariSenseiKnot",
+    text: "Shibari / Sensei / Knot",
+  },
+  STAFF: { value: "Staff", text: "Staff" },
+  UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
   });
-
   
   const MoonCEBCAddonName = "Moon Cards Editor";
   const meow_key = 42;
