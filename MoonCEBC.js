@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.15
+// @version 1.2.17
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -160,7 +160,7 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.16";
+  const AddonVersion = "1.2.17";
   const Hidden = "Hidden";
 
   //#endregion
@@ -840,14 +840,8 @@ document.head.appendChild(cssLink);
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
 
     //Load Cards data from BC Server
-    if (!ClubCardTextCache) {
-      const CardTextPath = "Screens/MiniGame/ClubCard/Text_ClubCard.csv";
-      ClubCardTextCache = TextAllScreenCache.get(CardTextPath);
-      if (!ClubCardTextCache) {
-        ClubCardTextCache = new TextCache(CardTextPath);
-        TextAllScreenCache.set(CardTextPath, ClubCardTextCache);
-      }
-    }
+    TextPrefetchFile(ScreenFileGetPath(`Text_ClubCard.csv`, "MiniGame", "ClubCard"));
+    ClubCardTextGet("Title Kinky Neighbor");
 
     if (CurrentScreen == "ChatRoom")
       AddonInfoMessage();
@@ -971,7 +965,7 @@ document.head.appendChild(cssLink);
 
       let card = cardsArray[i];
       if (cardsArray && i < cardsArray.length) {
-        const cardText = ClubCardTextCache.get("Text " + card.Name);
+        const cardText = ClubCardTextGet("Text " + card.Name);
         card.Text = formatTextForInnerHTML(cardText);
         const cardController = createCard(card);
 

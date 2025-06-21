@@ -73,8 +73,5 @@ Update 1.2.16
 2. Add Export/Import buttons and logic.
 3. Add italic and bold styles in cards description 
 
-Plans
-1. Show all reward card, but block acess if player dont have it. And show info how find.
-2. Instead of a large card, display a list of all currently selected cards.
-   Make a toggle to change the mode to Big Card or a list of selected cards.
-3. Settings Menu ???
+Update 1.2.17
+1. Fixed addon after bc r117 and their hotfix pack.
