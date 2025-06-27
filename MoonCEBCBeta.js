@@ -270,6 +270,7 @@ document.head.appendChild(cssLink);
         const player = args[0];
         const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
         const payload = BuildPayload(isPlayer);
+        console.log("📦 Payload to be sent:", payload);
         SendCardStatsToServer(payload);
       } catch (error) {
         //ignore
