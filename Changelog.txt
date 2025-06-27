@@ -75,3 +75,8 @@ Update 1.2.16
 
 Update 1.2.17
 1. Fixed addon after bc r117 and their hotfix pack.
+
+Update 1.2.18
+1. Created ClubCard Monitoring Tool (https://clubcardmonitoring.onrender.com/) — a website for tracking card statistics.
+2. Track card usage (seen / played) during matches and send stats to the website.
+3. Add new Info window in addon with useful links and project resources.

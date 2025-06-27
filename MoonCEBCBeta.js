@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.17
+// @version 1.2.18
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -62,6 +62,11 @@ document.head.appendChild(cssLink);
   STAFF: { value: "Staff", text: "Staff" },
   UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
   });
+
+  /** Card statistics repository. key = UniqueID
+   * @type {Map<string, { id: number, uniqueID: string, name: string, seen: boolean, played: boolean }> } 
+   * */
+  const CardStatsMap = new Map();
 
   const MoonCEBCAddonName = "Moon Cards Editor";
   const meow_key = 42;
@@ -160,7 +165,7 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.17";
+  const AddonVersion = "1.2.18";
   const Hidden = "Hidden";
 
   //#endregion
@@ -175,19 +180,6 @@ document.head.appendChild(cssLink);
     version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCEBC",
   });
-
-  // modApi.hookFunction("DrawImageEx", 0, (args, next) => {
-  //   if (args[0] == "Screens/MiniGame/ClubCard/Sleeve/Default.png") {
-  //     const newImage = CardGameCardCoverBackground;
-  //     args[0] = newImage;
-  //   }
-
-  //   // if (args[0] == "Backgrounds/ClubCardPlayBoard1.jpg") {
-  //   //   const newImage = CardGameBoardBackground;
-  //   //   args[0] = newImage;
-  //   // }
-  //   next(args);
-  // });
 
   modApi.hookFunction("MainRun", 0, (args, next) => {
     //TODO Hook ChatRoomRun and do it with a DrawButton?
@@ -232,13 +224,6 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("ChatRoomSync", 0, (args, next) => {
     AddonInfoMessage();
-    //TODO This part was necessary to clear users of old data that I used in the OnlineSharedSettings.MoonCEBC
-    //At this point, you can already remove this extra code, but let it be for now.
-    if (Player.OnlineSharedSettings.MoonCEBC) {
-      delete Player.OnlineSharedSettings.MoonCEBC;
-      ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
-    }
-
     return next(args);
   });
 
@@ -263,6 +248,38 @@ document.head.appendChild(cssLink);
   });
 
   //#endregion //------------------------------//
+
+  //#region ---------------Card Tracking Module--------------- //
+  modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
+    const result = next(args);
+    StartTrackingModule();
+    return result;
+  });
+
+  modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
+    const result = next(args);
+    RefreshTrackingAfterSync(ClubCardPlayer[0]);
+    return result;
+  });
+
+  modApi.hookFunction("ClubCardEndGameSyncAndMessage", 0, (args, next) => {
+    const result = next(args);
+
+    if (ClubCardIsOnline()) {
+      try {
+        const player = args[0];
+        const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
+        const payload = BuildPayload(isPlayer);
+        SendCardStatsToServer(payload);
+      } catch (error) {
+        //ignore
+      }
+    }
+    
+    return result;
+  });
+
+  //#endregion
 
   //#endregion
 
@@ -757,6 +774,18 @@ document.head.appendChild(cssLink);
       "left"
     );
 
+    const infoButtonWithImage = createButton(
+      null,
+      "Icons/Question.png",
+      OpenInfo,
+      "50%",
+      "80%",
+      "0",
+      "5%",
+      "Info",
+      "left"
+    );
+
     const exitButtonWithImage = createButton(
       null,
       "Icons/Exit.png",
@@ -769,6 +798,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
+    topSettingsRightPanel.appendChild(infoButtonWithImage);
     //topSettingsRightPanel.appendChild(settingsButton);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
@@ -1441,6 +1471,130 @@ document.head.appendChild(cssLink);
 
   //#endregion Export / Import Deck
   
+  //#region Info Window
+
+  function OpenInfo() {
+    const infoText =
+    `📌 Discord — BC Cards Community
+    Join discussions, ask questions, and meet other players:
+    🔗 https://discord.gg/ZByQXVHm4u
+
+    📊 Cards Monitoring Tool
+    Track cards stats:
+    🔗 https://clubcardmonitoring.onrender.com/
+
+    📰 News
+    🔗 https://discord.com/channels/1172246773352370337/1374075134071144590
+
+    🐞 Report Bugs
+    Found a bug? Help fix it faster:
+    🔗 https://discord.com/channels/1172246773352370337/1280926166836056064`;
+
+    CreateInfoWindow("Information", infoText);
+  }
+  /**
+   * Displays an informational window with auto-height and clean layout.
+   * @param {string} title - The window title
+   * @param {string} message - Text content to display (supports \n)
+   */
+  function CreateInfoWindow(title, message) {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    `;
+
+    const windowContainer = document.createElement("div");
+    windowContainer.style.cssText = `
+      position: relative;
+      width: min(90vw, 700px);
+      max-height: 90vh;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid black;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      background-image: url('Backgrounds/ClubCardPlayBoard1.jpg');
+      padding-bottom: 20px;
+    `;
+
+    const header = document.createElement("div");
+    header.style.cssText = `
+      height: auto;
+      min-height: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+      background-image: url(${MoonCEBCTopPanelBackground});
+    `;
+
+    const titleLabel = document.createElement("span");
+    titleLabel.textContent = title || "Information";
+    titleLabel.style.cssText = `
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      flex-grow: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    `;
+
+    const closeButton = createIconButton("✖", "Close", () => MainWindowPanel.removeChild(overlay));
+    header.append(titleLabel, closeButton);
+
+    const content = document.createElement("div");
+    content.style.cssText = `
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    `;
+
+    const messageBox = document.createElement("div");
+    messageBox.innerText = message || "No content provided.";
+    messageBox.style.cssText = `
+      width: 100%;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 1rem;
+      white-space: pre-line;
+    `;
+
+    const okButton = document.createElement("button");
+    okButton.textContent = "OK";
+    okButton.style.cssText = `
+      padding: 8px 35px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      align-self: center;
+    `;
+    okButton.onclick = () => MainWindowPanel.removeChild(overlay);
+
+    content.append(messageBox, okButton);
+    windowContainer.append(header, content);
+    overlay.appendChild(windowContainer);
+    MainWindowPanel.appendChild(overlay);
+  }
+
+
+  //#endregion
   
   function OpenSettingsMenu() {
     const settingsModal = createModal('settings-modal', MainWindowPanel, 'Moon Cards Editor Settings');
@@ -1705,6 +1859,139 @@ document.head.appendChild(cssLink);
 
     return sortedCards;
   }
+
+  //#region Card Tracking Module
+  function StartTrackingModule() {
+    InitTrackingFromDeckAndHand(ClubCardPlayer[0].Deck, ClubCardPlayer[0].Hand);
+    HookAllPlayerZones(ClubCardPlayer[0]);
+  }
+
+  /* ** Initialize tracking from FullDeck (at game start) ** */
+  function InitTrackingFromDeckAndHand(deck, hand) {
+    CardStatsMap.clear();
+    const source = [...deck, ...hand];
+    for (const card of source) {
+      CardStatsMap.set(card.UniqueID, {
+        id: card.ID,
+        uniqueID: card.UniqueID,
+        name: card.Name,
+        seen: false,
+        played: false
+      });
+    }
+  }
+
+  /* ** Mark a card as seen in hand ** */
+  function MarkSeen(card) {
+    const stat = CardStatsMap.get(card.UniqueID);
+    if (stat && !stat.seen) stat.seen = true;
+  }
+
+  /* ** Mark a card as played (on board/event/discard) ** */
+  function MarkPlayed(card) {
+    const stat = CardStatsMap.get(card.UniqueID);
+    if (stat && !stat.played) stat.played = true;
+  }
+
+  /* ** Hook array.push() to track card movement ** */
+  function HookPush(array, onCard) {
+    const originalPush = array.push;
+    array.push = function (...cards) {
+      for (const card of cards) {
+        if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) {
+          onCard(card);
+        }
+      }
+      return originalPush.apply(this, cards);
+    };
+  }
+
+  /* ** Apply push hooks to all player zones ** */
+  function HookAllPlayerZones(player) {
+    HookPush(player.Hand, MarkSeen);
+    HookPush(player.Board, MarkPlayed);
+    HookPush(player.Event, MarkPlayed);
+    HookPush(player.DiscardPile, MarkPlayed);
+  }
+
+  /**
+   * Build payload for API submission at the end of the game.
+   * Includes all cards from FullDeck, even if unused.
+   *
+   * @param {boolean} win - Whether the player won the match.
+   * @returns {{ id: number, name: string, score: number, win: boolean }[]} Array of card stats ready for upload.
+   */
+  function BuildPayload(win) {
+    RefreshTrackingAfterSync(ClubCardPlayer[0]);
+    const payload = [];
+    for (const stat of CardStatsMap.values()) {
+      const score = EvaluateScore(stat);
+      payload.push({
+        id: stat.id,
+        name: stat.name,
+        score: parseFloat(score.toFixed(2)),
+        win: win
+      });
+    }
+    return payload;
+  }
+
+  /* ** Simple scoring logic based on card usage ** */
+  function EvaluateScore(stat) {
+    if (stat.played) return 1;
+    if (stat.seen) return 0.5;
+    return 0.1;
+  }
+
+  /**
+   * Reapply push hooks and reanalyze state after receiving full game state from opponent.
+   * Should be called immediately after local ClubCardPlayer[0] is overwritten.
+   *
+   * @param {object} player - The local player object (ClubCardPlayer[0])
+   */
+  function RefreshTrackingAfterSync(player) {
+    HookAllPlayerZones(player);
+
+    for (const card of player.Hand) {
+      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkSeen(card);
+    }
+    for (const card of player.Board) {
+      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
+    }
+    for (const card of player.Event) {
+      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
+    }
+    for (const card of player.DiscardPile) {
+      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
+    }
+  }
+
+  /**
+ * Sends the final payload to the server.
+ *
+ * @param {{ id: number, name: string, score: number, win: boolean }[]} payload - Array of card stats.
+ */
+  function SendCardStatsToServer(payload) {
+    fetch("https://clubcardmonitoring.onrender.com/api/upload-cardstats/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.text())
+    .then(text => {
+      //console.log("📡 Server response:", text);
+    })
+    .catch(err => {
+      //console.error("❌ Failed to send card stats:", err);
+    });
+  } 
+
+
+  //#endregion
+
+  //#endregion
 
   //#region ChatMessageFunc
 
