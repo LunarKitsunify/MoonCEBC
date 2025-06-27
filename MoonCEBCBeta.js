@@ -798,7 +798,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    topSettingsRightPanel.appendChild(infoButtonWithImage);
+    //topSettingsRightPanel.appendChild(infoButtonWithImage);
     //topSettingsRightPanel.appendChild(settingsButton);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
