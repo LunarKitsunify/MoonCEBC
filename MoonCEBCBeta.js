@@ -265,7 +265,7 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("ClubCardCheckVictory", 5, (args, next) => {
     const result = next(args);
 
-    if (ClubCardIsOnline() && result) {
+    if (ClubCardIsOnline() && result && ClubCardFameGoal == 100) {
       try {
         const player = args[0];
         const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
