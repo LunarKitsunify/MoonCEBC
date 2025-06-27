@@ -262,7 +262,7 @@ document.head.appendChild(cssLink);
     return result;
   });
 
-  modApi.hookFunction("ClubCardCheckVictory", 0, (args, next) => {
+  modApi.hookFunction("ClubCardCheckVictory", 5, (args, next) => {
     const result = next(args);
 
     if (ClubCardIsOnline() && result) {
