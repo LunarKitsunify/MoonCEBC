@@ -262,10 +262,10 @@ document.head.appendChild(cssLink);
     return result;
   });
 
-  modApi.hookFunction("ClubCardEndGameSyncAndMessage", 0, (args, next) => {
+  modApi.hookFunction("ClubCardCheckVictory", 0, (args, next) => {
     const result = next(args);
 
-    if (ClubCardIsOnline()) {
+    if (ClubCardIsOnline() && result) {
       try {
         const player = args[0];
         const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
