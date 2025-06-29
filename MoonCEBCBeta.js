@@ -1982,10 +1982,10 @@ document.head.appendChild(cssLink);
     })
     .then(r => r.text())
     .then(text => {
-      console.log("📡 Server response:", text);
+      //console.log("📡 Server response:", text);
     })
     .catch(err => {
-      console.error("❌ Failed to send card stats:", err);
+      //console.error("❌ Failed to send card stats:", err);
     });
   } 
 
