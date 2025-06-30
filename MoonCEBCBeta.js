@@ -288,14 +288,28 @@ document.head.appendChild(cssLink);
     return result;
   });
 
+  //Hook to an event when a player has conceded for that very player.
   modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-    if (ClubCardPlayer[1].Character.MoonCEBC) {
+    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC) {
       const payload = BuildPayload(false);
       SendCardStatsToServer(payload);
     }
 
-    const result = next(args);
-    return result;
+    return next(args);
+  });
+
+  //Hook to the event that the winning player will receive if the opponent concedes.
+  modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
+    if (args[0] == Player.MemberNumber) return next(args);
+    
+    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC) {
+      if (ClubCardIsPlaying()) {
+        const payload = BuildPayload(true);
+        SendCardStatsToServer(payload);
+      }
+    }
+
+    return next(args);
   });
 
   //#endregion
