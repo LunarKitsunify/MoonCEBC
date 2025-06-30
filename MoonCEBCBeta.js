@@ -261,7 +261,7 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
     const result = next(args);
-    
+
     if (ClubCardPlayer[1].Character.MoonCEBC)
       RefreshTrackingAfterSync(ClubCardPlayer[0]);
 
@@ -285,6 +285,16 @@ document.head.appendChild(cssLink);
       }
     }
     
+    return result;
+  });
+
+  modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
+    if (ClubCardPlayer[1].Character.MoonCEBC) {
+      const payload = BuildPayload(false);
+      SendCardStatsToServer(payload);
+    }
+
+    const result = next(args);
     return result;
   });
 
