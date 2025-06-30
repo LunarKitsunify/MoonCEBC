@@ -15,19 +15,6 @@
 // @run-at document-end
 // ==/UserScript==
 
-// import(
-//   `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js?v=${(
-//     Date.now() / 10000
-//   ).toFixed(0)}`
-// );
-
-// import('https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js')
-//   .then((module) => {
-//     console.log(module);
-//   })
-//   .catch((err) => console.error("Failed to load module:", err));
-
-
 (function () {
   "use strict";
   var script = document.createElement("script");

@@ -252,13 +252,19 @@ document.head.appendChild(cssLink);
   //#region ---------------Card Tracking Module--------------- //
   modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
     const result = next(args);
-    StartTrackingModule();
+
+    if (ClubCardPlayer[1].Character.MoonCEBC)
+      StartTrackingModule();
+
     return result;
   });
 
   modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
     const result = next(args);
-    RefreshTrackingAfterSync(ClubCardPlayer[0]);
+    
+    if (ClubCardPlayer[1].Character.MoonCEBC)
+      RefreshTrackingAfterSync(ClubCardPlayer[0]);
+
     return result;
   });
 
@@ -267,11 +273,13 @@ document.head.appendChild(cssLink);
 
     if (ClubCardIsOnline() && result && ClubCardFameGoal == 100) {
       try {
-        const player = args[0];
-        const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
-        const payload = BuildPayload(isPlayer);
-        //console.log("📦 Payload to be sent:", payload);
-        SendCardStatsToServer(payload);
+        if (ClubCardPlayer[1].Character.MoonCEBC) {
+          const player = args[0];
+          const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
+          const payload = BuildPayload(isPlayer);
+          //console.log("📦 Payload to be sent:", payload);
+          SendCardStatsToServer(payload);
+        }
       } catch (error) {
         //ignore
       }
