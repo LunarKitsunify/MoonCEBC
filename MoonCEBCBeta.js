@@ -281,8 +281,6 @@ document.head.appendChild(cssLink);
           const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
           const payload = BuildPayload(isPlayer);
           SendCardStatsToServer(payload);
-          if (Player.MoonCEBC.Settings.Debug)
-            console.log("📦 Payload to be sent:", payload);
         }
       } catch (error) {
         if (Player.MoonCEBC.Settings.Debug)
@@ -2016,6 +2014,8 @@ document.head.appendChild(cssLink);
  * @param {{ id: number, name: string, score: number, win: boolean }[]} payload - Array of card stats.
  */
   function SendCardStatsToServer(payload) {
+    if (Player.MoonCEBC.Settings.Debug)
+      console.log("📦 Payload to be sent:", payload);
     fetch("https://clubcardmonitoring.onrender.com/api/upload-cardstats/", {
       method: "POST",
       headers: {
