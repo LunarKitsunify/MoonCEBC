@@ -1974,7 +1974,10 @@ document.head.appendChild(cssLink);
         win: win
       });
     }
-    return payload;
+    return {
+      member_number: Player?.MemberNumber ?? 0,
+      cards: payload
+    };
   }
 
   /* ** Simple scoring logic based on card usage ** */
