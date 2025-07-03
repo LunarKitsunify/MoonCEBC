@@ -275,16 +275,10 @@ document.head.appendChild(cssLink);
     const result = next(args);
 
     if (ClubCardIsOnline() && result && ClubCardFameGoal == 100) {
-      try {
-        if (ClubCardPlayer[1].Character.MoonCEBC) {
-          const player = args[0];
-          const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
-          const payload = BuildPayload(isPlayer);
-          SendCardStatsToServer(payload);
-        }
-      } catch (error) {
-        if (Player.MoonCEBC.Settings.Debug)
-          console.log(error)
+      if (ClubCardPlayer[1].Character.MoonCEBC) {
+        const player = args[0];
+        const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
+        SendCardStatsToServer(isPlayer);
       }
     }
     
@@ -293,10 +287,8 @@ document.head.appendChild(cssLink);
 
   //Hook to an event when a player has conceded for that very player.
   modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC) {
-      const payload = BuildPayload(false);
-      SendCardStatsToServer(payload);
-    }
+    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC)
+      SendCardStatsToServer(false);
 
     return next(args);
   });
@@ -305,12 +297,9 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
     if (args[0] == Player.MemberNumber) return next(args);
     
-    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC) {
-      if (ClubCardIsPlaying()) {
-        const payload = BuildPayload(true);
-        SendCardStatsToServer(payload);
-      }
-    }
+    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC)
+      if (ClubCardIsPlaying())
+        SendCardStatsToServer(true);
 
     return next(args);
   });
@@ -2011,27 +2000,35 @@ document.head.appendChild(cssLink);
   /**
  * Sends the final payload to the server.
  *
- * @param {{ id: number, name: string, score: number, win: boolean }[]} payload - Array of card stats.
+ * @param {win: boolean } win - Array of card stats.
  */
-  function SendCardStatsToServer(payload) {
-    if (Player.MoonCEBC.Settings.Debug)
-      console.log("📦 Payload to be sent:", payload);
-    fetch("https://clubcardmonitoring.onrender.com/api/upload-cardstats/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(r => r.text())
-      .then(text => {
-        if (Player.MoonCEBC.Settings.Debug)
-          console.log("📡 Server response:", text);
-    })
-    .catch(err => {
+  function SendCardStatsToServer(win) {
+    const payload = BuildPayload(win);
+    try {
       if (Player.MoonCEBC.Settings.Debug)
-        console.error("❌ Failed to send card stats:", err);
-    });
+        console.log("📦 Payload to be sent:", payload);
+
+      fetch("https://clubcardmonitoring.onrender.com/api/upload-cardstats/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.text())
+        .then(text => {
+          if (Player.MoonCEBC.Settings.Debug)
+            console.log("📡 Server response:", text);
+      })
+      .catch(err => {
+        if (Player.MoonCEBC.Settings.Debug)
+          console.error("❌ Failed to send card stats:", err);
+      });
+      
+    } catch (error) {
+      if (Player.MoonCEBC.Settings.Debug)
+        console.log(error)
+    }
   } 
 
 
