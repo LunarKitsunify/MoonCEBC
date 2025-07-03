@@ -167,6 +167,8 @@ document.head.appendChild(cssLink);
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   const AddonVersion = "1.2.18";
   const Hidden = "Hidden";
+  const DebugMode = true;
+
 
   //#endregion
 
@@ -210,7 +212,7 @@ document.head.appendChild(cssLink);
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Menu Addon Open Icon
-    if (C.MoonCEBC && C.MoonCEBC.IsMenuOpen)
+    if (C.MoonCEBC && C.MoonCEBC.Public && C.MoonCEBC.Public.IsMenuOpen)
       DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
     
     //Is Addon active Icon
@@ -240,7 +242,8 @@ document.head.appendChild(cssLink);
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
         const message = ParseAddonMessage(data);
-        sender.MoonCEBC = message;
+        sender.MoonCEBC ??= {};
+        sender.MoonCEBC.Public = message;
       }
     }
 
@@ -277,11 +280,13 @@ document.head.appendChild(cssLink);
           const player = args[0];
           const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
           const payload = BuildPayload(isPlayer);
-          //console.log("📦 Payload to be sent:", payload);
           SendCardStatsToServer(payload);
+          if (Player.MoonCEBC.Settings.Debug)
+            console.log("📦 Payload to be sent:", payload);
         }
       } catch (error) {
-        //ignore
+        if (Player.MoonCEBC.Settings.Debug)
+          console.log(error)
       }
     }
     
@@ -831,7 +836,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    //topSettingsRightPanel.appendChild(infoButtonWithImage);
+    topSettingsRightPanel.appendChild(infoButtonWithImage);
     //topSettingsRightPanel.appendChild(settingsButton);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
@@ -909,6 +914,9 @@ document.head.appendChild(cssLink);
 
     if (CurrentScreen == "ChatRoom")
       AddonInfoMessage();
+
+    Player.MoonCEBC ??= {};
+    Player.MoonCEBC.Settings = { Debug: DebugMode };
 
     console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
   }
@@ -2013,11 +2021,13 @@ document.head.appendChild(cssLink);
       body: JSON.stringify(payload)
     })
     .then(r => r.text())
-    .then(text => {
-      //console.log("📡 Server response:", text);
+      .then(text => {
+        if (Player.MoonCEBC.Settings.Debug)
+          console.log("📡 Server response:", text);
     })
     .catch(err => {
-      //console.error("❌ Failed to send card stats:", err);
+      if (Player.MoonCEBC.Settings.Debug)
+        console.error("❌ Failed to send card stats:", err);
     });
   } 
 
