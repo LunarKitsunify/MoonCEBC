@@ -272,10 +272,11 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ClubCardCheckVictory", 5, (args, next) => {
+    const isMiniGameEnded = MiniGameEnded;
     const result = next(args);
 
-    if (ClubCardIsOnline() && result && ClubCardFameGoal == 100) {
-      if (ClubCardPlayer[1].Character.MoonCEBC) {
+    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC) {
+      if (result && isMiniGameEnded != true) {
         const player = args[0];
         const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
         SendCardStatsToServer(isPlayer);
@@ -287,8 +288,9 @@ document.head.appendChild(cssLink);
 
   //Hook to an event when a player has conceded for that very player.
   modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC)
+    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC) {
       SendCardStatsToServer(false);
+    }
 
     return next(args);
   });
@@ -297,9 +299,10 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
     if (args[0] == Player.MemberNumber) return next(args);
     
-    if (ClubCardIsOnline() && ClubCardPlayer[1].Character.MoonCEBC)
-      if (ClubCardIsPlaying())
+    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC)
+      if (ClubCardIsPlaying()) {
         SendCardStatsToServer(true);
+      }
 
     return next(args);
   });
