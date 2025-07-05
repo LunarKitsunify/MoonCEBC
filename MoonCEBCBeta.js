@@ -1960,11 +1960,11 @@ document.head.appendChild(cssLink);
       payload.push({
         id: stat.id,
         name: stat.name,
-        score: parseFloat(score.toFixed(2)),
-        win: win
+        score: parseFloat(score.toFixed(2))
       });
     }
     return {
+      game_result: win,
       name: Player?.Name ?? null,
       nickname: Player?.Nickname ?? null,
       member_number: Player?.MemberNumber ?? 0,
