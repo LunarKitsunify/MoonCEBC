@@ -167,7 +167,7 @@ document.head.appendChild(cssLink);
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   const AddonVersion = "1.2.18";
   const Hidden = "Hidden";
-  const DebugMode = true;
+  const DebugMode = false;
 
 
   //#endregion
@@ -1965,6 +1965,8 @@ document.head.appendChild(cssLink);
       });
     }
     return {
+      name: Player?.Name ?? null,
+      nickname: Player?.Nickname ?? null,
       member_number: Player?.MemberNumber ?? 0,
       cards: payload
     };
