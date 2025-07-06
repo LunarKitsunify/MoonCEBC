@@ -166,6 +166,7 @@ document.head.appendChild(cssLink);
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
   const AddonVersion = "1.2.18";
+  const AddonType = "Beta";
   const Hidden = "Hidden";
   const DebugMode = false;
 
@@ -908,7 +909,7 @@ document.head.appendChild(cssLink);
     Player.MoonCEBC ??= {};
     Player.MoonCEBC.Settings = { Debug: DebugMode };
 
-    console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonVersion}`);
+    console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }
 
   /**
@@ -2056,7 +2057,7 @@ document.head.appendChild(cssLink);
       Dictionary: [],
     };
     if (target) message.Target = target;
-    const MoonMsg = { Version: AddonVersion, IsMenuOpen: isMenuOpen };
+    const MoonMsg = { Version: AddonVersion, Type: AddonType, IsMenuOpen: isMenuOpen };
 
     message.Dictionary.push(MoonMsg);
 
