@@ -239,7 +239,9 @@ document.head.appendChild(cssLink);
     for (let arg of args) {
       const data = arg;
       if (data.Type && data.Type !== Hidden) continue;
+      //########################
       //Hello Message
+      //########################
       if (data.Content === "MoonCEBC") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
@@ -247,26 +249,23 @@ document.head.appendChild(cssLink);
         sender.MoonCEBC ??= {};
         sender.MoonCEBC.Public = message;
       }
+      //########################
       //Token Message
+      //########################
       if (data.Content === "MoonCEBCToken") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
-        const moonMessage = data.Dictionary.find(entry => entry && typeof entry.Token !== 'undefined');
 
-        if (!Player.MoonCEBC.Game) {
-          Player.MoonCEBC.Game = {
-            Player1Token: null,
-            Player2Token: null
-          };
-        }
+        const entry = data.Dictionary.find(e => e?.Token);
+        if (!entry) return next(args);
 
-        if (moonMessage.IsFirstTurn) {
-          if (!Player.MoonCEBC.Game.Player1Token)
-            Player.MoonCEBC.Game.Player1Token = moonMessage.Token;
-        } else {
-          if (!Player.MoonCEBC.Game.Player2Token)
-            Player.MoonCEBC.Game.Player2Token = moonMessage.Token;
-        }
+        if (!Player.MoonCEBC.Game)
+          Player.MoonCEBC.Game = { Player1Token: null, Player2Token: null, GoesFirst: !entry.IsFirstTurn};
+        
+        if (entry.IsFirstTurn)
+          Player.MoonCEBC.Game.Player1Token = entry.Token;
+        else
+          Player.MoonCEBC.Game.Player2Token = entry.Token;
       };
     }
 
@@ -275,37 +274,25 @@ document.head.appendChild(cssLink);
 
   //create and send game_id for stats
   modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
-    const player1 = args[0].Data.Player1;
-    const player2 = args[0].Data.Player2;
-    const rng = args[0].RNG;
-
-    const turnIndex = Math.floor(rng * 2); // 0 or 1
-    const goesFirst = (turnIndex === 0) ? player1 : player2;
+    const { Player1, Player2 } = args[0].Data;
+    const { RNG } = args[0];
+  
+    const turnIndex = Math.floor(RNG * 2);
+    const goesFirst = (turnIndex === 0) ? Player1 : Player2;
     const isMyTurn = Player.MemberNumber == goesFirst;
 
     const gameToken = CreateGameId();
-    
-    if (!Player.MoonCEBC.Game) {
-      Player.MoonCEBC.Game = {
-        Player1Token: isMyTurn ? gameToken : null,
-        Player2Token: isMyTurn ? null : gameToken
-      };
-    } else {
-      if (isMyTurn)
-        Player.MoonCEBC.Game.Player1Token = gameToken;
-      else
-        Player.MoonCEBC.Game.Player2Token = gameToken;
-    }
+
+    const game = Player.MoonCEBC.Game ??= { Player1Token: null, Player2Token: null , GoesFirst: isMyTurn};
+    if (isMyTurn) game.Player1Token = gameToken;
+    else game.Player2Token = gameToken;
 
     const message = {
       Type: Hidden,
       Content: "MoonCEBCToken",
       Sender: Player.MemberNumber,
-      Dictionary: [],
+      Dictionary: [{ Token: gameToken, IsFirstTurn: isMyTurn }],
     };
-    const MoonMsg = { Token: gameToken , IsFirstTurn: isMyTurn};
-
-    message.Dictionary.push(MoonMsg);
 
     ServerSend("ChatRoomChat", message);
 
@@ -2008,11 +1995,19 @@ document.head.appendChild(cssLink);
   }
 
   /**
-   * Build payload for API submission at the end of the game.
-   * Includes all cards from FullDeck, even if unused.
+   * Builds a game result payload for API submission.
+   * Includes all tracked cards with their evaluated scores.
    *
    * @param {boolean} win - Whether the player won the match.
-   * @returns {{ id: number, name: string, score: number, win: boolean }[]} Array of card stats ready for upload.
+   * @returns {{
+   *   game_result: boolean,
+   *   game_token: string | null,
+   *   goes_first: boolean | null,
+   *   name: string | null,
+   *   nickname: string | null,
+   *   member_number: number,
+   *   cards: { id: number, name: string, score: number }[]
+   * }} Complete payload object.
    */
   function BuildPayload(win) {
     RefreshTrackingAfterSync(ClubCardPlayer[0]);
@@ -2025,8 +2020,18 @@ document.head.appendChild(cssLink);
         score: parseFloat(score.toFixed(2))
       });
     }
+    
+    const game = Player.MoonCEBC.Game ?? {};
+    const token1 = game.Player1Token ?? "";
+    const token2 = game.Player2Token ?? "";
+    const gameToken = (token1 && token2) ? `${token1}${token2}` : null;
+
+    const goesFirst = typeof game.GoesFirst === "boolean" ? game.GoesFirst : null;
+
     return {
       game_result: win,
+      game_token: gameToken,
+      goes_first : goesFirst,
       name: Player?.Name ?? null,
       nickname: Player?.Nickname ?? null,
       member_number: Player?.MemberNumber ?? 0,
@@ -2071,7 +2076,6 @@ document.head.appendChild(cssLink);
  */
   function SendCardStatsToServer(win) {
     const payload = BuildPayload(win);
-    return;
     try {
       if (Player.MoonCEBC.Settings.Debug)
         console.log("📦 Payload to be sent:", payload);
