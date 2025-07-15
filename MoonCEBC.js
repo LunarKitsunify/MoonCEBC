@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.18
+// @version 1.2.19
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -165,7 +165,7 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.18";
+  const AddonVersion = "1.2.19";
   const AddonType = "Stable";
   const Hidden = "Hidden";
   const DebugMode = false;
@@ -239,6 +239,9 @@ document.head.appendChild(cssLink);
     for (let arg of args) {
       const data = arg;
       if (data.Type && data.Type !== Hidden) continue;
+      //########################
+      //Hello Message
+      //########################
       if (data.Content === "MoonCEBC") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
@@ -246,7 +249,52 @@ document.head.appendChild(cssLink);
         sender.MoonCEBC ??= {};
         sender.MoonCEBC.Public = message;
       }
+      //########################
+      //Token Message
+      //########################
+      if (data.Content === "MoonCEBCToken") {
+        const sender = Character.find(a => a.MemberNumber === data.Sender);
+        if (!sender) return next(args);
+
+        const entry = data.Dictionary.find(e => e?.Token);
+        if (!entry) return next(args);
+
+        if (!Player.MoonCEBC.Game)
+          Player.MoonCEBC.Game = { Player1Token: null, Player2Token: null, GoesFirst: !entry.IsFirstTurn};
+        
+        if (entry.IsFirstTurn)
+          Player.MoonCEBC.Game.Player1Token = entry.Token;
+        else
+          Player.MoonCEBC.Game.Player2Token = entry.Token;
+      };
     }
+
+    return next(args);
+  });
+
+  //create and send game_id for stats
+  modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
+    const { Player1, Player2 } = args[0].Data;
+    const { RNG } = args[0];
+  
+    const turnIndex = Math.floor(RNG * 2);
+    const goesFirst = (turnIndex === 0) ? Player1 : Player2;
+    const isMyTurn = Player.MemberNumber == goesFirst;
+
+    const gameToken = CreateGameId();
+
+    const game = Player.MoonCEBC.Game ??= { Player1Token: null, Player2Token: null , GoesFirst: isMyTurn};
+    if (isMyTurn) game.Player1Token = gameToken;
+    else game.Player2Token = gameToken;
+
+    const message = {
+      Type: Hidden,
+      Content: "MoonCEBCToken",
+      Sender: Player.MemberNumber,
+      Dictionary: [{ Token: gameToken, IsFirstTurn: isMyTurn }],
+    };
+
+    ServerSend("ChatRoomChat", message);
 
     return next(args);
   });
@@ -1901,7 +1949,7 @@ document.head.appendChild(cssLink);
   /* ** Initialize tracking from FullDeck (at game start) ** */
   function InitTrackingFromDeckAndHand(deck, hand) {
     CardStatsMap.clear();
-    const source = [...deck, ...hand];
+    const source = [...hand, ...deck];
     for (const card of source) {
       CardStatsMap.set(card.UniqueID, {
         id: card.ID,
@@ -1938,20 +1986,45 @@ document.head.appendChild(cssLink);
     };
   }
 
+  function HookOpponentLiabilities(opponent) {
+    const board = opponent.Board;
+    const originalPush = board.push;
+
+    board.push = function (...cards) {
+      for (const card of cards) {
+        if (card?.UniqueID && ClubCardIsLiability(card) && CardStatsMap.has(card.UniqueID)) {
+          MarkPlayed(card);
+        }
+      }
+      return originalPush.apply(this, cards);
+    };
+  }
+
   /* ** Apply push hooks to all player zones ** */
   function HookAllPlayerZones(player) {
     HookPush(player.Hand, MarkSeen);
     HookPush(player.Board, MarkPlayed);
     HookPush(player.Event, MarkPlayed);
     HookPush(player.DiscardPile, MarkPlayed);
+
+    //for liability
+    HookOpponentLiabilities(ClubCardPlayer[1]);
   }
 
   /**
-   * Build payload for API submission at the end of the game.
-   * Includes all cards from FullDeck, even if unused.
+   * Builds a game result payload for API submission.
+   * Includes all tracked cards with their evaluated scores.
    *
    * @param {boolean} win - Whether the player won the match.
-   * @returns {{ id: number, name: string, score: number, win: boolean }[]} Array of card stats ready for upload.
+   * @returns {{
+   *   game_result: boolean,
+   *   game_token: string | null,
+   *   goes_first: boolean | null,
+   *   name: string | null,
+   *   nickname: string | null,
+   *   member_number: number,
+   *   cards: { id: number, name: string, score: number }[]
+   * }} Complete payload object.
    */
   function BuildPayload(win) {
     RefreshTrackingAfterSync(ClubCardPlayer[0]);
@@ -1964,8 +2037,18 @@ document.head.appendChild(cssLink);
         score: parseFloat(score.toFixed(2))
       });
     }
+    
+    const game = Player.MoonCEBC.Game ?? {};
+    const token1 = game.Player1Token ?? "";
+    const token2 = game.Player2Token ?? "";
+    const gameToken = (token1 && token2) ? `${token1}${token2}` : null;
+
+    const goesFirst = typeof game.GoesFirst === "boolean" ? game.GoesFirst : null;
+
     return {
       game_result: win,
+      game_token: gameToken,
+      goes_first : goesFirst,
       name: Player?.Name ?? null,
       nickname: Player?.Nickname ?? null,
       member_number: Player?.MemberNumber ?? 0,
@@ -2081,6 +2164,20 @@ document.head.appendChild(cssLink);
     return moonMessage || null;
   }
 
+  /**
+   * Creates a short game ID based on member ID and timestamp.
+   * @returns {string} Alphanumeric game ID.
+   */
+  function CreateGameId() {
+    const raw = Player.MemberNumber + "_" + Date.now();
+
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++)
+      hash = (hash * 31 + raw.charCodeAt(i)) | 0;
+
+    return Math.abs(hash).toString(36);
+  }
+
   //#endregion
 
   //#region parser functions
@@ -2135,59 +2232,57 @@ document.head.appendChild(cssLink);
 
 
 
-/**
- * Encodes an array of numbers into a Base64 string. For Export/Import Deck
- * @param {number[]} IdArrayDeck - The array of numerical IDs to encode.
- * @returns {string} - The encoded string.
- */
-function encodeEIDeck(IdArrayDeck) {
-    let encrypted = IdArrayDeck.map(id => id ^ meow_key);
-    let stringified = encrypted.join(",");
-    return btoa(stringified);
-}
-
-/**
- * Decodes a Base64 string back into an array of numbers with validation.
- * @param {string} encodedString - The encoded Base64 string.
- * @returns {number[]} - The decoded and validated array of IDs.
- */
-function decodeEIDeck(encodedString) {
-  try {
-      if (!encodedString || typeof encodedString !== "string") {
-          throw new Error("Invalid input: Not a string");
-      }
-
-      let decryptedString;
-      try {
-          decryptedString = atob(encodedString);
-      } catch (e) {
-          throw new Error("Invalid input: Not a valid Base64 string");
-      }
-
-      let numbers = decryptedString
-          .split(",")
-          .map(num => parseInt(num, 10))
-          .filter(num => !isNaN(num));
-
-      if (numbers.length < 30 || numbers.length > 40) {
-          throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
-      }
-
-      let decodedIds = numbers.map(id => id ^ meow_key);
-
-      let allIdsExist = decodedIds.every(id => MoonCEBCClubCardList.some(card => card.ID === id));
-      if (!allIdsExist) {
-          throw new Error("Invalid deck: Some IDs do not exist in the card database");
-      }
-
-      return decodedIds;
-
-  } catch (error) {
-      console.error("decodeEIDeck Error:", error.message);
-      return null;
+  /**
+   * Encodes an array of numbers into a Base64 string. For Export/Import Deck
+   * @param {number[]} IdArrayDeck - The array of numerical IDs to encode.
+   * @returns {string} - The encoded string.
+   */
+  function encodeEIDeck(IdArrayDeck) {
+      let encrypted = IdArrayDeck.map(id => id ^ meow_key);
+      let stringified = encrypted.join(",");
+      return btoa(stringified);
   }
-}
 
+  /**
+   * Decodes a Base64 string back into an array of numbers with validation.
+   * @param {string} encodedString - The encoded Base64 string.
+   * @returns {number[]} - The decoded and validated array of IDs.
+   */
+  function decodeEIDeck(encodedString) {
+    try {
+        if (!encodedString || typeof encodedString !== "string") {
+            throw new Error("Invalid input: Not a string");
+        }
 
+        let decryptedString;
+        try {
+            decryptedString = atob(encodedString);
+        } catch (e) {
+            throw new Error("Invalid input: Not a valid Base64 string");
+        }
+
+        let numbers = decryptedString
+            .split(",")
+            .map(num => parseInt(num, 10))
+            .filter(num => !isNaN(num));
+
+        if (numbers.length < 30 || numbers.length > 40) {
+            throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
+        }
+
+        let decodedIds = numbers.map(id => id ^ meow_key);
+
+        let allIdsExist = decodedIds.every(id => MoonCEBCClubCardList.some(card => card.ID === id));
+        if (!allIdsExist) {
+            throw new Error("Invalid deck: Some IDs do not exist in the card database");
+        }
+
+        return decodedIds;
+
+    } catch (error) {
+        console.error("decodeEIDeck Error:", error.message);
+        return null;
+    }
+  }
   //#endregion
 })();

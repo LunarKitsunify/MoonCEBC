@@ -80,3 +80,7 @@ Update 1.2.18
 1. Created ClubCard Monitoring Tool (https://clubcardmonitoring.onrender.com/) — a website for tracking card statistics.
 2. Track card usage (seen / played) during matches and send stats to the website.
 3. Add new Info window in addon with useful links and project resources.
+
+Update 1.2.19
+1. Small bug fixes for statistics collection for liability cards.
+2. The logic of data reception on the site side has been changed. Now valid pairs of games from two players by gameToken are required.
