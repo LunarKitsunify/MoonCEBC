@@ -1949,7 +1949,7 @@ document.head.appendChild(cssLink);
   /* ** Initialize tracking from FullDeck (at game start) ** */
   function InitTrackingFromDeckAndHand(deck, hand) {
     CardStatsMap.clear();
-    const source = [...deck, ...hand];
+    const source = [...hand, ...deck];
     for (const card of source) {
       CardStatsMap.set(card.UniqueID, {
         id: card.ID,
@@ -1986,12 +1986,29 @@ document.head.appendChild(cssLink);
     };
   }
 
+  function HookOpponentLiabilities(opponent) {
+    const board = opponent.Board;
+    const originalPush = board.push;
+
+    board.push = function (...cards) {
+      for (const card of cards) {
+        if (card?.UniqueID && ClubCardIsLiability(card) && CardStatsMap.has(card.UniqueID)) {
+          MarkPlayed(card);
+        }
+      }
+      return originalPush.apply(this, cards);
+    };
+  }
+
   /* ** Apply push hooks to all player zones ** */
   function HookAllPlayerZones(player) {
     HookPush(player.Hand, MarkSeen);
     HookPush(player.Board, MarkPlayed);
     HookPush(player.Event, MarkPlayed);
     HookPush(player.DiscardPile, MarkPlayed);
+
+    //for liability
+    HookOpponentLiabilities(ClubCardPlayer[1]);
   }
 
   /**
