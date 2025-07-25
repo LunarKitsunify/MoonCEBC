@@ -1,5 +1,5 @@
 <h2 align="center">
-  Moon Cards Editor BC
+  Moon Cards Editor
 </h2>
 
 Hello everyone. 

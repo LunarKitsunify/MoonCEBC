@@ -1,5 +1,3 @@
-MoonCEBC
-
 Release 1.0.0
 1. Interface for viewing and editing player decks.
 

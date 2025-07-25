@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.19
+// @version 1.2.20
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -18,6 +18,7 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
+import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
@@ -34,106 +35,101 @@ document.head.appendChild(cssLink);
     EDIT: "EditDeck",
     SETTINGS: "Settings",
   });
-  
+
   const CardTypes = Object.freeze({
-  ALL_CARDS: { value: "All Cards", text: "All Cards" },
-  SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
-  EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
-  REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
-  ABDL: { value: "ABDL", text: "ABDL" },
-  ASYLUM: { value: "Asylum", text: "Asylum" },
-  COLLEGE: { value: "College", text: "College" },
-  CRIMINAL: { value: "Criminal", text: "Criminal" },
-  DOMINANT_MISTRESS: {
-    value: "DominantMistress",
-    text: "Dominant / Mistress",
-  },
-  FETISHIST: { value: "Fetishist", text: "Fetishist" },
-  LIABILITY: { value: "Liability", text: "Liability" },
-  MAID: { value: "Maid", text: "Maid" },
-  PET: { value: "PetOwner", text: "Pet / Owner" },
-  PLAYER: { value: "Player", text: "Player" },
-  POLICE: { value: "Police", text: "Police" },
-  PORN: { value: "Porn", text: "Porn" },
-  SHIBARI_SENSEI_KNOT: {
-    value: "ShibariSenseiKnot",
-    text: "Shibari / Sensei / Knot",
-  },
-  STAFF: { value: "Staff", text: "Staff" },
-  UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
+    ALL_CARDS: { value: "All Cards", text: "All Cards" },
+    SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
+    EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
+    REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
+    ABDL: { value: "ABDL", text: "ABDL" },
+    ASYLUM: { value: "Asylum", text: "Asylum" },
+    COLLEGE: { value: "College", text: "College" },
+    CRIMINAL: { value: "Criminal", text: "Criminal" },
+    DOMINANT_MISTRESS: {
+      value: "DominantMistress",
+      text: "Dominant / Mistress",
+    },
+    FETISHIST: { value: "Fetishist", text: "Fetishist" },
+    LIABILITY: { value: "Liability", text: "Liability" },
+    MAID: { value: "Maid", text: "Maid" },
+    PET: { value: "PetOwner", text: "Pet / Owner" },
+    PLAYER: { value: "Player", text: "Player" },
+    POLICE: { value: "Police", text: "Police" },
+    PORN: { value: "Porn", text: "Porn" },
+    SHIBARI_SENSEI_KNOT: {
+      value: "ShibariSenseiKnot",
+      text: "Shibari / Sensei / Knot",
+    },
+    STAFF: { value: "Staff", text: "Staff" },
+    UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
   });
 
-  /** Card statistics repository. key = UniqueID
-   * @type {Map<string, { id: number, uniqueID: string, name: string, seen: boolean, played: boolean }> } 
-   * */
-  const CardStatsMap = new Map();
-
-  const MoonCEBCAddonName = "Moon Cards Editor";
+  const MoonCEAddonName = "Moon Cards Editor";
   const meow_key = 42;
-  
+
   const basePath = new URL(".", import.meta.url).href;
-  const MoonCEBCTopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
+  const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
 
   const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
-  const CardGameCardCoverBackground  = new URL("src/Images/MoonCECardCover.png", basePath).href;
+  const CardGameCardCoverBackground = new URL("src/Images/MoonCECardCover.png", basePath).href;
   /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
-  const MoonCEBCStatusIsAddonIcon = new URL("src/Images/IsAddon.png", basePath).href;
+  const MoonCEStatusIsAddonIcon = new URL("src/Images/IsAddon.png", basePath).href;
   /**
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
-  const MoonCEBCIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
+  const MoonCEIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
    */
-  let MoonCEBCClubCardList = [];
+  let MoonCEClubCardList = [];
   /**
    * Tracking the card on which the mouse is hovering
    * @type {ClubCard}
    */
-  let MoonCEBCMouseOverCard = [];
+  let MoonCEMouseOverCard = [];
   /**
    * Variable for saving data in the deck being changed
    * @type {ClubCard[]}
    */
-  let MoonCEBCEditCurrentDeck = [];
+  let MoonCEEditCurrentDeck = [];
   /**
    * Saves the original deck data in case the changes are undone.
    * @type {ClubCard[]}
    */
-  let MoonCEBCCurrentDeck = [];
+  let MoonCECurrentDeck = [];
   /**
    * Variable for filling cells with cards in edit mode
    * @type {ClubCard[]}
    */
-  let MoonCEBCCurrent30Cards = [];
+  let MoonCECurrent30Cards = [];
   /**
    * Sorts from the list of all cards those that match the group conditions.
    * @type {ClubCard[]}
    */
-  let MoonCEBCBuilderCurrentGroupsList = [];
+  let MoonCEBuilderCurrentGroupsList = [];
   /**
-   *array to sift out of the MoonCEBCBuilderCurrentGroupsList of cards matching the condition.
+   *array to sift out of the MoonCEBuilderCurrentGroupsList of cards matching the condition.
    * @type {ClubCard[]}
    */
-  let MoonCEBCBuilderSeacrhGroupList = [];
+  let MoonCEBuilderSeacrhGroupList = [];
   /**
    * Variable for tracking the current group in edit mode
    * @type {string}
    */
-  let MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
+  let MoonCECurrentGroup = CardTypes.ALL_CARDS.value;
   /**
    * Variable for tracking the current page in edit mode
    * @type {number}
    */
-  let MoonCEBCCurrentCardsListPage = 0;
+  let MoonCECurrentCardsListPage = 0;
   /**
    * Variable to track the mode of the addon. View decks or editor.
    * @type {string}
    */
-  let MoonCEBCPageMode = WindowStatus.VIEW;
+  let MoonCEPageMode = WindowStatus.VIEW;
   /**
    * variable for tracking the visibility of the addon window
    * @type {boolean}
@@ -165,7 +161,7 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.19";
+  const AddonVersion = "1.2.20";
   const AddonType = "Beta";
   const Hidden = "Hidden";
   const DebugMode = false;
@@ -178,10 +174,10 @@ document.head.appendChild(cssLink);
   //#region BC Mod SDK Stuff
 
   const modApi = bcModSdk.registerMod({
-    name: "MoonCEBC",
-    fullName: "Moon Cards Editor BC",
+    name: "MoonCE",
+    fullName: "Moon Cards Editor",
     version: AddonVersion,
-    repository: "https://github.com/LunarKitsunify/MoonCEBC",
+    repository: "https://github.com/LunarKitsunify/MoonCE",
   });
 
   modApi.hookFunction("MainRun", 0, (args, next) => {
@@ -194,6 +190,12 @@ document.head.appendChild(cssLink);
     UpdateStatusShowButton();
   });
 
+  //#region ---------------Settings--------------- //
+
+
+
+  //#endregion //------------------------------//
+
   //#region ---------------Draw Addon Icons--------------- //
 
   modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 0, (args, next) => {
@@ -201,8 +203,8 @@ document.head.appendChild(cssLink);
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Addon active Icon
-    if (C.MoonCEBC)
-      DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+    if (C.MoonCE)
+      DrawImageResize(MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
     return next(args);
   });
@@ -213,12 +215,12 @@ document.head.appendChild(cssLink);
     const [C, CharX, CharY, Zoom] = args;
 
     //Is Menu Addon Open Icon
-    if (C.MoonCEBC && C.MoonCEBC.Public && C.MoonCEBC.Public.IsMenuOpen)
-      DrawImageResize(MoonCEBCIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
-    
+    if (C.MoonCE && C.MoonCE.Public && C.MoonCE.Public.IsMenuOpen)
+      DrawImageResize(MoonCEIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
+
     //Is Addon active Icon
-    if (C.MoonCEBC)
-      DrawImageResize(MoonCEBCStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+    if (C.MoonCE)
+      DrawImageResize(MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
   });
 
   //#endregion //------------------------------//
@@ -242,30 +244,30 @@ document.head.appendChild(cssLink);
       //########################
       //Hello Message
       //########################
-      if (data.Content === "MoonCEBC") {
+      if (data.Content === "MoonCE") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
         const message = ParseAddonMessage(data);
-        sender.MoonCEBC ??= {};
-        sender.MoonCEBC.Public = message;
+        sender.MoonCE ??= {};
+        sender.MoonCE.Public = message;
       }
       //########################
       //Token Message
       //########################
-      if (data.Content === "MoonCEBCToken") {
+      if (data.Content === "MoonCEToken") {
         const sender = Character.find(a => a.MemberNumber === data.Sender);
         if (!sender) return next(args);
 
         const entry = data.Dictionary.find(e => e?.Token);
         if (!entry) return next(args);
 
-        if (!Player.MoonCEBC.Game)
-          Player.MoonCEBC.Game = { Player1Token: null, Player2Token: null, GoesFirst: !entry.IsFirstTurn};
-        
+        if (!Player.MoonCE.Game)
+          Player.MoonCE.Game = { Player1Token: null, Player2Token: null, GoesFirst: !entry.IsFirstTurn };
+
         if (entry.IsFirstTurn)
-          Player.MoonCEBC.Game.Player1Token = entry.Token;
+          Player.MoonCE.Game.Player1Token = entry.Token;
         else
-          Player.MoonCEBC.Game.Player2Token = entry.Token;
+          Player.MoonCE.Game.Player2Token = entry.Token;
       };
     }
 
@@ -276,20 +278,20 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
     const { Player1, Player2 } = args[0].Data;
     const { RNG } = args[0];
-  
+
     const turnIndex = Math.floor(RNG * 2);
     const goesFirst = (turnIndex === 0) ? Player1 : Player2;
     const isMyTurn = Player.MemberNumber == goesFirst;
 
     const gameToken = CreateGameId();
 
-    const game = Player.MoonCEBC.Game ??= { Player1Token: null, Player2Token: null , GoesFirst: isMyTurn};
+    const game = Player.MoonCE.Game ??= { Player1Token: null, Player2Token: null, GoesFirst: isMyTurn };
     if (isMyTurn) game.Player1Token = gameToken;
     else game.Player2Token = gameToken;
 
     const message = {
       Type: Hidden,
-      Content: "MoonCEBCToken",
+      Content: "MoonCEToken",
       Sender: Player.MemberNumber,
       Dictionary: [{ Token: gameToken, IsFirstTurn: isMyTurn }],
     };
@@ -300,63 +302,6 @@ document.head.appendChild(cssLink);
   });
 
   //#endregion //------------------------------//
-
-  //#region ---------------Card Tracking Module--------------- //
-  modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
-    const result = next(args);
-
-    if (ClubCardPlayer[1].Character.MoonCEBC)
-      StartTrackingModule();
-
-    return result;
-  });
-
-  modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
-    const result = next(args);
-
-    if (ClubCardPlayer[1].Character.MoonCEBC)
-      RefreshTrackingAfterSync(ClubCardPlayer[0]);
-
-    return result;
-  });
-
-  modApi.hookFunction("ClubCardCheckVictory", 5, (args, next) => {
-    const isMiniGameEnded = MiniGameEnded;
-    const result = next(args);
-
-    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC) {
-      if (result && isMiniGameEnded != true) {
-        const player = args[0];
-        const isPlayer = player?.Character?.MemberNumber === Player.MemberNumber;
-        SendCardStatsToServer(isPlayer);
-      }
-    }
-    
-    return result;
-  });
-
-  //Hook to an event when a player has conceded for that very player.
-  modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC) {
-      SendCardStatsToServer(false);
-    }
-
-    return next(args);
-  });
-
-  //Hook to the event that the winning player will receive if the opponent concedes.
-  modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
-    if (args[0] == Player.MemberNumber) return next(args);
-    
-    if (ClubCardIsOnline() && ClubCardIsPlaying() && ClubCardPlayer[1].Character.MoonCEBC)
-      if (ClubCardIsPlaying()) {
-        SendCardStatsToServer(true);
-      }
-
-    return next(args);
-  });
-
-  //#endregion
 
   //#endregion
 
@@ -488,7 +433,7 @@ document.head.appendChild(cssLink);
     topSettingsPanel.style.alignItems = "center";
     topSettingsPanel.style.height = TopPanelHeight;
     topSettingsPanel.style.width = "100%";
-    topSettingsPanel.style.backgroundImage = `url(${MoonCEBCTopPanelBackground})`;
+    topSettingsPanel.style.backgroundImage = `url(${MoonCETopPanelBackground})`;
     topSettingsPanel.style.backgroundRepeat = "repeat";
     mainWindow.appendChild(topSettingsPanel);
 
@@ -592,7 +537,7 @@ document.head.appendChild(cssLink);
     //#region deckNameImput
 
     const deckNameInput = document.createElement("input");
-    deckNameInput.id = "MoonCEBCDeckNameInputId";
+    deckNameInput.id = "MoonCEDeckNameInputId";
     deckNameInput.style.width = DeckNamePanelWidth;
     deckNameInput.style.height = "80%";
     deckNameInput.style.alignContent = "center";
@@ -631,8 +576,8 @@ document.head.appendChild(cssLink);
     groupSelect.style.textAlign = "center";
     groupSelect.style.fontSize = TopPanelTextSize;
     groupSelect.addEventListener("change", function () {
-      if (MoonCEBCCurrentGroup != groupSelect.value) {
-        MoonCEBCCurrentGroup = groupSelect.value;
+      if (MoonCECurrentGroup != groupSelect.value) {
+        MoonCECurrentGroup = groupSelect.value;
         searchCardInput.value = "";
         UpdateCardsListSetNewGroup();
       }
@@ -673,7 +618,7 @@ document.head.appendChild(cssLink);
     //#region Search Card Input
 
     const searchCardInput = document.createElement("input");
-    searchCardInput.id = "MoonCEBCSearchCardInputId";
+    searchCardInput.id = "MoonCESearchCardInputId";
     searchCardInput.style.width = "10%";
     searchCardInput.style.height = "80%";
     searchCardInput.style.alignContent = "center";
@@ -682,28 +627,28 @@ document.head.appendChild(cssLink);
     searchCardInput.placeholder = "Search Card";
     searchCardInput.addEventListener("input", (event) => {
       const newValue = event.target.value;
-      
+
       if (newValue && newValue != "") {
         const lowerSearch = newValue.toLowerCase();
-    
-        const searchResult = MoonCEBCBuilderCurrentGroupsList.filter(card => {
+
+        const searchResult = MoonCEBuilderCurrentGroupsList.filter(card => {
           const cleanedText = card.Text?.replaceAll(fameTextColor, "").replaceAll(moneyTextColor, "");
 
           const inName = card.Name.toLowerCase().includes(lowerSearch);
           const inText = cleanedText && cleanedText.toLowerCase().includes(lowerSearch);
           const inGroup = card.Group && card.Group.some(group => group.toLowerCase().includes(lowerSearch));
-      
+
           return inName || inText || inGroup;
         });
-      
-      MoonCEBCBuilderSeacrhGroupList = searchResult;
+
+        MoonCEBuilderSeacrhGroupList = searchResult;
       }
       else
-        MoonCEBCBuilderSeacrhGroupList = [];
+        MoonCEBuilderSeacrhGroupList = [];
 
-      MoonCEBCCurrentCardsListPage = 0;
-      MoonCEBCCurrent30Cards = Get30CardsGroup();
-      UpdateCardsCells(MoonCEBCCurrent30Cards);
+      MoonCECurrentCardsListPage = 0;
+      MoonCECurrent30Cards = Get30CardsGroup();
+      UpdateCardsCells(MoonCECurrent30Cards);
     });
     searchCardInput.addEventListener("keydown", (event) => {
       if (movementKeys.includes(event.code))
@@ -921,24 +866,24 @@ document.head.appendChild(cssLink);
    * Loads the club card list and ensures each card has its associated text.
    */
   function LoadClubCardList() {
-    if (!MoonCEBCClubCardList || MoonCEBCClubCardList.length === 0 || MoonCEBCClubCardList[0].Text === "") {
-      MoonCEBCClubCardList = [];
-          for (const card of ClubCardList) {
-              const copiedCard = { ...card };
-              let attemptsLeft = 2;
+    if (!MoonCEClubCardList || MoonCEClubCardList.length === 0 || MoonCEClubCardList[0].Text === "") {
+      MoonCEClubCardList = [];
+      for (const card of ClubCardList) {
+        const copiedCard = { ...card };
+        let attemptsLeft = 2;
 
-              while (attemptsLeft-- > 0) {
-                  const text = ClubCardTextGet("Text " + copiedCard.Name);
+        while (attemptsLeft-- > 0) {
+          const text = ClubCardTextGet("Text " + copiedCard.Name);
 
-                if (text && text != '') {
-                  copiedCard.Text = text;
-                  break;
-                }
-            }
-            
-              MoonCEBCClubCardList.push(copiedCard);
+          if (text && text != '') {
+            copiedCard.Text = text;
+            break;
           }
+        }
+
+        MoonCEClubCardList.push(copiedCard);
       }
+    }
   }
 
   /**
@@ -947,17 +892,26 @@ document.head.appendChild(cssLink);
   async function AddonLoad() {
     await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
 
-   //Load Cards data from BC Server
+    //Load Cards data from BC Server
     TextPrefetchFile(ScreenFileGetPath(`Text_ClubCard.csv`, "MiniGame", "ClubCard"));
     ClubCardTextGet("Title Kinky Neighbor");
 
     if (CurrentScreen == "ChatRoom")
       AddonInfoMessage();
 
-    Player.MoonCEBC ??= {};
-    Player.MoonCEBC.Settings = { Debug: DebugMode };
+    //##### Init MoonCE Settings #####//
+    const moonCe = Player.OnlineSharedSettings.MoonCE ??= {};
+    const settings = moonCe.Settings ??= {};
 
-    console.log(`${MoonCEBCAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
+    settings.DebugMode ??= false;
+    settings.UploadGameStats ??= true;
+    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    //################################//
+
+
+    TrackingModuleInitialization(modApi);
+
+    console.log(`${MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }
 
   /**
@@ -1054,13 +1008,13 @@ document.head.appendChild(cssLink);
     }
 
     for (let id of decodedDeck)
-      deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
+      deckData.push(MoonCEClubCardList.find((card) => card.ID === id));
     const sortedCards = SortCardsList(deckData);
-    MoonCEBCEditCurrentDeck = [...sortedCards];
-    MoonCEBCCurrentDeck = [...sortedCards];
-    MoonCEBCCurrent30Cards = [...sortedCards];
+    MoonCEEditCurrentDeck = [...sortedCards];
+    MoonCECurrentDeck = [...sortedCards];
+    MoonCECurrent30Cards = [...sortedCards];
 
-    UpdateCardsCells(MoonCEBCCurrent30Cards);
+    UpdateCardsCells(MoonCECurrent30Cards);
   }
   /**
    * updates cells with an array of 30 cards
@@ -1070,7 +1024,7 @@ document.head.appendChild(cssLink);
     for (let i = 0; i < 30; i++) {
       const cardCells = CardCells[i];
       if (cardCells) cardCells.innerHTML = "";
-      
+
       if (cardsArray == null)
         continue;
 
@@ -1081,32 +1035,32 @@ document.head.appendChild(cssLink);
         const cardController = createCard(card);
 
         //Update border selected cards
-        if (MoonCEBCPageMode == WindowStatus.EDIT)
-          if (MoonCEBCEditCurrentDeck.includes(card))
+        if (MoonCEPageMode == WindowStatus.EDIT)
+          if (MoonCEEditCurrentDeck.includes(card))
             cardController.showSelected();
 
         cardController.cardButton.addEventListener("click", () => {
-          const isEditMode = MoonCEBCPageMode == WindowStatus.EDIT;
+          const isEditMode = MoonCEPageMode == WindowStatus.EDIT;
           if (isEditMode) {
-            if (MoonCEBCEditCurrentDeck.includes(card)) {
-              const indexToRemove = MoonCEBCEditCurrentDeck.findIndex(
+            if (MoonCEEditCurrentDeck.includes(card)) {
+              const indexToRemove = MoonCEEditCurrentDeck.findIndex(
                 (removedCard) => removedCard.ID === card.ID
               );
-              MoonCEBCEditCurrentDeck.splice(indexToRemove, 1);
+              MoonCEEditCurrentDeck.splice(indexToRemove, 1);
               cardController.hideSelected();
 
               UpdateDeckCardsCounter();
             } else {
-              MoonCEBCEditCurrentDeck.push(card);
+              MoonCEEditCurrentDeck.push(card);
               cardController.showSelected();
               UpdateDeckCardsCounter();
             }
           }
         });
 
-        cardController.cardButton.addEventListener("mouseover", () => { 
-          if (MoonCEBCMouseOverCard != card) {
-            MoonCEBCMouseOverCard = card;
+        cardController.cardButton.addEventListener("mouseover", () => {
+          if (MoonCEMouseOverCard != card) {
+            MoonCEMouseOverCard = card;
             const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
             if (cardInfoPanel) cardInfoPanel.innerHTML = "";
             const cardControllerInfoPanel = createCard(card);
@@ -1135,7 +1089,7 @@ document.head.appendChild(cssLink);
       "#DeckCardsCounterId"
     );
 
-    const countCards = MoonCEBCEditCurrentDeck.length;
+    const countCards = MoonCEEditCurrentDeck.length;
 
     deckCardsCounter.textContent = `Select the cards (${countCards}/${"30 - 40"})`;
 
@@ -1158,7 +1112,7 @@ document.head.appendChild(cssLink);
     const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftEditPanelId"
     );
-    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector(
       "#PlayerDecksSelectId"
     );
@@ -1176,8 +1130,8 @@ document.head.appendChild(cssLink);
 
     groupSelect.selectedIndex = 0;
 
-    MoonCEBCPageMode = WindowStatus.EDIT;
-    MoonCEBCEditCurrentDeck = [...MoonCEBCCurrentDeck];
+    MoonCEPageMode = WindowStatus.EDIT;
+    MoonCEEditCurrentDeck = [...MoonCECurrentDeck];
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
   }
@@ -1196,12 +1150,12 @@ document.head.appendChild(cssLink);
 
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftEditPanel.style.display = "none";
-    MoonCEBCPageMode = WindowStatus.VIEW;
-    MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
-    MoonCEBCBuilderSeacrhGroupList = [];
-    MoonCEBCBuilderCurrentGroupsList = [];
-    MoonCEBCCurrentCardsListPage = 0;
-    UpdateCardsCells(MoonCEBCCurrentDeck);
+    MoonCEPageMode = WindowStatus.VIEW;
+    MoonCECurrentGroup = CardTypes.ALL_CARDS.value;
+    MoonCEBuilderSeacrhGroupList = [];
+    MoonCEBuilderCurrentGroupsList = [];
+    MoonCECurrentCardsListPage = 0;
+    UpdateCardsCells(MoonCECurrentDeck);
   }
 
   function SaveDeckButtonClick() {
@@ -1211,23 +1165,23 @@ document.head.appendChild(cssLink);
     const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftEditPanelId"
     );
-    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEDeckNameInputId");
     const isDeckNameValidation =
       deckNameInput.value != "" &&
       deckNameInput.value != null &&
       deckNameInput.value.length <= 30;
-    
-    if (isDeckNameValidation && MoonCEBCEditCurrentDeck.length >= 30 && MoonCEBCEditCurrentDeck.length <= 40) {
+
+    if (isDeckNameValidation && MoonCEEditCurrentDeck.length >= 30 && MoonCEEditCurrentDeck.length <= 40) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
-      MoonCEBCPageMode = WindowStatus.VIEW;
-      MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
-      MoonCEBCBuilderSeacrhGroupList = [];
-      MoonCEBCBuilderCurrentGroupsList = [];
-      MoonCEBCCurrentCardsListPage = 0;
+      MoonCEPageMode = WindowStatus.VIEW;
+      MoonCECurrentGroup = CardTypes.ALL_CARDS.value;
+      MoonCEBuilderSeacrhGroupList = [];
+      MoonCEBuilderCurrentGroupsList = [];
+      MoonCECurrentCardsListPage = 0;
 
       SaveNewDeck();
-      UpdateCardsCells(MoonCEBCEditCurrentDeck);
+      UpdateCardsCells(MoonCEEditCurrentDeck);
       LoadPlayerDecksSelectData();
     }
   }
@@ -1237,17 +1191,17 @@ document.head.appendChild(cssLink);
    * @param {boolean} [isSaveName=true] - variable that controls whether a new name for the deck will be stored.
    */
   function SaveNewDeck(isSaveName = true) {
-    const deckNameInput = MainWindowPanel.querySelector("#MoonCEBCDeckNameInputId");
+    const deckNameInput = MainWindowPanel.querySelector("#MoonCEDeckNameInputId");
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
-    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const cardIDs = MoonCEEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
- 
+
     if (isSaveName) {
       //fix null deck if player dont created them
       if (Player.Game.ClubCard.DeckName == null)
         Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-      
+
       const newDeckName = deckNameInput.value;
       Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
     }
@@ -1261,14 +1215,14 @@ document.head.appendChild(cssLink);
    * Function for switching cards pages in edit mode
    */
   function PrevButtonClick() {
-    if (MoonCEBCCurrentCardsListPage != 0) {
-      MoonCEBCCurrentCardsListPage -= 1;
+    if (MoonCECurrentCardsListPage != 0) {
+      MoonCECurrentCardsListPage -= 1;
       let newCardsLlist = Get30CardsGroup();
       if (newCardsLlist) {
-        MoonCEBCCurrent30Cards = [...newCardsLlist];
-        UpdateCardsCells(MoonCEBCCurrent30Cards);
+        MoonCECurrent30Cards = [...newCardsLlist];
+        UpdateCardsCells(MoonCECurrent30Cards);
       } else {
-        MoonCEBCCurrentCardsListPage += 1;
+        MoonCECurrentCardsListPage += 1;
       }
     }
   }
@@ -1277,13 +1231,13 @@ document.head.appendChild(cssLink);
    * Function for switching cards pages in edit mode
    */
   function NextButtonClick() {
-    MoonCEBCCurrentCardsListPage += 1;
+    MoonCECurrentCardsListPage += 1;
     let newCardsLlist = Get30CardsGroup();
     if (newCardsLlist) {
-      MoonCEBCCurrent30Cards = [...newCardsLlist];
-      UpdateCardsCells(MoonCEBCCurrent30Cards);
+      MoonCECurrent30Cards = [...newCardsLlist];
+      UpdateCardsCells(MoonCECurrent30Cards);
     } else {
-      MoonCEBCCurrentCardsListPage -= 1;
+      MoonCECurrentCardsListPage -= 1;
     }
   }
 
@@ -1291,9 +1245,9 @@ document.head.appendChild(cssLink);
    * Clear Current deck in edit mode
    */
   function ClearCurrentDeck() {
-    MoonCEBCEditCurrentDeck = [];
+    MoonCEEditCurrentDeck = [];
 
-    UpdateCardsCells(MoonCEBCCurrent30Cards);
+    UpdateCardsCells(MoonCECurrent30Cards);
 
     UpdateDeckCardsCounter();
   }
@@ -1314,11 +1268,11 @@ document.head.appendChild(cssLink);
       AddonInfoMessage();
       if (MainWindowPanel) MainWindowPanel.remove();
 
-      MoonCEBCCurrentGroup = CardTypes.ALL_CARDS.value;
-      MoonCEBCBuilderSeacrhGroupList = [];
-      MoonCEBCBuilderCurrentGroupsList = [];
-      MoonCEBCPageMode = WindowStatus.VIEW;
-      MoonCEBCCurrentCardsListPage = 0;
+      MoonCECurrentGroup = CardTypes.ALL_CARDS.value;
+      MoonCEBuilderSeacrhGroupList = [];
+      MoonCEBuilderCurrentGroupsList = [];
+      MoonCEPageMode = WindowStatus.VIEW;
+      MoonCECurrentCardsListPage = 0;
 
       CardCells = [];
     } else {
@@ -1327,14 +1281,14 @@ document.head.appendChild(cssLink);
       LoadMainWindow();
     }
 
-    MoonCEBCPageMode = WindowStatus.VIEW;
+    MoonCEPageMode = WindowStatus.VIEW;
     isVisibleMainWindow = !isVisibleMainWindow;
   }
 
   //#region Export / Import Deck
 
   function ExportDeck() {
-    const cardIDs = MoonCEBCEditCurrentDeck.map((card) => card.ID);
+    const cardIDs = MoonCEEditCurrentDeck.map((card) => card.ID);
     const encodeDeck = encodeEIDeck(cardIDs);
     CreateInputWindow("Export Deck", encodeDeck, null);
   }
@@ -1348,8 +1302,8 @@ document.head.appendChild(cssLink);
     if (decodedDeck == null) return false;
 
     for (let id of decodedDeck)
-      deckData.push(MoonCEBCClubCardList.find((card) => card.ID === id));
-    MoonCEBCEditCurrentDeck = deckData
+      deckData.push(MoonCEClubCardList.find((card) => card.ID === id));
+    MoonCEEditCurrentDeck = deckData
     SaveNewDeck(false);
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
     GetDeckData(playerDecksSelect);
@@ -1393,7 +1347,7 @@ document.head.appendChild(cssLink);
         font-weight: bold;
         border-bottom: 1px solid #ccc;
     `;
-    header.style.backgroundImage = `url(${MoonCEBCTopPanelBackground})`;
+    header.style.backgroundImage = `url(${MoonCETopPanelBackground})`;
 
     const titleLabel = document.createElement("span");
     titleLabel.textContent = title || "Enter data";
@@ -1427,9 +1381,9 @@ document.head.appendChild(cssLink);
     let copyButton = null;
     if (textAreaText && textAreaText != "") {
       copyButton = createIconButton("📋", "Copy", () => {
-          navigator.clipboard.writeText(inputField.value)
-              .then(() => toggleIcon(copyButton, "✅"))
-              .catch(() => toggleIcon(copyButton, "❌"));
+        navigator.clipboard.writeText(inputField.value)
+          .then(() => toggleIcon(copyButton, "✅"))
+          .catch(() => toggleIcon(copyButton, "❌"));
       });
     }
 
@@ -1482,7 +1436,7 @@ document.head.appendChild(cssLink);
     okButton.onclick = () => {
       if (typeof onOkCallback === "function") {
         const result = onOkCallback(inputField.value);
-        if(result) MainWindowPanel.removeChild(overlay);
+        if (result) MainWindowPanel.removeChild(overlay);
       }
       else {
         MainWindowPanel.removeChild(overlay);
@@ -1494,14 +1448,14 @@ document.head.appendChild(cssLink);
     content.append(inputContainer, buttonContainer);
 
     overlay.onclick = (event) => {
-        if (event.target === overlay) MainWindowPanel.removeChild(overlay);
+      if (event.target === overlay) MainWindowPanel.removeChild(overlay);
     };
 
     windowContainer.append(header, content);
     overlay.appendChild(windowContainer);
     MainWindowPanel.appendChild(overlay);
   }
-  
+
   /**
  * Changes the button icon for a short time.
  * @param {HTMLButtonElement} button - Button to change.
@@ -1529,7 +1483,7 @@ document.head.appendChild(cssLink);
         padding: 0;
         overflow: hidden;
     `;
-    
+
     const icon = document.createElement("span");
     icon.innerHTML = iconText;
     icon.style.cssText = `
@@ -1545,17 +1499,17 @@ document.head.appendChild(cssLink);
     button.onclick = onClick;
 
     return button;
-}
+  }
 
 
 
   //#endregion Export / Import Deck
-  
+
   //#region Info Window
 
   function OpenInfo() {
     const infoText =
-    `📌 Discord — BC Cards Community
+      `📌 Discord — BC Cards Community
     Join discussions, ask questions, and meet other players:
     🔗 https://discord.gg/ZByQXVHm4u
 
@@ -1614,7 +1568,7 @@ document.head.appendChild(cssLink);
       padding: 10px 16px;
       font-weight: bold;
       border-bottom: 1px solid #ccc;
-      background-image: url(${MoonCEBCTopPanelBackground});
+      background-image: url(${MoonCETopPanelBackground});
     `;
 
     const titleLabel = document.createElement("span");
@@ -1675,13 +1629,13 @@ document.head.appendChild(cssLink);
 
 
   //#endregion
-  
+
   function OpenSettingsMenu() {
     const settingsModal = createModal('settings-modal', MainWindowPanel, 'Moon Cards Editor Settings');
-     const menuContainer1 = settingsModal.addMenuContainer('row');
+    const menuContainer1 = settingsModal.addMenuContainer('row');
     // const menuContainer2 = settingsModal.addMenuContainer('row');
     // const menuContainer3 = settingsModal.addMenuContainer('row');
-     createSettingsMenu(menuContainer1, settingsData);
+    createSettingsMenu(menuContainer1, settingsData);
     // createSettingsMenu(menuContainer2, settingsData);
     // createSettingsMenu(menuContainer3, settingsData);
     settingsModal.open();
@@ -1689,56 +1643,56 @@ document.head.appendChild(cssLink);
 
   const settingsData = [
     {
-        groupName: 'General Settings',
-        settings: [
-            {
-                name: 'Enable Notifications',
-                shortDescription: 'Receive alerts',
-                fullDescription: 'Enables notifications for all important updates.',
-                type: 'checkbox',
-                defaultValue: true,
-                onChange: (newValue) => {
-                    console.log(`Notifications: ${newValue}`);
-                }
-            },
-            {
-                name: 'Username',
-                shortDescription: 'Enter your username',
-                fullDescription: 'Your unique username for the system.',
-                type: 'text',
-                defaultValue: 'User123',
-                onChange: (newValue) => {
-                    console.log(`Username updated to: ${newValue}`);
-                }
-            },
-            {
-                name: 'Theme',
-                shortDescription: 'Select a theme',
-                fullDescription: 'Choose between Light and Dark themes.',
-                type: 'dropdown',
-                options: ['Light', 'Dark'],
-                defaultValue: 'Light',
-                onChange: (newValue) => {
-                    console.log(`Theme changed to: ${newValue}`);
-                }
-            },
-            {
-                name: 'Reset Settings',
-                shortDescription: 'Reset all settings to default',
-                fullDescription: 'Click this button to reset all settings to their default values.',
-                type: 'button',
-                onClick: () => {
-                    console.log('Settings have been reset to default!');
-                }
-            }
-        ]
+      groupName: 'General Settings',
+      settings: [
+        {
+          name: 'Enable Notifications',
+          shortDescription: 'Receive alerts',
+          fullDescription: 'Enables notifications for all important updates.',
+          type: 'checkbox',
+          defaultValue: true,
+          onChange: (newValue) => {
+            console.log(`Notifications: ${newValue}`);
+          }
+        },
+        {
+          name: 'Username',
+          shortDescription: 'Enter your username',
+          fullDescription: 'Your unique username for the system.',
+          type: 'text',
+          defaultValue: 'User123',
+          onChange: (newValue) => {
+            console.log(`Username updated to: ${newValue}`);
+          }
+        },
+        {
+          name: 'Theme',
+          shortDescription: 'Select a theme',
+          fullDescription: 'Choose between Light and Dark themes.',
+          type: 'dropdown',
+          options: ['Light', 'Dark'],
+          defaultValue: 'Light',
+          onChange: (newValue) => {
+            console.log(`Theme changed to: ${newValue}`);
+          }
+        },
+        {
+          name: 'Reset Settings',
+          shortDescription: 'Reset all settings to default',
+          fullDescription: 'Click this button to reset all settings to their default values.',
+          type: 'button',
+          onClick: () => {
+            console.log('Settings have been reset to default!');
+          }
+        }
+      ]
     }
-];
+  ];
 
   //#endregion
 
   //#endregion
-  
+
   /**
    * Function for sorting from the general list of cards,
    * the selected group of cards by the current value from the drop-down list.
@@ -1749,24 +1703,24 @@ document.head.appendChild(cssLink);
   function UpdateCardsListSetNewGroup() {
     let cardGroupList = [];
     const rewardPlayerCards = decodeStringDeckToID(Player.Game.ClubCard.Reward);
-    const allRewardCards = MoonCEBCClubCardList.filter(
+    const allRewardCards = MoonCEClubCardList.filter(
       (card) => card.Reward != undefined
     );
 
-    switch (MoonCEBCCurrentGroup) {
+    switch (MoonCECurrentGroup) {
       case CardTypes.ALL_CARDS.value:
-        cardGroupList = [...MoonCEBCClubCardList];
+        cardGroupList = [...MoonCEClubCardList];
         break;
       case CardTypes.SELECTED_CARDS.value:
-        cardGroupList = [...MoonCEBCEditCurrentDeck];
+        cardGroupList = [...MoonCEEditCurrentDeck];
         break;
       case CardTypes.EVENTS_CARDS.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) => card.Type == "Event"
         );
         break;
       case CardTypes.UNGROUPED.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) => card.Group == undefined && card.Type != "Event"
         );
         break;
@@ -1774,7 +1728,7 @@ document.head.appendChild(cssLink);
         cardGroupList = allRewardCards;
         break;
       case CardTypes.ASYLUM.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("AsylumPatient") ||
@@ -1782,14 +1736,14 @@ document.head.appendChild(cssLink);
         );
         break;
       case CardTypes.DOMINANT_MISTRESS.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("Dominant") || card.Group.includes("Mistress"))
         );
         break;
       case CardTypes.ABDL.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("ABDLBaby") ||
@@ -1797,7 +1751,7 @@ document.head.appendChild(cssLink);
         );
         break;
       case CardTypes.COLLEGE.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("CollegeStudent") ||
@@ -1805,7 +1759,7 @@ document.head.appendChild(cssLink);
         );
         break;
       case CardTypes.SHIBARI_SENSEI_KNOT.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("Shibari") ||
@@ -1814,7 +1768,7 @@ document.head.appendChild(cssLink);
         );
         break;
       case CardTypes.PET.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("Pet") ||
@@ -1822,7 +1776,7 @@ document.head.appendChild(cssLink);
         );
         break;
       case CardTypes.PORN.value:
-        cardGroupList = MoonCEBCClubCardList.filter(
+        cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("PornActress") ||
@@ -1831,8 +1785,8 @@ document.head.appendChild(cssLink);
         );
         break;
       default:
-        cardGroupList = MoonCEBCClubCardList.filter(
-          (card) => card.Group && card.Group.includes(MoonCEBCCurrentGroup)
+        cardGroupList = MoonCEClubCardList.filter(
+          (card) => card.Group && card.Group.includes(MoonCECurrentGroup)
         );
         break;
     }
@@ -1850,10 +1804,10 @@ document.head.appendChild(cssLink);
     });
 
     const sortedCards = SortCardsList(cardGroupList);
-    MoonCEBCBuilderCurrentGroupsList = [...sortedCards];
-    MoonCEBCCurrentCardsListPage = 0;
-    MoonCEBCCurrent30Cards = Get30CardsGroup();
-    UpdateCardsCells(MoonCEBCCurrent30Cards);
+    MoonCEBuilderCurrentGroupsList = [...sortedCards];
+    MoonCECurrentCardsListPage = 0;
+    MoonCECurrent30Cards = Get30CardsGroup();
+    UpdateCardsCells(MoonCECurrent30Cards);
   }
 
   /**
@@ -1862,13 +1816,13 @@ document.head.appendChild(cssLink);
    */
   function Get30CardsGroup() {
     const cardsPerPage = 30;
-    const countSkipCards = MoonCEBCCurrentCardsListPage * cardsPerPage;
-    const searchCardInput = MainWindowPanel.querySelector("#MoonCEBCSearchCardInputId");
+    const countSkipCards = MoonCECurrentCardsListPage * cardsPerPage;
+    const searchCardInput = MainWindowPanel.querySelector("#MoonCESearchCardInputId");
 
     const cardsSources =
       searchCardInput.value.length > 0
-        ? MoonCEBCBuilderSeacrhGroupList
-        : MoonCEBCBuilderCurrentGroupsList;
+        ? MoonCEBuilderSeacrhGroupList
+        : MoonCEBuilderCurrentGroupsList;
 
     const countTakePossibleCards = cardsSources.length - countSkipCards;
 
@@ -1940,189 +1894,6 @@ document.head.appendChild(cssLink);
     return sortedCards;
   }
 
-  //#region Card Tracking Module
-  function StartTrackingModule() {
-    InitTrackingFromDeckAndHand(ClubCardPlayer[0].Deck, ClubCardPlayer[0].Hand);
-    HookAllPlayerZones(ClubCardPlayer[0]);
-  }
-
-  /* ** Initialize tracking from FullDeck (at game start) ** */
-  function InitTrackingFromDeckAndHand(deck, hand) {
-    CardStatsMap.clear();
-    const source = [...hand, ...deck];
-    for (const card of source) {
-      CardStatsMap.set(card.UniqueID, {
-        id: card.ID,
-        uniqueID: card.UniqueID,
-        name: card.Name,
-        seen: false,
-        played: false
-      });
-    }
-  }
-
-  /* ** Mark a card as seen in hand ** */
-  function MarkSeen(card) {
-    const stat = CardStatsMap.get(card.UniqueID);
-    if (stat && !stat.seen) stat.seen = true;
-  }
-
-  /* ** Mark a card as played (on board/event/discard) ** */
-  function MarkPlayed(card) {
-    const stat = CardStatsMap.get(card.UniqueID);
-    if (stat && !stat.played) stat.played = true;
-  }
-
-  /* ** Hook array.push() to track card movement ** */
-  function HookPush(array, onCard) {
-    const originalPush = array.push;
-    array.push = function (...cards) {
-      for (const card of cards) {
-        if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) {
-          onCard(card);
-        }
-      }
-      return originalPush.apply(this, cards);
-    };
-  }
-
-  function HookOpponentLiabilities(opponent) {
-    const board = opponent.Board;
-    const originalPush = board.push;
-
-    board.push = function (...cards) {
-      for (const card of cards) {
-        if (card?.UniqueID && ClubCardIsLiability(card) && CardStatsMap.has(card.UniqueID)) {
-          MarkPlayed(card);
-        }
-      }
-      return originalPush.apply(this, cards);
-    };
-  }
-
-  /* ** Apply push hooks to all player zones ** */
-  function HookAllPlayerZones(player) {
-    HookPush(player.Hand, MarkSeen);
-    HookPush(player.Board, MarkPlayed);
-    HookPush(player.Event, MarkPlayed);
-    HookPush(player.DiscardPile, MarkPlayed);
-
-    //for liability
-    HookOpponentLiabilities(ClubCardPlayer[1]);
-  }
-
-  /**
-   * Builds a game result payload for API submission.
-   * Includes all tracked cards with their evaluated scores.
-   *
-   * @param {boolean} win - Whether the player won the match.
-   * @returns {{
-   *   game_result: boolean,
-   *   game_token: string | null,
-   *   goes_first: boolean | null,
-   *   name: string | null,
-   *   nickname: string | null,
-   *   member_number: number,
-   *   cards: { id: number, name: string, score: number }[]
-   * }} Complete payload object.
-   */
-  function BuildPayload(win) {
-    RefreshTrackingAfterSync(ClubCardPlayer[0]);
-    const payload = [];
-    for (const stat of CardStatsMap.values()) {
-      const score = EvaluateScore(stat);
-      payload.push({
-        id: stat.id,
-        name: stat.name,
-        score: parseFloat(score.toFixed(2))
-      });
-    }
-    
-    const game = Player.MoonCEBC.Game ?? {};
-    const token1 = game.Player1Token ?? "";
-    const token2 = game.Player2Token ?? "";
-    const gameToken = (token1 && token2) ? `${token1}${token2}` : null;
-
-    const goesFirst = typeof game.GoesFirst === "boolean" ? game.GoesFirst : null;
-
-    return {
-      game_result: win,
-      game_token: gameToken,
-      goes_first : goesFirst,
-      name: Player?.Name ?? null,
-      nickname: Player?.Nickname ?? null,
-      member_number: Player?.MemberNumber ?? 0,
-      cards: payload
-    };
-  }
-
-  /* ** Simple scoring logic based on card usage ** */
-  function EvaluateScore(stat) {
-    if (stat.played) return 1;
-    if (stat.seen) return 0.5;
-    return 0.1;
-  }
-
-  /**
-   * Reapply push hooks and reanalyze state after receiving full game state from opponent.
-   * Should be called immediately after local ClubCardPlayer[0] is overwritten.
-   *
-   * @param {object} player - The local player object (ClubCardPlayer[0])
-   */
-  function RefreshTrackingAfterSync(player) {
-    HookAllPlayerZones(player);
-
-    for (const card of player.Hand) {
-      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkSeen(card);
-    }
-    for (const card of player.Board) {
-      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
-    }
-    for (const card of player.Event) {
-      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
-    }
-    for (const card of player.DiscardPile) {
-      if (card?.UniqueID && CardStatsMap.has(card.UniqueID)) MarkPlayed(card);
-    }
-  }
-
-  /**
- * Sends the final payload to the server.
- *
- * @param {win: boolean } win - Array of card stats.
- */
-  function SendCardStatsToServer(win) {
-    const payload = BuildPayload(win);
-    try {
-      if (Player.MoonCEBC.Settings.Debug)
-        console.log("📦 Payload to be sent:", payload);
-
-      fetch("https://clubcardmonitoring.onrender.com/api/upload-cardstats/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(r => r.text())
-        .then(text => {
-          if (Player.MoonCEBC.Settings.Debug)
-            console.log("📡 Server response:", text);
-      })
-      .catch(err => {
-        if (Player.MoonCEBC.Settings.Debug)
-          console.error("❌ Failed to send card stats:", err);
-      });
-      
-    } catch (error) {
-      if (Player.MoonCEBC.Settings.Debug)
-        console.log(error)
-    }
-  } 
-
-
-  //#endregion
-
   //#endregion
 
   //#region ChatMessageFunc
@@ -2135,7 +1906,7 @@ document.head.appendChild(cssLink);
   function AddonInfoMessage(target = null, isMenuOpen = false) {
     const message = {
       Type: Hidden,
-      Content: "MoonCEBC",
+      Content: "MoonCE",
       Sender: Player.MemberNumber,
       Dictionary: [],
     };
@@ -2238,9 +2009,9 @@ document.head.appendChild(cssLink);
    * @returns {string} - The encoded string.
    */
   function encodeEIDeck(IdArrayDeck) {
-      let encrypted = IdArrayDeck.map(id => id ^ meow_key);
-      let stringified = encrypted.join(",");
-      return btoa(stringified);
+    let encrypted = IdArrayDeck.map(id => id ^ meow_key);
+    let stringified = encrypted.join(",");
+    return btoa(stringified);
   }
 
   /**
@@ -2250,38 +2021,38 @@ document.head.appendChild(cssLink);
    */
   function decodeEIDeck(encodedString) {
     try {
-        if (!encodedString || typeof encodedString !== "string") {
-            throw new Error("Invalid input: Not a string");
-        }
+      if (!encodedString || typeof encodedString !== "string") {
+        throw new Error("Invalid input: Not a string");
+      }
 
-        let decryptedString;
-        try {
-            decryptedString = atob(encodedString);
-        } catch (e) {
-            throw new Error("Invalid input: Not a valid Base64 string");
-        }
+      let decryptedString;
+      try {
+        decryptedString = atob(encodedString);
+      } catch (e) {
+        throw new Error("Invalid input: Not a valid Base64 string");
+      }
 
-        let numbers = decryptedString
-            .split(",")
-            .map(num => parseInt(num, 10))
-            .filter(num => !isNaN(num));
+      let numbers = decryptedString
+        .split(",")
+        .map(num => parseInt(num, 10))
+        .filter(num => !isNaN(num));
 
-        if (numbers.length < 30 || numbers.length > 40) {
-            throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
-        }
+      if (numbers.length < 30 || numbers.length > 40) {
+        throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
+      }
 
-        let decodedIds = numbers.map(id => id ^ meow_key);
+      let decodedIds = numbers.map(id => id ^ meow_key);
 
-        let allIdsExist = decodedIds.every(id => MoonCEBCClubCardList.some(card => card.ID === id));
-        if (!allIdsExist) {
-            throw new Error("Invalid deck: Some IDs do not exist in the card database");
-        }
+      let allIdsExist = decodedIds.every(id => MoonCEClubCardList.some(card => card.ID === id));
+      if (!allIdsExist) {
+        throw new Error("Invalid deck: Some IDs do not exist in the card database");
+      }
 
-        return decodedIds;
+      return decodedIds;
 
     } catch (error) {
-        console.error("decodeEIDeck Error:", error.message);
-        return null;
+      console.error("decodeEIDeck Error:", error.message);
+      return null;
     }
   }
   //#endregion
