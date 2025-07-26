@@ -239,7 +239,7 @@ function RefreshTrackingAfterSync(player) {
  */
 function SendCardStatsToServer(win) {
     const payload = BuildPayload(win);
-    const isDebugMode = Player?.OnlineSharedSettings?.MoonCE?.Settings?.DebugMode;
+    const isDebugMode = Player?.ExtensionSettings?.MoonCE?.Settings?.DebugMode;
     
     if (isDebugMode)
         console.log("📦 Payload to be sent:", payload);
