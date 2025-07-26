@@ -1,6 +1,6 @@
 export function InitChatCommand() {
     CommandCombine([{
-        Tag: 'moonhelp',
+        Tag: 'moon',
         Description: "Moon Card Editor commands",
         Action: () => {
             MoonHelpCommand();
@@ -36,11 +36,11 @@ function MoonHelpCommand() {
 }
 
 function SetStatsTracking(enabled) {
-    const moonCe = Player.OnlineSharedSettings.MoonCE ??= {};
+    const moonCe = Player.ExtensionSettings.MoonCE ??= {};
     const settings = moonCe.Settings ??= {};
 
-    settings.UploadGameStats = enabled;
-    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    settings.GameStats = enabled;
+    ServerPlayerExtensionSettingsSync("MoonCE")
 
     if (enabled)
         ChatRoomSendLocal("Statistics tracking is enabled. You can check the result here: <a href='https://clubcardmonitoring.onrender.com/' target='_blank'>ClubCard Monitoring</a>");

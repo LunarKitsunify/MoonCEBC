@@ -18,8 +18,8 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
-import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
-import { InitChatCommand } from "./Services/ChatCommand.js";
+import { TrackingModuleInitialization as InitStatsTracking } from './Services/TrackingCardsStatModule.js'
+import { InitChatCommand as InitChatCommands } from "./Services/ChatCommand.js";
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
@@ -901,19 +901,16 @@ document.head.appendChild(cssLink);
       AddonInfoMessage();
 
     //##### Init MoonCE Settings #####//
-    const moonCe = Player.OnlineSharedSettings.MoonCE ??= {};
+    const moonCe = Player.ExtensionSettings.MoonCE ??= {};
     const settings = moonCe.Settings ??= {};
 
     settings.DebugMode ??= false;
-    settings.UploadGameStats ??= true;
-    ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
+    settings.GameStats ??= true;
+    ServerPlayerExtensionSettingsSync("MoonCE")
     //################################//
 
-    //Init ChatCommands
-    InitChatCommand();
-
-
-    TrackingModuleInitialization(modApi);
+    InitChatCommands();
+    InitStatsTracking(modApi);
 
     console.log(`${MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }

@@ -263,7 +263,7 @@ function SendCardStatsToServer(win) {
 }
 
 function IsStatsUploadEnabled() {
-    return Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
+    return Player?.ExtensionSettings?.MoonCE?.Settings?.GameStats;
 }
 
 function IsOpponentMoonCE() {
