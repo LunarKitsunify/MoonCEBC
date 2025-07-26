@@ -19,6 +19,7 @@
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
+import { InitChatCommand } from "./Services/ChatCommand.js";
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
@@ -907,6 +908,9 @@ document.head.appendChild(cssLink);
     settings.UploadGameStats ??= true;
     ServerAccountUpdate.QueueData({ OnlineSharedSettings: Player.OnlineSharedSettings });
     //################################//
+
+    //Init ChatCommands
+    InitChatCommand();
 
 
     TrackingModuleInitialization(modApi);

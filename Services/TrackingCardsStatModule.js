@@ -8,10 +8,7 @@ export function TrackingModuleInitialization(modApi) {
     modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
         const result = next(args);
 
-        const uploadEnabled = Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
-        const opponentIsMoonCE = ClubCardPlayer?.[1]?.Character?.MoonCE;
-
-        if (uploadEnabled && opponentIsMoonCE) {
+        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
             try {
                 StartTrackingModule();
             } catch (error) {
@@ -24,10 +21,7 @@ export function TrackingModuleInitialization(modApi) {
     modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
         const result = next(args);
 
-        const uploadEnabled = Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
-        const opponentIsMoonCE = ClubCardPlayer?.[1]?.Character?.MoonCE;
-
-        if (uploadEnabled && opponentIsMoonCE) {
+        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
             try {
                 RefreshTrackingAfterSync(ClubCardPlayer[0]);
             } catch (error) {
@@ -42,10 +36,7 @@ export function TrackingModuleInitialization(modApi) {
         const isMiniGameEnded = MiniGameEnded;
         const result = next(args);
 
-        const uploadEnabled = Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
-        const opponentIsMoonCE = ClubCardPlayer?.[1]?.Character?.MoonCE;
-
-        if (uploadEnabled && opponentIsMoonCE) {
+        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying()) {
                     if (result && isMiniGameEnded != true) {
@@ -64,10 +55,7 @@ export function TrackingModuleInitialization(modApi) {
 
     //Hook to an event when a player has conceded for that very player.
     modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-        const uploadEnabled = Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
-        const opponentIsMoonCE = ClubCardPlayer?.[1]?.Character?.MoonCE;
-
-        if (uploadEnabled && opponentIsMoonCE) {
+        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying()) {
                     SendCardStatsToServer(false); 
@@ -83,11 +71,8 @@ export function TrackingModuleInitialization(modApi) {
     //Hook to the event that the winning player will receive if the opponent concedes.
     modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
         if (args[0] == Player.MemberNumber) return next(args);
-        
-        const uploadEnabled = Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
-        const opponentIsMoonCE = ClubCardPlayer?.[1]?.Character?.MoonCE;
 
-        if (uploadEnabled && opponentIsMoonCE) {
+        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying())
                     SendCardStatsToServer(true);
@@ -277,5 +262,12 @@ function SendCardStatsToServer(win) {
         });
 }
 
+function IsStatsUploadEnabled() {
+    return Player?.OnlineSharedSettings?.MoonCE?.Settings?.UploadGameStats;
+}
+
+function IsOpponentMoonCE() {
+    return ClubCardPlayer?.[1]?.Character?.MoonCE;
+}
 
 //#endregion
