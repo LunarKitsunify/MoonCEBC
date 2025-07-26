@@ -82,3 +82,7 @@ Update 1.2.18
 Update 1.2.19
 1. Small bug fixes for statistics collection for liability cards.
 2. The logic of data reception on the site side has been changed. Now valid pairs of games from two players by gameToken are required.
+
+Update 1.2.20
+1. Add /moon chat command
+2. Added the ability to enable/disable the collection of card statistics. Usage: /moonstats on | off"
