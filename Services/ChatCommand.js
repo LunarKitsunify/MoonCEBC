@@ -1,4 +1,4 @@
-export function InitChatCommand() {
+export function InitChatCommands() {
     CommandCombine([{
         Tag: 'moon',
         Description: "Moon Card Editor commands",

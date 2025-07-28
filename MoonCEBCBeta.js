@@ -18,8 +18,9 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
-import { TrackingModuleInitialization as InitStatsTracking } from './Services/TrackingCardsStatModule.js'
-import { InitChatCommand as InitChatCommands } from "./Services/ChatCommand.js";
+import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
+import { InitChatCommands } from "./Services/ChatCommand.js";
+import { InitSettings } from "./Services/Settings.js";
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
@@ -900,17 +901,9 @@ document.head.appendChild(cssLink);
     if (CurrentScreen == "ChatRoom")
       AddonInfoMessage();
 
-    //##### Init MoonCE Settings #####//
-    const moonCe = Player.ExtensionSettings.MoonCE ??= {};
-    const settings = moonCe.Settings ??= {};
-
-    settings.DebugMode ??= false;
-    settings.GameStats ??= true;
-    ServerPlayerExtensionSettingsSync("MoonCE")
-    //################################//
-
+    InitSettings();
     InitChatCommands();
-    InitStatsTracking(modApi);
+    TrackingModuleInitialization(modApi);
 
     console.log(`${MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }
@@ -950,28 +943,32 @@ document.head.appendChild(cssLink);
    * Also updates the card boxes for the first option.
    */
   function LoadPlayerDecksSelectData() {
-    if (Player.Game.ClubCard == null) return;
+    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+    const decksExist = useAddonDecks ? Player.ExtensionSettings?.MoonCE?.Decks : Player.Game.ClubCard;
+    if (!decksExist) return;
 
-    const playerDecksSelect = MainWindowPanel.querySelector(
-      "#PlayerDecksSelectId"
-    );
+    const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
 
     const oldSelectedIndex = playerDecksSelect.selectedIndex;
     playerDecksSelect.innerHTML = "";
     let playerDecksData = [];
-    if (
-      Player.Game.ClubCard.DeckName != null &&
-      Player.Game.ClubCard.DeckName.length > 0
-    )
-      playerDecksData = Player.Game.ClubCard.DeckName;
-    else playerDecksData = ["", "", "", "", "", "", "", "", "", ""];
 
-    for (let i = 0; i <= 9; i++)
-      if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
+    if (useAddonDecks) {
+      // ##### Moon decks storage ##### //
+      playerDecksData = Player.ExtensionSettings.MoonCE.Decks.DeckName;
+    } else {
+      // ##### BC deck storage ##### //
+      if ( Player.Game.ClubCard.DeckName != null && Player.Game.ClubCard.DeckName.length > 0)
+        playerDecksData = Player.Game.ClubCard.DeckName;
+      else
+        playerDecksData = ["", "", "", "", "", "", "", "", "", ""];
+      
+      for (let i = 0; i <= 9; i++)
+        if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
 
-    //I'm deleting the 11th element of the deck array.
-    //I don't quite understand why it is needed, because there are no decks under this index.
-    if (playerDecksData.length == 11) playerDecksData.pop();
+      //I'm deleting the 11th element of the deck array.
+      if (playerDecksData.length == 11) playerDecksData.pop();
+    }
 
     playerDecksData.forEach((name, index) => {
       if (name != null) {
@@ -998,8 +995,11 @@ document.head.appendChild(cssLink);
    * @returns {void} - Nothing
    */
   function GetDeckData(decksCombobox) {
+    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
+
     let selectedIndex = decksCombobox.value;
-    const encodedDeck = Player.Game.ClubCard.Deck[selectedIndex];
+    const encodedDeck = decksSources[selectedIndex];
     let deckData = [];
     let decodedDeck = [];
     if (encodedDeck == "" || encodedDeck == null) {
@@ -1197,19 +1197,30 @@ document.head.appendChild(cssLink);
     const cardIDs = MoonCEEditCurrentDeck.map((card) => card.ID);
     const encodeIDDeck = encodeIDDeckToString(cardIDs);
     const selectedIndex = playerDecksSelect.selectedIndex;
+    const newDeckName = deckNameInput.value;
+    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
 
-    if (isSaveName) {
-      //fix null deck if player dont created them
-      if (Player.Game.ClubCard.DeckName == null)
-        Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-
-      const newDeckName = deckNameInput.value;
-      Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+    if (useAddonDecks) {
+      // ##### Moon deck storage ##### //
+      if (isSaveName)
+        Player.ExtensionSettings.MoonCE.Decks.DeckName[selectedIndex] = newDeckName;
+      Player.ExtensionSettings.MoonCE.Decks.Deck[selectedIndex] = encodeIDDeck;
+      ServerPlayerExtensionSettingsSync("MoonCE");
+    } else {
+      // ##### BC deck storage ##### //
+      if (isSaveName) {
+        //fix null deck if player dont created them
+        if (Player.Game.ClubCard.DeckName == null)
+          Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
+  
+        Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
+      }
+  
+      Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
+  
+      ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
     }
 
-    Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
-
-    ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
   }
 
   /**
