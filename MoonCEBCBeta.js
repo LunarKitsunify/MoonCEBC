@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.20
+// @version 1.2.21
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -66,8 +66,11 @@ document.head.appendChild(cssLink);
     UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
   });
 
+  const AddonVersion = "1.2.20";
+  const AddonType = "Beta";
   const MoonCEAddonName = "Moon Cards Editor";
   const meow_key = 42;
+  const Hidden = "Hidden";
 
   const basePath = new URL(".", import.meta.url).href;
   const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
@@ -162,10 +165,6 @@ document.head.appendChild(cssLink);
   const moneyTextColor = "#006400";
 
   const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-  const AddonVersion = "1.2.20";
-  const AddonType = "Beta";
-  const Hidden = "Hidden";
-  const DebugMode = false;
 
 
   //#endregion
@@ -176,7 +175,7 @@ document.head.appendChild(cssLink);
 
   const modApi = bcModSdk.registerMod({
     name: "MoonCE",
-    fullName: "Moon Cards Editor",
+    fullName: MoonCEAddonName,
     version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCE",
   });
@@ -191,9 +190,10 @@ document.head.appendChild(cssLink);
   //   UpdateStatusShowButton();
   // });
 
+  //#region ---------------Button "Open Addon" in ChatRoom--------------- //
   modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
     const result = next(args);
-    DrawAddonButtonWithImage( 0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor" );
+    DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
     return result;
   });
 
@@ -202,6 +202,7 @@ document.head.appendChild(cssLink);
     if (MouseIn(0, 930, 35, 70)) OpenExitAddonWindow();
     return result;
   });
+  //#endregion
 
   //#region ---------------Draw Addon Icons--------------- //
 
@@ -310,20 +311,20 @@ document.head.appendChild(cssLink);
 
   //#endregion //------------------------------//
 
-  //#endregion
-
-  //#region Button in ClubCard Configuration
+  //#region ---------------Button "Open Addon" in ClubCard Configuration--------------- //
 
   modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
     next(args);
     //TODO delte if all okeyDrawButton(1815, 190, 90, 90, "", "White", MoonLogo);
-    DrawAddonButtonWithImage( 1815, 190, 90, 90, "White", MoonLogo, "Moon Cards Editor" );
+    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", MoonLogo, "Moon Cards Editor");
   });
 
   modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
     next(args);
     if (MouseIn(1815, 190, 90, 90)) OpenExitAddonWindow();
   });
+
+  //#endregion
 
   //#endregion
 
@@ -418,51 +419,51 @@ document.head.appendChild(cssLink);
    * @param {boolean} [Disabled] - Optional disabled flag
    */
   function DrawAddonButtonWithImage(Left, Top, Width, Height, Color, ImageSrc, HoveringText = null, Disabled = false) {
-      ControllerAddActiveArea(Left, Top);
+    ControllerAddActiveArea(Left, Top);
 
-      // Draw button rectangle
-      MainCanvas.beginPath();
-      MainCanvas.rect(Left, Top, Width, Height);
-      const hovering = MouseX >= Left && MouseX <= Left + Width && MouseY >= Top && MouseY <= Top + Height;
-      MainCanvas.fillStyle = (hovering && !CommonIsMobile && !Disabled) ? "Cyan" : Color;
-      MainCanvas.fillRect(Left, Top, Width, Height);
-      MainCanvas.lineWidth = 2;
-      MainCanvas.strokeStyle = 'black';
-      MainCanvas.stroke();
-      MainCanvas.closePath();
+    // Draw button rectangle
+    MainCanvas.beginPath();
+    MainCanvas.rect(Left, Top, Width, Height);
+    const hovering = MouseX >= Left && MouseX <= Left + Width && MouseY >= Top && MouseY <= Top + Height;
+    MainCanvas.fillStyle = (hovering && !CommonIsMobile && !Disabled) ? "Cyan" : Color;
+    MainCanvas.fillRect(Left, Top, Width, Height);
+    MainCanvas.lineWidth = 2;
+    MainCanvas.strokeStyle = 'black';
+    MainCanvas.stroke();
+    MainCanvas.closePath();
 
-      // Draw image scaled to button area
-      if (ImageSrc) {
-          DrawImageEx(ImageSrc, MainCanvas, Left + 2, Top + 2, {
-              Width: Width - 4,
-              Height: Height - 4
-          });
-      }
+    // Draw image scaled to button area
+    if (ImageSrc) {
+      DrawImageEx(ImageSrc, MainCanvas, Left + 2, Top + 2, {
+        Width: Width - 4,
+        Height: Height - 4
+      });
+    }
 
-      // Optional tooltip
-      if (hovering && HoveringText && !CommonIsMobile && !CommonPhotoMode) {
-          DrawHoverElements.push(() => DrawButtonHover(Left, Top, Width, Height, HoveringText));
-      }
+    // Optional tooltip
+    if (hovering && HoveringText && !CommonIsMobile && !CommonPhotoMode) {
+      DrawHoverElements.push(() => DrawButtonHover(Left, Top, Width, Height, HoveringText));
+    }
   }
 
   //#endregion
 
   //#region showButton
-  const showButton = document.createElement("button");
-  showButton.style.backgroundImage =
-    "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
-  showButton.style.backgroundSize = "cover";
-  showButton.style.backgroundPosition = "center";
-  showButton.style.position = "absolute";
-  showButton.style.width = "2.23%";
-  showButton.style.height = "5%";
-  showButton.style.bottom = "0px";
-  showButton.style.left = "1.5%";
-  showButton.style.transform = "translateX(calc(50% - 45%))";
-  showButton.style.padding = "1px 2px";
-  showButton.style.display = "none";
-  showButton.addEventListener("click", OpenExitAddonWindow);
-  document.body.appendChild(showButton);
+  // const showButton = document.createElement("button");
+  // showButton.style.backgroundImage =
+  //   "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
+  // showButton.style.backgroundSize = "cover";
+  // showButton.style.backgroundPosition = "center";
+  // showButton.style.position = "absolute";
+  // showButton.style.width = "2.23%";
+  // showButton.style.height = "5%";
+  // showButton.style.bottom = "0px";
+  // showButton.style.left = "1.5%";
+  // showButton.style.transform = "translateX(calc(50% - 45%))";
+  // showButton.style.padding = "1px 2px";
+  // showButton.style.display = "none";
+  // showButton.addEventListener("click", OpenExitAddonWindow);
+  // document.body.appendChild(showButton);
 
   //#endregion
 
@@ -540,9 +541,9 @@ document.head.appendChild(cssLink);
       });
     }
 
-    
+
     //#region DeckModeSwitch
-    
+
     const deckModeSwitch = createButton(
       null,
       Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png",
@@ -554,9 +555,9 @@ document.head.appendChild(cssLink);
       "Switch deck storage mode : BC or Addon",
       "right"
     );
-    
+
     //#endregion
-    
+
     const editButton = createButton(
       "Edit Deck",
       null,
@@ -568,7 +569,7 @@ document.head.appendChild(cssLink);
       "Open edit menu",
       "right"
     );
-    
+
     const exportButton = createButton(
       "Export",
       null,
@@ -580,7 +581,7 @@ document.head.appendChild(cssLink);
       "Export Deck",
       "right"
     );
-    
+
     const importButton = createButton(
       "Import",
       null,
@@ -592,14 +593,14 @@ document.head.appendChild(cssLink);
       "Import Deck",
       "right"
     );
-    
+
     topSettingsLeftViewPanel.appendChild(deckModeSwitch);
     topSettingsLeftViewPanel.appendChild(playerDecksSelect);
     topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
     topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
-    
+
     //#region topSettingsLeftEditPanel
     const topSettingsLeftEditPanel = document.createElement("div");
     topSettingsLeftEditPanel.id = "TopSettingsLeftEditPanelId";
@@ -1036,11 +1037,11 @@ document.head.appendChild(cssLink);
       playerDecksData = Player.ExtensionSettings.MoonCE.Decks.DeckName;
     } else {
       // ##### BC deck storage ##### //
-      if ( Player.Game.ClubCard.DeckName != null && Player.Game.ClubCard.DeckName.length > 0)
+      if (Player.Game.ClubCard.DeckName != null && Player.Game.ClubCard.DeckName.length > 0)
         playerDecksData = Player.Game.ClubCard.DeckName;
       else
         playerDecksData = ["", "", "", "", "", "", "", "", "", ""];
-      
+
       for (let i = 0; i <= 9; i++)
         if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
 
@@ -1302,12 +1303,12 @@ document.head.appendChild(cssLink);
         //fix null deck if player dont created them
         if (Player.Game.ClubCard.DeckName == null)
           Player.Game.ClubCard.DeckName = ["Deck #1", "Deck #2", "Deck #3", "Deck #4", "Deck #5", "Deck #6", "Deck #7", "Deck #8", "Deck #9", "Deck #10"];
-  
+
         Player.Game.ClubCard.DeckName[selectedIndex] = newDeckName;
       }
-  
+
       Player.Game.ClubCard.Deck[selectedIndex] = encodeIDDeck;
-  
+
       ServerAccountUpdate.QueueData({ Game: Player.Game }, true);
     }
 
