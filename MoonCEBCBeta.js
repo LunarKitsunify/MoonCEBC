@@ -79,8 +79,8 @@ document.head.appendChild(cssLink);
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
   const MoonCEIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
-  const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href;
-  const BCDeckIcon = new URL("src/Images/BCDeckIcon.png", basePath).href;
+  const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href; //MoonDeckIcon
+  const MoonLogo = new URL("src/Images/AddonIcon2.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
@@ -181,21 +181,27 @@ document.head.appendChild(cssLink);
     repository: "https://github.com/LunarKitsunify/MoonCE",
   });
 
-  modApi.hookFunction("MainRun", 0, (args, next) => {
-    //TODO Hook ChatRoomRun and do it with a DrawButton?
-    //This should minimize the load on the server instead of constantly running in MainRun
-    //At the moment I'm doing it via MainRun because from ChatRoomRun ,
-    //I won't be able to track the moment of leaving the room. Or I'll have to do a lot of twisting for that.
-    //That is, the button should be shown or hidden when conditions are met.
-    next(args);
-    UpdateStatusShowButton();
+  // modApi.hookFunction("MainRun", 0, (args, next) => {
+  //   //TODO Hook ChatRoomRun and do it with a DrawButton?
+  //   //This should minimize the load on the server instead of constantly running in MainRun
+  //   //At the moment I'm doing it via MainRun because from ChatRoomRun ,
+  //   //I won't be able to track the moment of leaving the room. Or I'll have to do a lot of twisting for that.
+  //   //That is, the button should be shown or hidden when conditions are met.
+  //   next(args);
+  //   UpdateStatusShowButton();
+  // });
+
+  modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
+    const result = next(args);
+    DrawAddonButtonWithImage( 0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor" );
+    return result;
   });
 
-  //#region ---------------Settings--------------- //
-
-
-
-  //#endregion //------------------------------//
+  modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
+    const result = next(args);
+    if (MouseIn(0, 930, 35, 70)) OpenExitAddonWindow();
+    return result;
+  });
 
   //#region ---------------Draw Addon Icons--------------- //
 
@@ -306,6 +312,21 @@ document.head.appendChild(cssLink);
 
   //#endregion
 
+  //#region Button in ClubCard Configuration
+
+  modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
+    next(args);
+    //TODO delte if all okeyDrawButton(1815, 190, 90, 90, "", "White", MoonLogo);
+    DrawAddonButtonWithImage( 1815, 190, 90, 90, "White", MoonLogo, "Moon Cards Editor" );
+  });
+
+  modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
+    next(args);
+    if (MouseIn(1815, 190, 90, 90)) OpenExitAddonWindow();
+  });
+
+  //#endregion
+
   //////////////////START//////////////////
   AddonLoad();
 
@@ -381,6 +402,47 @@ document.head.appendChild(cssLink);
     }
 
     return button;
+  }
+
+  /**
+   * Draws a button with an image scaled to fit within the button rectangle.
+   * Works around default DrawButton's unscaled image rendering.
+   *
+   * @param {number} Left - X position of the button
+   * @param {number} Top - Y position of the button
+   * @param {number} Width - Width of the button
+   * @param {number} Height - Height of the button
+   * @param {string} Color - Background color
+   * @param {string} ImageSrc - Path or URL of the image
+   * @param {string} [HoveringText] - Optional tooltip text
+   * @param {boolean} [Disabled] - Optional disabled flag
+   */
+  function DrawAddonButtonWithImage(Left, Top, Width, Height, Color, ImageSrc, HoveringText = null, Disabled = false) {
+      ControllerAddActiveArea(Left, Top);
+
+      // Draw button rectangle
+      MainCanvas.beginPath();
+      MainCanvas.rect(Left, Top, Width, Height);
+      const hovering = MouseX >= Left && MouseX <= Left + Width && MouseY >= Top && MouseY <= Top + Height;
+      MainCanvas.fillStyle = (hovering && !CommonIsMobile && !Disabled) ? "Cyan" : Color;
+      MainCanvas.fillRect(Left, Top, Width, Height);
+      MainCanvas.lineWidth = 2;
+      MainCanvas.strokeStyle = 'black';
+      MainCanvas.stroke();
+      MainCanvas.closePath();
+
+      // Draw image scaled to button area
+      if (ImageSrc) {
+          DrawImageEx(ImageSrc, MainCanvas, Left + 2, Top + 2, {
+              Width: Width - 4,
+              Height: Height - 4
+          });
+      }
+
+      // Optional tooltip
+      if (hovering && HoveringText && !CommonIsMobile && !CommonPhotoMode) {
+          DrawHoverElements.push(() => DrawButtonHover(Left, Top, Width, Height, HoveringText));
+      }
   }
 
   //#endregion
@@ -483,7 +545,7 @@ document.head.appendChild(cssLink);
     
     const deckModeSwitch = createButton(
       null,
-      Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : BCDeckIcon,
+      Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png",
       () => SwitchDeckStorageMode(deckModeSwitch),
       "3%",
       "80%",
@@ -938,22 +1000,22 @@ document.head.appendChild(cssLink);
     return true;
   }
 
-  /**
-   * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
-   */
-  function UpdateStatusShowButton() {
-    //check if in room selected ClubCard game
-    const isClubCardsGame = ChatRoomGame == "ClubCard";
-    //check where the player is
-    const isInChatRoom = CurrentScreen == "ChatRoom";
+  // /**
+  //  * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
+  //  */
+  // function UpdateStatusShowButton() {
+  //   //check if in room selected ClubCard game
+  //   const isClubCardsGame = ChatRoomGame == "ClubCard";
+  //   //check where the player is
+  //   const isInChatRoom = CurrentScreen == "ChatRoom";
 
-    const isShowButton = isInChatRoom && true;
+  //   const isShowButton = isInChatRoom && true;
 
-    if (isShowButton && showButton.style.display !== "block")
-      showButton.style.display = "block";
-    else if (!isShowButton && showButton.style.display !== "none")
-      showButton.style.display = "none";
-  }
+  //   if (isShowButton && showButton.style.display !== "block")
+  //     showButton.style.display = "block";
+  //   else if (!isShowButton && showButton.style.display !== "none")
+  //     showButton.style.display = "none";
+  // }
   /**
    * Checks the player's data and fills the drop-down list with the player's decks.
    * Also updates the card boxes for the first option.
@@ -1160,7 +1222,7 @@ document.head.appendChild(cssLink);
     settings.UseAddonDecks = !settings.UseAddonDecks;
     ServerPlayerExtensionSettingsSync("MoonCE");
 
-    const newIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : BCDeckIcon;
+    const newIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
     buttonElement.innerHTML = `<img src="${newIcon}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`;
     LoadPlayerDecksSelectData();
   }
