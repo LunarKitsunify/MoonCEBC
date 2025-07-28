@@ -71,9 +71,6 @@ document.head.appendChild(cssLink);
 
   const basePath = new URL(".", import.meta.url).href;
   const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
-
-  const CardGameBoardBackground = "https://i.imgur.com/sagZ9Xp.png";
-  const CardGameCardCoverBackground = new URL("src/Images/MoonCECardCover.png", basePath).href;
   /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
@@ -82,6 +79,8 @@ document.head.appendChild(cssLink);
    * If a player opens the addon menu, an icon is rendered for the other players.
    */
   const MoonCEIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
+  const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href;
+  const BCDeckIcon = new URL("src/Images/BCDeckIcon.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
@@ -479,8 +478,23 @@ document.head.appendChild(cssLink);
       });
     }
 
-    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
-
+    
+    //#region DeckModeSwitch
+    
+    const deckModeSwitch = createButton(
+      null,
+      Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : BCDeckIcon,
+      () => SwitchDeckStorageMode(deckModeSwitch),
+      "3%",
+      "80%",
+      "0",
+      "0",
+      "Switch deck storage mode : BC or Addon",
+      "right"
+    );
+    
+    //#endregion
+    
     const editButton = createButton(
       "Edit Deck",
       null,
@@ -492,8 +506,7 @@ document.head.appendChild(cssLink);
       "Open edit menu",
       "right"
     );
-    topSettingsLeftViewPanel.appendChild(editButton);
-
+    
     const exportButton = createButton(
       "Export",
       null,
@@ -505,7 +518,7 @@ document.head.appendChild(cssLink);
       "Export Deck",
       "right"
     );
-
+    
     const importButton = createButton(
       "Import",
       null,
@@ -517,11 +530,14 @@ document.head.appendChild(cssLink);
       "Import Deck",
       "right"
     );
-
+    
+    topSettingsLeftViewPanel.appendChild(deckModeSwitch);
+    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
+    topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
     topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
-
+    
     //#region topSettingsLeftEditPanel
     const topSettingsLeftEditPanel = document.createElement("div");
     topSettingsLeftEditPanel.id = "TopSettingsLeftEditPanelId";
@@ -1135,6 +1151,18 @@ document.head.appendChild(cssLink);
     MoonCEEditCurrentDeck = [...MoonCECurrentDeck];
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
+  }
+
+  function SwitchDeckStorageMode(buttonElement) {
+    const settings = Player.ExtensionSettings?.MoonCE?.Settings;
+    if (!settings) return;
+
+    settings.UseAddonDecks = !settings.UseAddonDecks;
+    ServerPlayerExtensionSettingsSync("MoonCE");
+
+    const newIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : BCDeckIcon;
+    buttonElement.innerHTML = `<img src="${newIcon}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`;
+    LoadPlayerDecksSelectData();
   }
 
   //#endregion
