@@ -21,6 +21,8 @@ import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
 import { InitSettings } from "./Services/Settings.js";
+import { DeckSelectorRun , DeckSelectorClick } from "./Services/StartGameDeckSelector.js"
+import { CreateButton, DrawAddonButtonWithImage } from "./Services/UIObject.js"
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');
@@ -30,7 +32,6 @@ document.head.appendChild(cssLink);
 
 (function () {
   "use strict";
-
   //#region Const
   const WindowStatus = Object.freeze({
     VIEW: "ViewDeck",
@@ -180,16 +181,6 @@ document.head.appendChild(cssLink);
     repository: "https://github.com/LunarKitsunify/MoonCE",
   });
 
-  // modApi.hookFunction("MainRun", 0, (args, next) => {
-  //   //TODO Hook ChatRoomRun and do it with a DrawButton?
-  //   //This should minimize the load on the server instead of constantly running in MainRun
-  //   //At the moment I'm doing it via MainRun because from ChatRoomRun ,
-  //   //I won't be able to track the moment of leaving the room. Or I'll have to do a lot of twisting for that.
-  //   //That is, the button should be shown or hidden when conditions are met.
-  //   next(args);
-  //   UpdateStatusShowButton();
-  // });
-
   //#region ---------------Button "Open Addon" in ChatRoom--------------- //
   modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
     const result = next(args);
@@ -315,7 +306,6 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
     next(args);
-    //TODO delte if all okeyDrawButton(1815, 190, 90, 90, "", "White", MoonLogo);
     DrawAddonButtonWithImage(1815, 190, 90, 90, "White", MoonLogo, "Moon Cards Editor");
   });
 
@@ -326,146 +316,36 @@ document.head.appendChild(cssLink);
 
   //#endregion
 
+  //#region ---------------Replacing the standard deck loader at game startup--------------- //
+  modApi.hookFunction("ClubCardClick", 0, (args, next) => {
+    if (ClubCardPopup.Mode == "DECK") {
+      DeckSelectorClick();
+      return;
+    }
+    return next(args);
+  });
+
+  modApi.hookFunction("ClubCardRenderPopup", 0, (args, next) => {
+    if (ClubCardPopup.Mode == "DECK") {
+      DeckSelectorRun();
+      return;
+    }
+    return next(args);
+  });
+
+  // modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
+  //   const result = next(args);
+  //   CreateMoonDeckSelector();
+  //   return result;
+  // });
+  //#endregion
+
   //#endregion
 
   //////////////////START//////////////////
   AddonLoad();
 
   //#region UI
-
-  //#region Create UI Object func
-
-  /**
-   * Creates a button with an optional image or text.
-   *
-   * @param {string} content - The text for the button (if the button is text-based). If null, the button will have an image.
-   * @param {string} imageSrc - The path to the image. If null, the button will have text.
-   * @param {function} onClick - The event handler function for the button click.
-   * @param {string} width - Width from parent space
-   * @param {string} height - Height from parent space
-   * @param {string} marginLeft - The left margin of the button.
-   * @param {string} marginRight - The right margin of the button.
-   * @param {string} tooltip - The tooltip text to display.
-   * @param {string} tooltipPosition - The position of the tooltip: "top", "right", "bottom", or "left".
-   * @returns {HTMLButtonElement} The created button element.
-   */
-  function createButton(
-    content,
-    imageSrc,
-    onClick,
-    width,
-    height,
-    marginLeft,
-    marginRight,
-    tooltip = null,
-    tooltipPosition = "right"
-  ) {
-    const button = ElementButton.Create(
-      `ToolTipButton_${Math.random().toString(36).substring(2, 9)}`,
-      onClick,
-      {
-        tooltip: tooltip,
-        tooltipPosition: tooltipPosition,
-      },
-      {
-        button: {
-          style: {
-            marginLeft: marginLeft,
-            marginRight: marginRight,
-            display: "flex",
-            height: height,
-            width: width,
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            userSelect: "none",
-          },
-
-          innerHTML: content
-            ? `<span style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; font-size: ${TopPanelTextSize};">${content}</span>`
-            : `<img src="${imageSrc}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`,
-        },
-        tooltip: {
-          style: {},
-        },
-      }
-    );
-    if (Player.Themed && Player.Themed.ColorsModule.base) {
-      button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
-      button.style.borderColor = Player.Themed.ColorsModule.base.accent;
-      button.style.color = Player.Themed.ColorsModule.base.text;
-      button.addEventListener("mouseover", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.base.accent;
-      });
-      button.addEventListener("mouseout", () => {
-        button.style.backgroundColor = Player.Themed.ColorsModule.base.main;
-      });
-    }
-
-    return button;
-  }
-
-  /**
-   * Draws a button with an image scaled to fit within the button rectangle.
-   * Works around default DrawButton's unscaled image rendering.
-   *
-   * @param {number} Left - X position of the button
-   * @param {number} Top - Y position of the button
-   * @param {number} Width - Width of the button
-   * @param {number} Height - Height of the button
-   * @param {string} Color - Background color
-   * @param {string} ImageSrc - Path or URL of the image
-   * @param {string} [HoveringText] - Optional tooltip text
-   * @param {boolean} [Disabled] - Optional disabled flag
-   */
-  function DrawAddonButtonWithImage(Left, Top, Width, Height, Color, ImageSrc, HoveringText = null, Disabled = false) {
-    ControllerAddActiveArea(Left, Top);
-
-    // Draw button rectangle
-    MainCanvas.beginPath();
-    MainCanvas.rect(Left, Top, Width, Height);
-    const hovering = MouseX >= Left && MouseX <= Left + Width && MouseY >= Top && MouseY <= Top + Height;
-    MainCanvas.fillStyle = (hovering && !CommonIsMobile && !Disabled) ? "Cyan" : Color;
-    MainCanvas.fillRect(Left, Top, Width, Height);
-    MainCanvas.lineWidth = 2;
-    MainCanvas.strokeStyle = 'black';
-    MainCanvas.stroke();
-    MainCanvas.closePath();
-
-    // Draw image scaled to button area
-    if (ImageSrc) {
-      DrawImageEx(ImageSrc, MainCanvas, Left + 2, Top + 2, {
-        Width: Width - 4,
-        Height: Height - 4
-      });
-    }
-
-    // Optional tooltip
-    if (hovering && HoveringText && !CommonIsMobile && !CommonPhotoMode) {
-      DrawHoverElements.push(() => DrawButtonHover(Left, Top, Width, Height, HoveringText));
-    }
-  }
-
-  //#endregion
-
-  //#region showButton
-  // const showButton = document.createElement("button");
-  // showButton.style.backgroundImage =
-  //   "url('Screens/MiniGame/ClubCard/Sleeve/Default.png')";
-  // showButton.style.backgroundSize = "cover";
-  // showButton.style.backgroundPosition = "center";
-  // showButton.style.position = "absolute";
-  // showButton.style.width = "2.23%";
-  // showButton.style.height = "5%";
-  // showButton.style.bottom = "0px";
-  // showButton.style.left = "1.5%";
-  // showButton.style.transform = "translateX(calc(50% - 45%))";
-  // showButton.style.padding = "1px 2px";
-  // showButton.style.display = "none";
-  // showButton.addEventListener("click", OpenExitAddonWindow);
-  // document.body.appendChild(showButton);
-
-  //#endregion
 
   function LoadMainWindow() {
     //#region mainWindow
@@ -544,7 +424,7 @@ document.head.appendChild(cssLink);
 
     //#region DeckModeSwitch
 
-    const deckModeSwitch = createButton(
+    const deckModeSwitch = CreateButton(
       null,
       Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png",
       () => SwitchDeckStorageMode(deckModeSwitch),
@@ -558,7 +438,7 @@ document.head.appendChild(cssLink);
 
     //#endregion
 
-    const editButton = createButton(
+    const editButton = CreateButton(
       "Edit Deck",
       null,
       SetEditMode,
@@ -570,7 +450,7 @@ document.head.appendChild(cssLink);
       "right"
     );
 
-    const exportButton = createButton(
+    const exportButton = CreateButton(
       "Export",
       null,
       ExportDeck,
@@ -582,7 +462,7 @@ document.head.appendChild(cssLink);
       "right"
     );
 
-    const importButton = createButton(
+    const importButton = CreateButton(
       "Import",
       null,
       ImportDeck,
@@ -749,7 +629,7 @@ document.head.appendChild(cssLink);
     groupButtons.style.boxSizing = "border-box";
     groupButtons.style.gap = "2%";
 
-    const clearButton = createButton(
+    const clearButton = CreateButton(
       null,
       "Icons/Trash.png",
       ClearCurrentDeck,
@@ -761,7 +641,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const defaultButton = createButton(
+    const defaultButton = CreateButton(
       "Default",
       "Icons/Small/Undo.png",
       null,
@@ -773,7 +653,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const leftCardsListButtonWithImage = createButton(
+    const leftCardsListButtonWithImage = CreateButton(
       null,
       "Icons/Prev.png",
       PrevButtonClick,
@@ -785,7 +665,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const rightCardsListButtonWithImage = createButton(
+    const rightCardsListButtonWithImage = CreateButton(
       null,
       "Icons/Next.png",
       NextButtonClick,
@@ -797,7 +677,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const saveDeckButtonWithImage = createButton(
+    const saveDeckButtonWithImage = CreateButton(
       null,
       "Icons/Accept.png",
       SaveDeckButtonClick,
@@ -809,7 +689,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const cancelDeckButtonWithImage = createButton(
+    const cancelDeckButtonWithImage = CreateButton(
       null,
       "Icons/Cancel.png",
       CancelDeckButtonClick,
@@ -865,7 +745,7 @@ document.head.appendChild(cssLink);
     topSettingsRightPanel.style.gap = TopLeftPanelGap;
     topSettingsPanel.appendChild(topSettingsRightPanel);
 
-    const settingsButton = createButton(
+    const settingsButton = CreateButton(
       null,
       "Icons/General.png",
       OpenSettingsMenu,
@@ -877,7 +757,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const infoButtonWithImage = createButton(
+    const infoButtonWithImage = CreateButton(
       null,
       "Icons/Question.png",
       OpenInfo,
@@ -889,7 +769,7 @@ document.head.appendChild(cssLink);
       "left"
     );
 
-    const exitButtonWithImage = createButton(
+    const exitButtonWithImage = CreateButton(
       null,
       "Icons/Exit.png",
       OpenExitAddonWindow,
@@ -1001,22 +881,6 @@ document.head.appendChild(cssLink);
     return true;
   }
 
-  // /**
-  //  * The function is loaded into Run via BcModSdk and constantly checks to see if the button can be displayed to open the addon window
-  //  */
-  // function UpdateStatusShowButton() {
-  //   //check if in room selected ClubCard game
-  //   const isClubCardsGame = ChatRoomGame == "ClubCard";
-  //   //check where the player is
-  //   const isInChatRoom = CurrentScreen == "ChatRoom";
-
-  //   const isShowButton = isInChatRoom && true;
-
-  //   if (isShowButton && showButton.style.display !== "block")
-  //     showButton.style.display = "block";
-  //   else if (!isShowButton && showButton.style.display !== "none")
-  //     showButton.style.display = "none";
-  // }
   /**
    * Checks the player's data and fills the drop-down list with the player's decks.
    * Also updates the card boxes for the first option.
@@ -1223,9 +1087,13 @@ document.head.appendChild(cssLink);
     settings.UseAddonDecks = !settings.UseAddonDecks;
     ServerPlayerExtensionSettingsSync("MoonCE");
 
-    const newIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
+    const newIcon = GetIconSwitchDeckStorageButton();
     buttonElement.innerHTML = `<img src="${newIcon}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`;
     LoadPlayerDecksSelectData();
+  }
+
+  function GetIconSwitchDeckStorageButton() {
+    return Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
   }
 
   //#endregion
@@ -2029,11 +1897,8 @@ document.head.appendChild(cssLink);
   function ParseAddonMessage(data) {
     let moonMessage = null;
 
-    if (Array.isArray(data.Dictionary)) {
-      moonMessage = data.Dictionary.find(entry =>
-        entry && typeof entry.Version !== 'undefined' && typeof entry.IsMenuOpen !== 'undefined'
-      );
-    }
+    if (Array.isArray(data.Dictionary))
+      moonMessage = data.Dictionary.find(entry => entry && typeof entry.Version !== 'undefined' && typeof entry.IsMenuOpen !== 'undefined');
 
     return moonMessage || null;
   }
@@ -2124,9 +1989,8 @@ document.head.appendChild(cssLink);
    */
   function decodeEIDeck(encodedString) {
     try {
-      if (!encodedString || typeof encodedString !== "string") {
+      if (!encodedString || typeof encodedString !== "string")
         throw new Error("Invalid input: Not a string");
-      }
 
       let decryptedString;
       try {
@@ -2140,16 +2004,14 @@ document.head.appendChild(cssLink);
         .map(num => parseInt(num, 10))
         .filter(num => !isNaN(num));
 
-      if (numbers.length < 30 || numbers.length > 40) {
+      if (numbers.length < 30 || numbers.length > 40)
         throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
-      }
 
       let decodedIds = numbers.map(id => id ^ meow_key);
 
       let allIdsExist = decodedIds.every(id => MoonCEClubCardList.some(card => card.ID === id));
-      if (!allIdsExist) {
+      if (!allIdsExist)
         throw new Error("Invalid deck: Some IDs do not exist in the card database");
-      }
 
       return decodedIds;
 
@@ -2159,4 +2021,6 @@ document.head.appendChild(cssLink);
     }
   }
   //#endregion
+  //whoohaha
+  //ooo yeah
 })();
