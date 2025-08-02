@@ -92,7 +92,7 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	wrapper.id = id;
 	wrapper.style.position = "fixed";
 	wrapper.style.zIndex = 1000;
-	wrapper.style.fontSize = "1em";
+	wrapper.style.fontSize = "1.5em";
 	wrapper.style.userSelect = "none";
 	wrapper.style.display = "flex";
 	wrapper.style.flexDirection = "column";
@@ -136,12 +136,12 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	options.style.overflowY = "auto";
 	options.style.display = "none";
 	options.style.position = "absolute";
-	options.style.top = "63%";
+	options.style.top = "55%";
 	options.style.left = "0";
 	options.style.right = "0";
 	options.style.boxSizing = "border-box";
 	options.style.maxHeight = "800%";
-	options.style.paddingRight = "4px";
+	//options.style.paddingRight = "1px";
 
 	function UpdateDropdownOptions(newOptions) {
 		currentOptions = newOptions;

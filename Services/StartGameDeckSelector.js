@@ -1,5 +1,5 @@
 import { DrawAddonButtonWithImage , CreateCustomDropdown } from "./UIObject.js"
-let selectedDeck = null;
+let selectedDeckIndex = 0;
 let decks = null;
 // const basePath = new URL(".", import.meta.url).href;
 // const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href;
@@ -49,7 +49,7 @@ const SourcesButtonRect = createRect(RectCenterX + Gap, TitleRect.y + TitleRect.
 //#############
 
 //### Row 3 ###
-const DecksDropdownRect = createCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 300, ElementsHeight);
+const DecksDropdownRect = createCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 300, 90);
 //#############
 //#endregion
 
@@ -83,9 +83,9 @@ export function DeckSelectorRun() {
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
 	} else {
 		decks = GetDeckNamesList();
-		DropDownRef = CreateCustomDropdown("MoonDecksDropdown", decks, () => { /* selectedDeck = DropDownRef.GetValue(); */});
+		DropDownRef = CreateCustomDropdown("MoonDecksDropdown", decks, () => { selectedDeckIndex = DropDownRef.GetIndex(); });
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
-		selectedDeck = decks[0];
+		DropDownRef.SetValue(decks[selectedDeckIndex]);
 	}
 	//#####
 	
@@ -203,15 +203,14 @@ function SwitchDeckStorageMode() {
 	
 	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
 
+	selectedDeckIndex = 0;
 	const newDecks = GetDeckNamesList();
 	DropDownRef.UpdateOptions(newDecks);
-	//DropDownRef.SetValue(newDecks[0]);
-	// selectedDeck = DropDownRef.GetValue();
 
-	if (newDecks.length > 0) {
-		DropDownRef.SetValue(newDecks[0]);
-		selectedDeck = newDecks[0];
-	}
+	// if (newDecks.length > 0) {
+	// 	DropDownRef.SetValue(newDecks[0]);
+	// 	selectedDeck = newDecks[0];
+	// }
 }
 
 function createCenteredRect(y, w, h) {
