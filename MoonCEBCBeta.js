@@ -21,7 +21,7 @@ import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
 import { InitSettings } from "./Services/Settings.js";
-import { DeckSelectorRun , DeckSelectorClick } from "./Services/StartGameDeckSelector.js"
+import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
 import { CreateButton, DrawAddonButtonWithImage } from "./Services/UIObject.js"
 import { bcModSdk } from './src/BCModSdk.js';
 
@@ -318,7 +318,7 @@ document.head.appendChild(cssLink);
 
   //#region ---------------Replacing the standard deck loader at game startup--------------- //
   modApi.hookFunction("ClubCardClick", 0, (args, next) => {
-    if (ClubCardPopup.Mode == "DECK") {
+    if (ClubCardPopup?.Mode == "DECK") {
       DeckSelectorClick();
       return;
     }
@@ -326,12 +326,22 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ClubCardRenderPopup", 0, (args, next) => {
-    if (ClubCardPopup.Mode == "DECK") {
+    if (ClubCardPopup?.Mode && ClubCardPopup?.Mode == "DECK") {
       DeckSelectorRun();
       return;
     }
     return next(args);
   });
+
+  modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
+    MoonClubCardLoadDeck();
+  });
+
+  // modApi.patchFunction("ClubCardLoadDeckNumber", {
+  //   'Player.Game.ClubCard.Deck':
+  //   'Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks ? Player.ExtensionSettings?.MoonCE?.Decks : Player.Game.ClubCard'
+  // });
+
 
   // modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
   //   const result = next(args);
@@ -1094,6 +1104,11 @@ document.head.appendChild(cssLink);
 
   function GetIconSwitchDeckStorageButton() {
     return Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
+  }
+
+  function GetDeckStorageSources() {
+    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+    return useAddonDecks ? Player.ExtensionSettings?.MoonCE?.Decks : Player.Game.ClubCard;
   }
 
   //#endregion

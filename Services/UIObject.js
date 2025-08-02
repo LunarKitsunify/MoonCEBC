@@ -1,4 +1,6 @@
 //#region DOM
+const TopPanelTextSize = "1.2vw";
+
 /**
  * Creates a button with an optional image or text.
  *
@@ -73,199 +75,18 @@ export function CreateButton(
  * Creates a custom dropdown element and appends it to the document.
  *
  * @returns {{
- *   UpdateOptions: (newOptions: string[]) => void,    // Replace the list of options
- *   SetValue: (value: string) => void,                // Set the selected value manually
- *   GetValue: () => string,                           // Get the current selected value
- *   Wrapper: HTMLDivElement                           // The root dropdown container element
- * }}
- */
-export function CreateCustomDropdown1(id, optionsList, onChange) {
-	const existing = document.getElementById(id);
-	if (existing) existing.remove();
-
-	const wrapper = document.createElement("div");
-	wrapper.id = id;
-	wrapper.style.position = "fixed";
-	wrapper.style.zIndex = 1000;
-	wrapper.style.fontSize = "1em";
-	wrapper.style.userSelect = "none";
-	wrapper.style.display = "flex";
-	wrapper.style.flexDirection = "column";
-	wrapper.style.boxSizing = "border-box";
-
-	const selected = document.createElement("div");
-	selected.textContent = optionsList[0] ?? "";
-	selected.style.flex = "0 0 40%";
-	selected.style.padding = "2% 4%";
-	selected.style.background = "white";
-	selected.style.color = "black";
-	selected.style.border = "1px solid #00aaff";
-	selected.style.cursor = "pointer";
-	selected.style.display = "flex";
-	selected.style.alignItems = "center";
-	selected.onclick = () => {
-		options.style.display = options.style.display === "block" ? "none" : "block";
-	};
-	wrapper.appendChild(selected);
-
-	const options = document.createElement("div");
-	options.style.flex = "1";
-	options.style.background = "#111";
-	options.style.border = "1px solid #00aaff";
-	options.style.overflowY = "auto";
-	options.style.display = "none";
-	options.style.position = "absolute";
-	options.style.top = "63%";
-	options.style.left = "0";
-	options.style.right = "0";
-	options.style.boxSizing = "border-box";
-	options.style.maxHeight = "800%";
-
-	function UpdateDropdownOptions(newOptions) {
-		options.innerHTML = "";
-
-		newOptions.forEach(opt => {
-			const el = document.createElement("div");
-			el.textContent = opt;
-			el.style.padding = "2% 4%";
-			el.style.cursor = "pointer";
-			el.style.background = "#111";
-			el.style.color = "#fff";
-			el.onmouseenter = () => el.style.background = "#333";
-			el.onmouseleave = () => el.style.background = "#111";
-			el.onclick = () => {
-				selected.textContent = opt;
-				options.style.display = "none";
-				if (onChange) onChange(opt);
-			};
-			options.appendChild(el);
-		});
-	}
-
-	UpdateDropdownOptions(optionsList);
-
-	wrapper.appendChild(options);
-	document.body.appendChild(wrapper);
-
-	return {
-		UpdateOptions: UpdateDropdownOptions,
-		SetValue: (value) => { selected.textContent = value },
-		GetValue: () => selected.textContent,
-		Wrapper: wrapper
-	};
-}
-
-/**
- * Creates a custom dropdown element and appends it to the document.
- *
- * @returns {{
  *   UpdateOptions: (newOptions: string[]) => void,
  *   SetValue: (value: string) => void,
  *   GetValue: () => string,
- *   Wrapper: HTMLDivElement
- * }}
- */
-export function CreateCustomDropdown2(id, optionsList, onChange) {
-	const existing = document.getElementById(id);
-	if (existing) existing.remove();
-
-	const wrapper = document.createElement("div");
-	wrapper.id = id;
-	wrapper.style.position = "fixed";
-	wrapper.style.zIndex = 1000;
-	wrapper.style.fontSize = "1em";
-	wrapper.style.userSelect = "none";
-	wrapper.style.display = "flex";
-	wrapper.style.flexDirection = "column";
-	wrapper.style.boxSizing = "border-box";
-
-	const selected = document.createElement("div");
-	selected.textContent = optionsList[0] ?? "";
-	selected.style.flex = "0 0 40%";
-	selected.style.padding = "2% 4%";
-	selected.style.background = "white";
-	selected.style.color = "black";
-	selected.style.border = "1px solid #00aaff";
-	selected.style.cursor = "pointer";
-	selected.style.display = "flex";
-    selected.style.alignItems = "center";
-    selected.style.justifyContent = "space-between";
-	selected.onclick = () => {
-		options.style.display = options.style.display === "block" ? "none" : "block";
-    };
-    
-
-    const arrow = document.createElement("span");
-    arrow.textContent = "▼";
-    arrow.style.marginLeft = "auto";
-    arrow.style.paddingRight = "8px";
-    arrow.style.fontSize = "0.8em";
-    arrow.style.pointerEvents = "none";
-
-    selected.appendChild(arrow);
-
-	wrapper.appendChild(selected);
-
-	const options = document.createElement("div");
-	options.style.flex = "1";
-	options.style.background = "#f0f0f0";
-	options.style.border = "1px solid #00aaff";
-	options.style.overflowY = "auto";
-	options.style.display = "none";
-	options.style.position = "absolute";
-	options.style.top = "63%";
-	options.style.left = "0";
-	options.style.right = "0";
-	options.style.boxSizing = "border-box";
-	options.style.maxHeight = "800%";
-
-	function UpdateDropdownOptions(newOptions) {
-		options.innerHTML = "";
-
-		newOptions.forEach(opt => {
-			const el = document.createElement("div");
-			el.textContent = opt;
-			el.style.padding = "2% 4%";
-			el.style.cursor = "pointer";
-			el.style.background = "#f0f0f0";
-			el.style.color = "black";
-			el.onmouseenter = () => el.style.background = "#dcdcdc";
-			el.onmouseleave = () => el.style.background = "#f0f0f0";
-			el.onclick = () => {
-				selected.textContent = opt;
-				options.style.display = "none";
-				if (onChange) onChange(opt);
-			};
-			options.appendChild(el);
-		});
-	}
-
-	UpdateDropdownOptions(optionsList);
-
-	wrapper.appendChild(options);
-	document.body.appendChild(wrapper);
-
-	return {
-		UpdateOptions: UpdateDropdownOptions,
-		SetValue: (value) => { selected.textContent = value },
-		GetValue: () => selected.textContent,
-		Wrapper: wrapper
-	};
-}
-
-/**
- * Creates a custom dropdown element and appends it to the document.
- *
- * @returns {{
- *   UpdateOptions: (newOptions: string[]) => void,
- *   SetValue: (value: string) => void,
- *   GetValue: () => string,
+ * 	 GetIndex: () => number,
  *   Wrapper: HTMLDivElement
  * }}
  */
 export function CreateCustomDropdown(id, optionsList, onChange) {
 	const existing = document.getElementById(id);
 	if (existing) existing.remove();
+
+	let currentOptions = optionsList;
 
 	const wrapper = document.createElement("div");
 	wrapper.id = id;
@@ -323,6 +144,7 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	options.style.paddingRight = "4px";
 
 	function UpdateDropdownOptions(newOptions) {
+		currentOptions = newOptions;
 		options.innerHTML = "";
 
 		newOptions.forEach(opt => {
@@ -343,7 +165,7 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 		});
 	}
 
-	UpdateDropdownOptions(optionsList);
+	UpdateDropdownOptions(currentOptions);
 	wrapper.appendChild(options);
 	document.body.appendChild(wrapper);
 
@@ -351,6 +173,7 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 		UpdateOptions: UpdateDropdownOptions,
 		SetValue: (value) => { selectedLabel.textContent = value },
 		GetValue: () => selectedLabel.textContent,
+		GetIndex: () => currentOptions.indexOf(selectedLabel.textContent),
 		Wrapper: wrapper
 	};
 }

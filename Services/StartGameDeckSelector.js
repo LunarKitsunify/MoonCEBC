@@ -12,6 +12,7 @@ let SwitchDeckStorageModeIcon = null;
  *   UpdateOptions: (newOptions: string[]) => void,    // Replace the list of options
  *   SetValue: (value: string) => void,                // Manually set the selected value
  *   GetValue: () => string,                           // Get the currently selected value
+ * 	 GetIndex: () => number,						   // Get the currently selected deck index 
  *   Wrapper: HTMLDivElement                           // Root dropdown container
  * }}
  */
@@ -82,8 +83,7 @@ export function DeckSelectorRun() {
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
 	} else {
 		decks = GetDeckNamesList();
-		//ElementCreateDropdown("MoonDecksDropdown", GetDeckNamesList(), DeckSelectedOnChange);
-		DropDownRef = CreateCustomDropdown("MoonDecksDropdown", decks, DeckSelectedOnChange);
+		DropDownRef = CreateCustomDropdown("MoonDecksDropdown", decks, () => { /* selectedDeck = DropDownRef.GetValue(); */});
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
 		selectedDeck = decks[0];
 	}
@@ -96,18 +96,101 @@ export function DeckSelectorRun() {
 }
 
 export function DeckSelectorClick() {
+	//Stwitch deck storage mode : BC or Addon
 	if (MouseIn(SourcesButtonRect.x, SourcesButtonRect.y, SourcesButtonRect.w, SourcesButtonRect.h))
 		SwitchDeckStorageMode();
+	//Load deck and start game.
+	if (MouseIn(StartButtonRect.x, StartButtonRect.y, StartButtonRect.w, StartButtonRect.h)) {
+		//MoonLoadDeckNumber();
+		const deckIndex = DropDownRef.GetIndex();
+		ClubCardLoadDeckNumber(deckIndex);
+		ElementRemove("MoonDecksDropdown");
+	}
 }
 
-function DeckSelectedOnChange() {
-	selectedDeck = this.value;
-	console.log(this.value);
+export function MoonClubCardLoadDeck() {
+	const DeckNum = DropDownRef.GetIndex();
+	const deckSources = GetDecksList();
+	let Deck = [];
+	if (deckSources.length > DeckNum && deckSources[DeckNum]?.length >= ClubCardBuilderMinDeckSize && deckSources[DeckNum]?.length <= ClubCardBuilderMaxDeckSize) {
+		let msg = TextGet("UsingDeck").replace("PLAYERNAME", CharacterNickname(Player));
+		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, null, {}, null, msg);
+		for (let i = 0; i < deckSources[DeckNum]?.length; i++)
+			Deck.push(deckSources[DeckNum].charCodeAt(i));
+	} else {
+		let msg = TextGet("NoValidDeckFound").replace("PLAYERNAME", CharacterNickname(Player));
+		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, null, {}, null, msg);
+		Deck = ClubCardBuilderDefaultDeck.slice();
+		}
+
+	ElementRemove("MoonDecksDropdown");
+
+	// Loads the deck and shuffles it
+	let Index = ClubCardGetPlayerIndex();
+	if (Index >= 0) {
+		ClubCardPlayer[Index].Deck = ClubCardShuffle(ClubCardLoadDeck(Deck));
+		ClubCardPlayer[Index].FullDeck = ClubCardLoadDeck(Deck);
+	}
+
+	// Starts the game with the loaded deck
+	if (!ClubCardIsOnline()) {
+		const textGetKey = "Start" + ((ClubCardTurnIndex == 0) ? "Player" : "Opponent");
+		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, textGetKey);
+		ClubCardPlayer[0].Hand.push(ClubCardGetCopyCardByName("Tips"));
+		ClubCardPlayer[1].Hand.push(ClubCardGetCopyCardByName("Tips"));
+		ClubCardPlayerDrawCard(ClubCardPlayer[0], (ClubCardTurnIndex == 0) ? 5 : 6);
+		ClubCardPlayerDrawCard(ClubCardPlayer[1], (ClubCardTurnIndex == 1) ? 5 : 6);
+	} else {
+		ClubCardPlayer[Index].Hand.push(ClubCardGetCopyCardByName("Tips"));
+		ClubCardPlayerDrawCard(ClubCardPlayer[Index], (ClubCardTurnIndex == Index) ? 5 : 6);
+	}
+	// Syncs online data
+	// Only send our own data when we select a deck, otherwise we could overwrite the other
+	// player's deck selection if they both select at the same time.
+	GameClubCardSyncOnlineData("Action", true);
+
+	// If a card can be won against the NPC
+	ClubCardReward = null;
+	if (!ClubCardIsOnline() && (ClubCardPlayer[1].Character.IsNpc()))
+		for (let Card of ClubCardList)
+			if ((Card.Reward === "NPC-" + ClubCardPlayer[1].Character.Name) || (Card.Reward === ClubCardPlayer[1].Character.AccountName)) {
+				let Char = String.fromCharCode(Card.ID);
+				if ((Player.Game == null) || (Player.Game.ClubCard == null) || (Player.Game.ClubCard.Reward == null) || (Player.Game.ClubCard.Reward.indexOf(Char) < 0)) {
+					ClubCardReward = Card;
+					break;
+				}
+			}
+
+	// If a card can be won against the online player
+	if (ClubCardIsOnline() && ClubCardIsPlaying())
+		for (let Card of ClubCardList)
+			if (Card.Reward && ((Card.RewardMemberNumber === ClubCardOnlinePlayerMemberNumber1) || (Card.RewardMemberNumber === ClubCardOnlinePlayerMemberNumber2))) {
+				let Char = String.fromCharCode(Card.ID);
+				if ((Player.Game == null) || (Player.Game.ClubCard == null) || (Player.Game.ClubCard.Reward == null) || (Player.Game.ClubCard.Reward.indexOf(Char) < 0)) {
+					ClubCardReward = Card;
+					break;
+				}
+			}
+
+	// Show the winnable card or start the game right away
+	if (ClubCardReward != null) {
+		if (ClubCardReward.Type == null) ClubCardReward.Type = "Member";
+		ClubCardFocus = { ...ClubCardReward, Location: 'Reward' , AnimationState: 'idle'};
+		if (ClubCardPlayer[1].Control === "AI") ClubCardPlayer[1].Hand.push({ ...ClubCardReward });
+		ClubCardCreatePopup("TEXT", TextGet("CanWinNewCard") + " " + ClubCardReward.Title, TextGet("Play"), null, "ClubCardAIStart()", null);
+		ClubCardOptionSelection = true;
+	} else ClubCardAIStart();
 }
 
 function GetDeckNamesList() {
 	const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
 	let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : Player.Game.ClubCard.DeckName;
+	return decksSources;
+}
+
+function GetDecksList() {
+	const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+	let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
 	return decksSources;
 }
 
@@ -122,7 +205,13 @@ function SwitchDeckStorageMode() {
 
 	const newDecks = GetDeckNamesList();
 	DropDownRef.UpdateOptions(newDecks);
-	DropDownRef.SetValue(newDecks[0]);
+	//DropDownRef.SetValue(newDecks[0]);
+	// selectedDeck = DropDownRef.GetValue();
+
+	if (newDecks.length > 0) {
+		DropDownRef.SetValue(newDecks[0]);
+		selectedDeck = newDecks[0];
+	}
 }
 
 function createCenteredRect(y, w, h) {
