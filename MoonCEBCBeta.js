@@ -33,58 +33,10 @@ document.head.appendChild(cssLink);
 
 (function () {
   "use strict";
-  //#region Const
+  //#region Variables
   const AddonVersion = "1.2.20";
   const AddonType = "Beta";
   
-  const WindowStatus = Object.freeze({
-    VIEW: "ViewDeck",
-    EDIT: "EditDeck",
-    SETTINGS: "Settings",
-  });
-
-  const CardTypes = Object.freeze({
-    ALL_CARDS: { value: "All Cards", text: "All Cards" },
-    SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
-    EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
-    REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
-    ABDL: { value: "ABDL", text: "ABDL" },
-    ASYLUM: { value: "Asylum", text: "Asylum" },
-    COLLEGE: { value: "College", text: "College" },
-    CRIMINAL: { value: "Criminal", text: "Criminal" },
-    DOMINANT_MISTRESS: {
-      value: "DominantMistress",
-      text: "Dominant / Mistress",
-    },
-    FETISHIST: { value: "Fetishist", text: "Fetishist" },
-    LIABILITY: { value: "Liability", text: "Liability" },
-    MAID: { value: "Maid", text: "Maid" },
-    PET: { value: "PetOwner", text: "Pet / Owner" },
-    PLAYER: { value: "Player", text: "Player" },
-    POLICE: { value: "Police", text: "Police" },
-    PORN: { value: "Porn", text: "Porn" },
-    SHIBARI_SENSEI_KNOT: {
-      value: "ShibariSenseiKnot",
-      text: "Shibari / Sensei / Knot",
-    },
-    STAFF: { value: "Staff", text: "Staff" },
-    UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
-  });
-  const meow_key = 42;
-  const Hidden = "Hidden";
-
-  const basePath = new URL(".", import.meta.url).href;
-  //const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
-  /**
-   * If the people in the room pass the addon check, draws a card icon for them.
-   */
-  const MoonCEStatusIsAddonIcon = new URL("src/Images/IsAddon.png", basePath).href;
-  /**
-   * If a player opens the addon menu, an icon is rendered for the other players.
-   */
-  const MoonCEIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
-  const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href;
-  const MoonLogo = new URL("src/Images/AddonIcon2.png", basePath).href;
   /**
    * A variable for storing and manipulating the list of cards. To avoid touching cards in the main client.
    * @type {ClubCard[]}
@@ -150,25 +102,6 @@ document.head.appendChild(cssLink);
    * Variable for accessing  mainWindow = document.createElement("div");
    */
   let MainWindowPanel = null;
-
-  //#region Size and color customization
-
-  const TopPanelHeight = "7%";
-  const TopPanelTextSize = "1.2vw";
-  const DeckNamePanelWidth = "20%";
-  const TopLeftPanelGap = "1%";
-  const TopPanelSidePadding = "0.5%";
-  const TopLeftPanelWidth = "92%";
-  const TopRightPanelWidth = `calc(100% - ${TopLeftPanelWidth})`;
-
-  //const requiredLevelTestColor = "#FF5733";
-  const fameTextColor = "#3357FF";
-  const moneyTextColor = "#006400";
-
-  const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
-
-
-  //#endregion
 
   //#endregion
 
@@ -385,7 +318,7 @@ document.head.appendChild(cssLink);
     topSettingsPanel.style.borderBottom = "2px solid black";
     topSettingsPanel.style.boxSizing = "border-box";
     topSettingsPanel.style.alignItems = "center";
-    topSettingsPanel.style.height = TopPanelHeight;
+    topSettingsPanel.style.height = Constants.TopPanelHeight;
     topSettingsPanel.style.width = "100%";
     topSettingsPanel.style.backgroundImage = `url(${Constants.MoonCETopPanelBackground})`;
     topSettingsPanel.style.backgroundRepeat = "repeat";
@@ -397,20 +330,20 @@ document.head.appendChild(cssLink);
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftViewPanel.style.justifyContent = "flex-start";
     topSettingsLeftViewPanel.style.alignItems = "center";
-    topSettingsLeftViewPanel.style.width = TopLeftPanelWidth;
+    topSettingsLeftViewPanel.style.width = Constants.TopLeftPanelWidth;
     topSettingsLeftViewPanel.style.height = "100%";
     topSettingsLeftViewPanel.style.boxSizing = "border-box";
-    topSettingsLeftViewPanel.style.gap = TopLeftPanelGap;
-    topSettingsLeftViewPanel.style.paddingLeft = TopPanelSidePadding;
+    topSettingsLeftViewPanel.style.gap = Constants.TopLeftPanelGap;
+    topSettingsLeftViewPanel.style.paddingLeft = Constants.TopPanelSidePadding;
     topSettingsPanel.appendChild(topSettingsLeftViewPanel);
 
     const playerDecksSelect = document.createElement("select");
     playerDecksSelect.id = "PlayerDecksSelectId";
-    playerDecksSelect.style.width = DeckNamePanelWidth;
+    playerDecksSelect.style.width = Constants.DeckNamePanelWidth;
     playerDecksSelect.style.height = "80%";
     playerDecksSelect.style.alignContent = "center";
     playerDecksSelect.style.textAlign = "center";
-    playerDecksSelect.style.fontSize = TopPanelTextSize;
+    playerDecksSelect.style.fontSize = Constants.TopPanelTextSize;
     playerDecksSelect.addEventListener("change", function () {
       GetDeckData(playerDecksSelect);
     });
@@ -497,23 +430,23 @@ document.head.appendChild(cssLink);
     topSettingsLeftEditPanel.style.display = "none";
     topSettingsLeftEditPanel.style.justifyContent = "flex-start";
     topSettingsLeftEditPanel.style.alignItems = "center";
-    topSettingsLeftEditPanel.style.width = TopLeftPanelWidth;
+    topSettingsLeftEditPanel.style.width = Constants.TopLeftPanelWidth;
     topSettingsLeftEditPanel.style.height = "100%";
     topSettingsLeftEditPanel.style.boxSizing = "border-box";
-    topSettingsLeftEditPanel.style.gap = TopLeftPanelGap;
-    topSettingsLeftEditPanel.style.paddingLeft = TopPanelSidePadding;
-    topSettingsLeftEditPanel.style.paddingRight = TopPanelSidePadding;
+    topSettingsLeftEditPanel.style.gap = Constants.TopLeftPanelGap;
+    topSettingsLeftEditPanel.style.paddingLeft = Constants.TopPanelSidePadding;
+    topSettingsLeftEditPanel.style.paddingRight = Constants.TopPanelSidePadding;
     topSettingsPanel.appendChild(topSettingsLeftEditPanel);
 
     //#region deckNameImput
 
     const deckNameInput = document.createElement("input");
     deckNameInput.id = "MoonCEDeckNameInputId";
-    deckNameInput.style.width = DeckNamePanelWidth;
+    deckNameInput.style.width = Constants.DeckNamePanelWidth;
     deckNameInput.style.height = "80%";
     deckNameInput.style.alignContent = "center";
     deckNameInput.style.textAlign = "center";
-    deckNameInput.style.fontSize = TopPanelTextSize;
+    deckNameInput.style.fontSize = Constants.TopPanelTextSize;
     deckNameInput.placeholder = "Deck Name";
     if (Player.Themed) {
       const userColor = Player.Themed.ColorsModule.textColor;
@@ -530,7 +463,7 @@ document.head.appendChild(cssLink);
       });
     }
     deckNameInput.addEventListener("keydown", (event) => {
-      if (movementKeys.includes(event.code))
+      if (Constants.movementKeys.includes(event.code))
         event.stopPropagation();
     });
 
@@ -545,7 +478,7 @@ document.head.appendChild(cssLink);
     groupSelect.style.alignContent = "center";
 
     groupSelect.style.textAlign = "center";
-    groupSelect.style.fontSize = TopPanelTextSize;
+    groupSelect.style.fontSize = Constants.TopPanelTextSize;
     groupSelect.addEventListener("change", function () {
       if (MoonCECurrentGroup != groupSelect.value) {
         MoonCECurrentGroup = groupSelect.value;
@@ -594,7 +527,7 @@ document.head.appendChild(cssLink);
     searchCardInput.style.height = "80%";
     searchCardInput.style.alignContent = "center";
     searchCardInput.style.textAlign = "center";
-    searchCardInput.style.fontSize = TopPanelTextSize;
+    searchCardInput.style.fontSize = Constants.TopPanelTextSize;
     searchCardInput.placeholder = "Search Card";
     searchCardInput.addEventListener("input", (event) => {
       const newValue = event.target.value;
@@ -603,7 +536,7 @@ document.head.appendChild(cssLink);
         const lowerSearch = newValue.toLowerCase();
 
         const searchResult = MoonCEBuilderCurrentGroupsList.filter(card => {
-          const cleanedText = card.Text?.replaceAll(fameTextColor, "").replaceAll(moneyTextColor, "");
+          const cleanedText = card.Text?.replaceAll(Constants.fameTextColor, "").replaceAll(Constants.moneyTextColor, "");
 
           const inName = card.Name.toLowerCase().includes(lowerSearch);
           const inText = cleanedText && cleanedText.toLowerCase().includes(lowerSearch);
@@ -622,7 +555,7 @@ document.head.appendChild(cssLink);
       UpdateCardsCells(MoonCECurrent30Cards);
     });
     searchCardInput.addEventListener("keydown", (event) => {
-      if (movementKeys.includes(event.code))
+      if (Constants.movementKeys.includes(event.code))
         event.stopPropagation();
     });
 
@@ -721,7 +654,7 @@ document.head.appendChild(cssLink);
     deckCardsCounter.style.textAlign = "center";
     deckCardsCounter.style.pointerEvents = "none";
     deckCardsCounter.style.userSelect = "none";
-    deckCardsCounter.style.fontSize = TopPanelTextSize;
+    deckCardsCounter.style.fontSize = Constants.TopPanelTextSize;
     deckCardsCounter.style.color = "white";
 
     //#endregion
@@ -747,12 +680,12 @@ document.head.appendChild(cssLink);
     topSettingsRightPanel.style.flexDirection = "row";
     topSettingsRightPanel.style.justifyContent = "flex-end";
     topSettingsRightPanel.style.alignItems = "center";
-    topSettingsRightPanel.style.width = TopRightPanelWidth;
+    topSettingsRightPanel.style.width = Constants.TopRightPanelWidth;
     topSettingsRightPanel.style.height = "100%";
     topSettingsRightPanel.style.boxSizing = "border-box";
-    topSettingsRightPanel.style.paddingRight = TopPanelSidePadding;
-    topSettingsRightPanel.style.paddingLeft = TopPanelSidePadding;
-    topSettingsRightPanel.style.gap = TopLeftPanelGap;
+    topSettingsRightPanel.style.paddingRight = Constants.TopPanelSidePadding;
+    topSettingsRightPanel.style.paddingLeft = Constants.TopPanelSidePadding;
+    topSettingsRightPanel.style.gap = Constants.TopLeftPanelGap;
     topSettingsPanel.appendChild(topSettingsRightPanel);
 
     const settingsButton = CreateButton(
@@ -807,7 +740,7 @@ document.head.appendChild(cssLink);
     bottomPanel.style.justifyContent = "space-between";
     bottomPanel.style.alignItems = "center";
     bottomPanel.style.width = "100%";
-    bottomPanel.style.height = `calc(100% - ${TopPanelHeight})`;
+    bottomPanel.style.height = `calc(100% - ${Constants.TopPanelHeight})`;
     bottomPanel.style.boxSizing = "border-box";
     mainWindow.appendChild(bottomPanel);
 
@@ -1948,11 +1881,11 @@ document.head.appendChild(cssLink);
     const formattedText = text
       .replace(
         fameRegex,
-        (match) => `<span style='color: ${fameTextColor};'>${match}</span>`
+        (match) => `<span style='color: ${Constants.fameTextColor};'>${match}</span>`
       )
       .replace(
         moneyRegex,
-        (match) => `<span style='color: ${moneyTextColor};'>${match}</span>`
+        (match) => `<span style='color: ${Constants.moneyTextColor};'>${match}</span>`
       );
 
     return formattedText;

@@ -1,9 +1,10 @@
-import { DrawAddonButtonWithImage , CreateCustomDropdown } from "./UIObject.js"
+import { DrawAddonButtonWithImage, CreateCustomDropdown } from "./UIObject.js"
+import * as Constants from "./Constants.js";
 let selectedDeckIndex = 0;
 let decks = null;
 
-const basePath = new URL("../src/Images/", import.meta.url).href;
-const MoonDeckIcon = new URL("MoonDeckIcon.png", basePath).href;
+//const basePath = new URL("../src/Images/", import.meta.url).href;
+//const MoonDeckIcon = new URL("MoonDeckIcon.png", basePath).href;
 let SwitchDeckStorageModeIcon = null;
 /**
  * @type {{
@@ -56,7 +57,7 @@ const StartButtonRect = createCenteredRect(DecksDropdownRect.y + DecksDropdownRe
 //#############
 
 export function DeckSelectorRun() {
-	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
+	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png";
 
 	DrawRect(548, 298, 604, 404, "White");
 	DrawRect(550, 300, 600, 400, "Black");
@@ -66,8 +67,8 @@ export function DeckSelectorRun() {
 	//#####
 	
 	//##### Deck Info
-	DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
-		"White", "Icons/Public.png", "Check current deck");
+	// DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
+	// 	"White", "Icons/Public.png", "Check current deck");
 
 	
 	//##### decks sources button and dropdown
@@ -199,7 +200,7 @@ function SwitchDeckStorageMode() {
     settings.UseAddonDecks = !settings.UseAddonDecks;
 	ServerPlayerExtensionSettingsSync("MoonCE");
 	
-	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? MoonDeckIcon : "Icons/Logo.png";
+	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png";
 
 	selectedDeckIndex = 0;
 	const newDecks = GetDeckNamesList();
