@@ -120,9 +120,23 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	selected.appendChild(selectedLabel);
 	selected.appendChild(arrow);
 
-	selected.onclick = () => {
-		options.style.display = options.style.display === "block" ? "none" : "block";
+	// selected.onclick = () => {
+	// 	options.style.display = options.style.display === "block" ? "none" : "block";
+	// };
+
+	selected.onclick = (event) => {
+		event.stopPropagation();
+
+		const isOpen = options.style.display === "block";
+		options.style.display = isOpen ? "none" : "block";
+
+		if (!isOpen) {
+			window.addEventListener("mousedown", outsideClickHandler);
+		} else {
+			window.removeEventListener("mousedown", outsideClickHandler);
+		}
 	};
+
 
 	wrapper.appendChild(selected);
 
@@ -159,6 +173,13 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 			};
 			options.appendChild(el);
 		});
+	}
+
+	function outsideClickHandler(event) {
+		if (!wrapper.contains(event.target)) {
+			options.style.display = "none";
+			window.removeEventListener("mousedown", outsideClickHandler);
+		}
 	}
 
 	UpdateDropdownOptions(currentOptions);
