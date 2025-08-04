@@ -24,6 +24,7 @@ import { InitSettings } from "./Services/Settings.js";
 import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
 import { CreateButton, DrawAddonButtonWithImage } from "./Services/UIObject.js"
 import { bcModSdk } from './src/BCModSdk.js';
+import * as Constants from "./Services/Constants.js";
 
 const cssLink = document.createElement('link');
 cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
@@ -69,12 +70,11 @@ document.head.appendChild(cssLink);
 
   const AddonVersion = "1.2.20";
   const AddonType = "Beta";
-  const MoonCEAddonName = "Moon Cards Editor";
   const meow_key = 42;
   const Hidden = "Hidden";
 
   const basePath = new URL(".", import.meta.url).href;
-  const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
+  //const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
   /**
    * If the people in the room pass the addon check, draws a card icon for them.
    */
@@ -176,7 +176,7 @@ document.head.appendChild(cssLink);
 
   const modApi = bcModSdk.registerMod({
     name: "MoonCE",
-    fullName: MoonCEAddonName,
+    fullName: Constants.MoonCEAddonName,
     version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCE",
   });
@@ -387,7 +387,7 @@ document.head.appendChild(cssLink);
     topSettingsPanel.style.alignItems = "center";
     topSettingsPanel.style.height = TopPanelHeight;
     topSettingsPanel.style.width = "100%";
-    topSettingsPanel.style.backgroundImage = `url(${MoonCETopPanelBackground})`;
+    topSettingsPanel.style.backgroundImage = `url(${Constants.MoonCETopPanelBackground})`;
     topSettingsPanel.style.backgroundRepeat = "repeat";
     mainWindow.appendChild(topSettingsPanel);
 
@@ -874,7 +874,7 @@ document.head.appendChild(cssLink);
     InitChatCommands();
     TrackingModuleInitialization(modApi);
 
-    console.log(`${MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
+    console.log(`${Constants.MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }
 
   /**
@@ -1333,7 +1333,7 @@ document.head.appendChild(cssLink);
         font-weight: bold;
         border-bottom: 1px solid #ccc;
     `;
-    header.style.backgroundImage = `url(${MoonCETopPanelBackground})`;
+    header.style.backgroundImage = `url(${Constants.MoonCETopPanelBackground})`;
 
     const titleLabel = document.createElement("span");
     titleLabel.textContent = title || "Enter data";
@@ -1554,7 +1554,7 @@ document.head.appendChild(cssLink);
       padding: 10px 16px;
       font-weight: bold;
       border-bottom: 1px solid #ccc;
-      background-image: url(${MoonCETopPanelBackground});
+      background-image: url(${Constants.MoonCETopPanelBackground});
     `;
 
     const titleLabel = document.createElement("span");
@@ -1984,8 +1984,6 @@ document.head.appendChild(cssLink);
     return decodedNumbers;
   }
 
-
-
   /**
    * Encodes an array of numbers into a Base64 string. For Export/Import Deck
    * @param {number[]} IdArrayDeck - The array of numerical IDs to encode.
@@ -2036,6 +2034,4 @@ document.head.appendChild(cssLink);
     }
   }
   //#endregion
-  //whoohaha
-  //ooo yeah
 })();

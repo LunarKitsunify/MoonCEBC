@@ -1,8 +1,6 @@
 import { DrawAddonButtonWithImage , CreateCustomDropdown } from "./UIObject.js"
 let selectedDeckIndex = 0;
 let decks = null;
-// const basePath = new URL(".", import.meta.url).href;
-// const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href;
 
 const basePath = new URL("../src/Images/", import.meta.url).href;
 const MoonDeckIcon = new URL("MoonDeckIcon.png", basePath).href;
