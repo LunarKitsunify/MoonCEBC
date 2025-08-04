@@ -2,7 +2,7 @@
     // export const AddonType = "Beta";
     export const MoonCEAddonName = "Moon Cards Editor";
     export const meow_key = 42;
-    export const Hidden = "Hidden";
+    export const MessageTypeHidden = "Hidden";
 
     export const WindowStatus = Object.freeze({
         VIEW: "ViewDeck",
@@ -39,7 +39,7 @@
     });
 
     //#region Images
-    export const basePath = new URL(".", import.meta.url).href;
+    export const basePath = new URL("../", import.meta.url).href;
     export const MoonCETopPanelBackground = new URL("src/Images/MoonCETopPanelBackground.jpg", basePath).href;
     /**
      * If the people in the room pass the addon check, draws a card icon for them.
