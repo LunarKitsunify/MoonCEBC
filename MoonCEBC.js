@@ -20,7 +20,7 @@
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization as InitStatsTracking } from './Services/TrackingCardsStatModule.js'
-import { InitChatCommand as InitChatCommands } from "./Services/ChatCommand.js";
+import { InitChatCommands } from "./Services/ChatCommand.js";
 import { bcModSdk } from './src/BCModSdk.js';
 
 const cssLink = document.createElement('link');

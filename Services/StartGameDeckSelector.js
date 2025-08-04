@@ -2,9 +2,6 @@ import { DrawAddonButtonWithImage, CreateCustomDropdown } from "./UIObject.js"
 import * as Constants from "./Constants.js";
 let selectedDeckIndex = 0;
 let decks = null;
-
-//const basePath = new URL("../src/Images/", import.meta.url).href;
-//const MoonDeckIcon = new URL("MoonDeckIcon.png", basePath).href;
 let SwitchDeckStorageModeIcon = null;
 /**
  * @type {{
@@ -100,15 +97,13 @@ export function DeckSelectorClick(onInfoClick) {
 		SwitchDeckStorageMode();
 	//Load deck and start game.
 	if (MouseIn(StartButtonRect.x, StartButtonRect.y, StartButtonRect.w, StartButtonRect.h)) {
-		//MoonLoadDeckNumber();
 		const deckIndex = DropDownRef.GetIndex();
 		ClubCardLoadDeckNumber(deckIndex);
 		ElementRemove("MoonDecksDropdown");
 	}
-	if (MouseIn(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h)) {
-		//selectedDeckIndex = DropDownRef.GetIndex();
+	//Start game click
+	if (MouseIn(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h))
 		onInfoClick(selectedDeckIndex);
-	}
 }
 
 export function MoonClubCardLoadDeck() {
@@ -210,10 +205,6 @@ function SwitchDeckStorageMode() {
 	const newDecks = GetDeckNamesList();
 	DropDownRef.UpdateOptions(newDecks);
 	DropDownRef.SetValue(newDecks[0]);
-	// if (newDecks.length > 0) {
-	// 	DropDownRef.SetValue(newDecks[0]);
-	// 	selectedDeck = newDecks[0];
-	// }
 }
 
 function createCenteredRect(y, w, h) {
