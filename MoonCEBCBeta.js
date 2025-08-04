@@ -252,7 +252,7 @@ document.head.appendChild(cssLink);
   //#region ---------------Replacing the standard deck loader at game startup--------------- //
   modApi.hookFunction("ClubCardClick", 0, (args, next) => {
     if (ClubCardPopup?.Mode == "DECK") {
-      DeckSelectorClick();
+      DeckSelectorClick(OpenExitAddonWindow);
       return;
     }
     return next(args);
@@ -290,7 +290,7 @@ document.head.appendChild(cssLink);
 
   //#region UI
 
-  function LoadMainWindow() {
+  function LoadMainWindow(deckIndex = null) {
     //#region mainWindow
     const mainWindow = document.createElement("div");
     mainWindow.style.position = "fixed";
@@ -761,7 +761,7 @@ document.head.appendChild(cssLink);
     //#endregion
 
     //load decks data
-    LoadPlayerDecksSelectData();
+    LoadPlayerDecksSelectData(deckIndex);
   }
 
   //#endregion
@@ -828,14 +828,15 @@ document.head.appendChild(cssLink);
    * Checks the player's data and fills the drop-down list with the player's decks.
    * Also updates the card boxes for the first option.
    */
-  function LoadPlayerDecksSelectData() {
+  function LoadPlayerDecksSelectData(deckIndex = null) {
     const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
     const decksExist = useAddonDecks ? Player.ExtensionSettings?.MoonCE?.Decks : Player.Game.ClubCard;
     if (!decksExist) return;
 
     const playerDecksSelect = MainWindowPanel.querySelector("#PlayerDecksSelectId");
+    let oldSelectedIndex = playerDecksSelect.selectedIndex;
+    if (deckIndex) oldSelectedIndex = deckIndex;
 
-    const oldSelectedIndex = playerDecksSelect.selectedIndex;
     playerDecksSelect.innerHTML = "";
     let playerDecksData = [];
 
@@ -870,8 +871,7 @@ document.head.appendChild(cssLink);
       }
     });
 
-    playerDecksSelect.selectedIndex =
-      oldSelectedIndex != -1 ? oldSelectedIndex : 0;
+    playerDecksSelect.selectedIndex = oldSelectedIndex != -1 ? oldSelectedIndex : 0;
 
     GetDeckData(playerDecksSelect);
   }
@@ -1182,7 +1182,7 @@ document.head.appendChild(cssLink);
   /**
    * Function to open or close the addon window
    */
-  function OpenExitAddonWindow() {
+  function OpenExitAddonWindow(deckIndex = null) {
     if (isVisibleMainWindow) {
       AddonInfoMessage();
       if (MainWindowPanel) MainWindowPanel.remove();
@@ -1197,7 +1197,7 @@ document.head.appendChild(cssLink);
     } else {
       LoadClubCardList();
       AddonInfoMessage(null, true);
-      LoadMainWindow();
+      LoadMainWindow(deckIndex);
     }
 
     MoonCEPageMode = Constants.WindowStatus.VIEW;

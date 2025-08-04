@@ -67,8 +67,8 @@ export function DeckSelectorRun() {
 	//#####
 	
 	//##### Deck Info
-	// DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
-	// 	"White", "Icons/Public.png", "Check current deck");
+	DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
+		"White", "Icons/Public.png", "Check current deck");
 
 	
 	//##### decks sources button and dropdown
@@ -94,7 +94,7 @@ export function DeckSelectorRun() {
 	
 }
 
-export function DeckSelectorClick() {
+export function DeckSelectorClick(onInfoClick) {
 	//Stwitch deck storage mode : BC or Addon
 	if (MouseIn(SourcesButtonRect.x, SourcesButtonRect.y, SourcesButtonRect.w, SourcesButtonRect.h))
 		SwitchDeckStorageMode();
@@ -104,6 +104,10 @@ export function DeckSelectorClick() {
 		const deckIndex = DropDownRef.GetIndex();
 		ClubCardLoadDeckNumber(deckIndex);
 		ElementRemove("MoonDecksDropdown");
+	}
+	if (MouseIn(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h)) {
+		//selectedDeckIndex = DropDownRef.GetIndex();
+		onInfoClick(selectedDeckIndex);
 	}
 }
 
@@ -205,7 +209,7 @@ function SwitchDeckStorageMode() {
 	selectedDeckIndex = 0;
 	const newDecks = GetDeckNamesList();
 	DropDownRef.UpdateOptions(newDecks);
-
+	DropDownRef.SetValue(newDecks[0]);
 	// if (newDecks.length > 0) {
 	// 	DropDownRef.SetValue(newDecks[0]);
 	// 	selectedDeck = newDecks[0];
