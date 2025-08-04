@@ -86,3 +86,8 @@ Update 1.2.19
 Update 1.2.20
 1. Add /moon chat command
 2. Added the ability to enable/disable the collection of card statistics. Usage: /moonstats on | off"
+
+Update 1.2.21
+1. Added an additional 20 slots for decks. As well as a switch for their use in the addon window.
+2. Changed the deck selection window at game start. Now you can freely change sources of decks ( BC or Addon ). 
+   Also, you can open the addon window and view decks.
