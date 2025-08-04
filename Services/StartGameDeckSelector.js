@@ -45,12 +45,12 @@ const SourcesButtonRect = CreateRect(RectCenterX + Gap, TitleRect.y + TitleRect.
 //#############
 
 //### Row 3 ###
-const DecksDropdownRect = CreateCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 300, 90);
+const DecksDropdownRect = CreateCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 270, 90);
 //#############
 //#endregion
 
 //### Row 4 ###
-const StartButtonRect = CreateCenteredRect(DecksDropdownRect.y + DecksDropdownRect.h - 25, 240, 75);
+const StartButtonRect = CreateCenteredRect(DecksDropdownRect.y + DecksDropdownRect.h, 240, 75);
 //#############
 
 export function DeckSelectorRun() {

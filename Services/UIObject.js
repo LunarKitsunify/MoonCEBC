@@ -91,14 +91,12 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	const wrapper = document.createElement("div");
 	wrapper.id = id;
 	wrapper.style.position = "fixed";
-	//wrapper.style.zIndex = 1000;
 	wrapper.style.fontSize = "1.5em";
 	wrapper.style.userSelect = "none";
 	wrapper.style.display = "flex";
 	wrapper.style.flexDirection = "column";
 	wrapper.style.boxSizing = "border-box";
 
-	// Создаём selected
 	const selected = document.createElement("div");
 	selected.style.flex = "0 0 40%";
 	selected.style.padding = "2% 4%";
@@ -128,7 +126,6 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 
 	wrapper.appendChild(selected);
 
-	// Создаём options
 	const options = document.createElement("div");
 	options.style.flex = "1";
 	options.style.background = "#f0f0f0";
@@ -141,7 +138,6 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
 	options.style.right = "0";
 	options.style.boxSizing = "border-box";
 	options.style.maxHeight = "400%";
-	//options.style.paddingRight = "1px";
 
 	function UpdateDropdownOptions(newOptions) {
 		currentOptions = newOptions;
