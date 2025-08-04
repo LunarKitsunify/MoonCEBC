@@ -91,3 +91,4 @@ Update 1.2.21
 1. Added an additional 20 slots for decks. As well as a switch for their use in the addon window.
 2. Changed the deck selection window at game start. Now you can freely change sources of decks ( BC or Addon ). 
    Also, you can open the addon window and view decks.
+3. Added button to open addon in configurator club card game in online room.

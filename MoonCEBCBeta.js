@@ -25,7 +25,7 @@ import { InitSettings } from "./Services/Settings.js";
 import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
 import { CreateButton, DrawAddonButtonWithImage } from "./Services/UIObject.js"
 import { bcModSdk } from './src/BCModSdk.js';
-import * as Constants from "./Services/Constants.js";
+import * as Common from "./Services/Common.js";
 
 const cssLink = document.createElement('link');
 cssLink.href = new URL('./Style/styles.css', import.meta.url).href;
@@ -77,7 +77,7 @@ document.head.appendChild(cssLink);
    * Variable for tracking the current group in edit mode
    * @type {string}
    */
-  let MoonCECurrentGroup = Constants.CardTypes.ALL_CARDS.value;
+  let MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
   /**
    * Variable for tracking the current page in edit mode
    * @type {number}
@@ -87,7 +87,7 @@ document.head.appendChild(cssLink);
    * Variable to track the mode of the addon. View decks or editor.
    * @type {string}
    */
-  let MoonCEPageMode = Constants.WindowStatus.VIEW;
+  let MoonCEPageMode = Common.WindowStatus.VIEW;
   /**
    * variable for tracking the visibility of the addon window
    * @type {boolean}
@@ -110,7 +110,7 @@ document.head.appendChild(cssLink);
 
   const modApi = bcModSdk.registerMod({
     name: "MoonCE",
-    fullName: Constants.MoonCEAddonName,
+    fullName: Common.MoonCEAddonName,
     version: AddonVersion,
     repository: "https://github.com/LunarKitsunify/MoonCE",
   });
@@ -137,7 +137,7 @@ document.head.appendChild(cssLink);
 
     //Is Addon active Icon
     if (C.MoonCE)
-      DrawImageResize(Constants.MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+      DrawImageResize(Common.MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
 
     return next(args);
   });
@@ -149,11 +149,11 @@ document.head.appendChild(cssLink);
 
     //Is Menu Addon Open Icon
     if (C.MoonCE && C.MoonCE.Public && C.MoonCE.Public.IsMenuOpen)
-      DrawImageResize(Constants.MoonCEIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
+      DrawImageResize(Common.MoonCEIsOpenMenuIcon, CharX + 375 * Zoom, CharY + 50 * Zoom, 50 * Zoom, 50 * Zoom);
 
     //Is Addon active Icon
     if (C.MoonCE)
-      DrawImageResize(Constants.MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
+      DrawImageResize(Common.MoonCEStatusIsAddonIcon, CharX + 347 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom);
   });
 
   //#endregion //------------------------------//
@@ -173,7 +173,7 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("ChatRoomMessage", 0, (args, next) => {
     for (let arg of args) {
       const data = arg;
-      if (data.Type && data.Type !== Constants.MessageTypeHidden) continue;
+      if (data.Type && data.Type !== Common.MessageTypeHidden) continue;
       //########################
       //Hello Message
       //########################
@@ -223,7 +223,7 @@ document.head.appendChild(cssLink);
     else game.Player2Token = gameToken;
 
     const message = {
-      Type: Constants.MessageTypeHidden,
+      Type: Common.MessageTypeHidden,
       Content: "MoonCEToken",
       Sender: Player.MemberNumber,
       Dictionary: [{ Token: gameToken, IsFirstTurn: isMyTurn }],
@@ -240,7 +240,7 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
     next(args);
-    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Constants.MoonLogo, "Moon Cards Editor");
+    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
   });
 
   modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
@@ -270,18 +270,6 @@ document.head.appendChild(cssLink);
   modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
     MoonClubCardLoadDeck();
   });
-
-  // modApi.patchFunction("ClubCardLoadDeckNumber", {
-  //   'Player.Game.ClubCard.Deck':
-  //   'Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks ? Player.ExtensionSettings?.MoonCE?.Decks : Player.Game.ClubCard'
-  // });
-
-
-  // modApi.hookFunction("ClubCardLoad", 0, (args, next) => {
-  //   const result = next(args);
-  //   CreateMoonDeckSelector();
-  //   return result;
-  // });
   //#endregion
 
   //#endregion
@@ -319,9 +307,9 @@ document.head.appendChild(cssLink);
     topSettingsPanel.style.borderBottom = "2px solid black";
     topSettingsPanel.style.boxSizing = "border-box";
     topSettingsPanel.style.alignItems = "center";
-    topSettingsPanel.style.height = Constants.TopPanelHeight;
+    topSettingsPanel.style.height = Common.TopPanelHeight;
     topSettingsPanel.style.width = "100%";
-    topSettingsPanel.style.backgroundImage = `url(${Constants.MoonCETopPanelBackground})`;
+    topSettingsPanel.style.backgroundImage = `url(${Common.MoonCETopPanelBackground})`;
     topSettingsPanel.style.backgroundRepeat = "repeat";
     mainWindow.appendChild(topSettingsPanel);
 
@@ -331,20 +319,20 @@ document.head.appendChild(cssLink);
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftViewPanel.style.justifyContent = "flex-start";
     topSettingsLeftViewPanel.style.alignItems = "center";
-    topSettingsLeftViewPanel.style.width = Constants.TopLeftPanelWidth;
+    topSettingsLeftViewPanel.style.width = Common.TopLeftPanelWidth;
     topSettingsLeftViewPanel.style.height = "100%";
     topSettingsLeftViewPanel.style.boxSizing = "border-box";
-    topSettingsLeftViewPanel.style.gap = Constants.TopLeftPanelGap;
-    topSettingsLeftViewPanel.style.paddingLeft = Constants.TopPanelSidePadding;
+    topSettingsLeftViewPanel.style.gap = Common.TopLeftPanelGap;
+    topSettingsLeftViewPanel.style.paddingLeft = Common.TopPanelSidePadding;
     topSettingsPanel.appendChild(topSettingsLeftViewPanel);
 
     const playerDecksSelect = document.createElement("select");
     playerDecksSelect.id = "PlayerDecksSelectId";
-    playerDecksSelect.style.width = Constants.DeckNamePanelWidth;
+    playerDecksSelect.style.width = Common.DeckNamePanelWidth;
     playerDecksSelect.style.height = "80%";
     playerDecksSelect.style.alignContent = "center";
     playerDecksSelect.style.textAlign = "center";
-    playerDecksSelect.style.fontSize = Constants.TopPanelTextSize;
+    playerDecksSelect.style.fontSize = Common.TopPanelTextSize;
     playerDecksSelect.addEventListener("change", function () {
       GetDeckData(playerDecksSelect);
     });
@@ -370,7 +358,7 @@ document.head.appendChild(cssLink);
 
     const deckModeSwitch = CreateButton(
       null,
-      Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png",
+      Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png",
       () => SwitchDeckStorageMode(deckModeSwitch),
       "3%",
       "80%",
@@ -431,23 +419,23 @@ document.head.appendChild(cssLink);
     topSettingsLeftEditPanel.style.display = "none";
     topSettingsLeftEditPanel.style.justifyContent = "flex-start";
     topSettingsLeftEditPanel.style.alignItems = "center";
-    topSettingsLeftEditPanel.style.width = Constants.TopLeftPanelWidth;
+    topSettingsLeftEditPanel.style.width = Common.TopLeftPanelWidth;
     topSettingsLeftEditPanel.style.height = "100%";
     topSettingsLeftEditPanel.style.boxSizing = "border-box";
-    topSettingsLeftEditPanel.style.gap = Constants.TopLeftPanelGap;
-    topSettingsLeftEditPanel.style.paddingLeft = Constants.TopPanelSidePadding;
-    topSettingsLeftEditPanel.style.paddingRight = Constants.TopPanelSidePadding;
+    topSettingsLeftEditPanel.style.gap = Common.TopLeftPanelGap;
+    topSettingsLeftEditPanel.style.paddingLeft = Common.TopPanelSidePadding;
+    topSettingsLeftEditPanel.style.paddingRight = Common.TopPanelSidePadding;
     topSettingsPanel.appendChild(topSettingsLeftEditPanel);
 
     //#region deckNameImput
 
     const deckNameInput = document.createElement("input");
     deckNameInput.id = "MoonCEDeckNameInputId";
-    deckNameInput.style.width = Constants.DeckNamePanelWidth;
+    deckNameInput.style.width = Common.DeckNamePanelWidth;
     deckNameInput.style.height = "80%";
     deckNameInput.style.alignContent = "center";
     deckNameInput.style.textAlign = "center";
-    deckNameInput.style.fontSize = Constants.TopPanelTextSize;
+    deckNameInput.style.fontSize = Common.TopPanelTextSize;
     deckNameInput.placeholder = "Deck Name";
     if (Player.Themed) {
       const userColor = Player.Themed.ColorsModule.textColor;
@@ -464,7 +452,7 @@ document.head.appendChild(cssLink);
       });
     }
     deckNameInput.addEventListener("keydown", (event) => {
-      if (Constants.movementKeys.includes(event.code))
+      if (Common.movementKeys.includes(event.code))
         event.stopPropagation();
     });
 
@@ -479,7 +467,7 @@ document.head.appendChild(cssLink);
     groupSelect.style.alignContent = "center";
 
     groupSelect.style.textAlign = "center";
-    groupSelect.style.fontSize = Constants.TopPanelTextSize;
+    groupSelect.style.fontSize = Common.TopPanelTextSize;
     groupSelect.addEventListener("change", function () {
       if (MoonCECurrentGroup != groupSelect.value) {
         MoonCECurrentGroup = groupSelect.value;
@@ -504,7 +492,7 @@ document.head.appendChild(cssLink);
     }
 
     function populateGroupSelect() {
-      Object.values(Constants.CardTypes).forEach((type) => {
+      Object.values(Common.CardTypes).forEach((type) => {
         const option = document.createElement("option");
         option.value = type.value;
         option.text = type.text;
@@ -528,7 +516,7 @@ document.head.appendChild(cssLink);
     searchCardInput.style.height = "80%";
     searchCardInput.style.alignContent = "center";
     searchCardInput.style.textAlign = "center";
-    searchCardInput.style.fontSize = Constants.TopPanelTextSize;
+    searchCardInput.style.fontSize = Common.TopPanelTextSize;
     searchCardInput.placeholder = "Search Card";
     searchCardInput.addEventListener("input", (event) => {
       const newValue = event.target.value;
@@ -537,7 +525,7 @@ document.head.appendChild(cssLink);
         const lowerSearch = newValue.toLowerCase();
 
         const searchResult = MoonCEBuilderCurrentGroupsList.filter(card => {
-          const cleanedText = card.Text?.replaceAll(Constants.fameTextColor, "").replaceAll(Constants.moneyTextColor, "");
+          const cleanedText = card.Text?.replaceAll(Common.fameTextColor, "").replaceAll(Common.moneyTextColor, "");
 
           const inName = card.Name.toLowerCase().includes(lowerSearch);
           const inText = cleanedText && cleanedText.toLowerCase().includes(lowerSearch);
@@ -556,7 +544,7 @@ document.head.appendChild(cssLink);
       UpdateCardsCells(MoonCECurrent30Cards);
     });
     searchCardInput.addEventListener("keydown", (event) => {
-      if (Constants.movementKeys.includes(event.code))
+      if (Common.movementKeys.includes(event.code))
         event.stopPropagation();
     });
 
@@ -655,7 +643,7 @@ document.head.appendChild(cssLink);
     deckCardsCounter.style.textAlign = "center";
     deckCardsCounter.style.pointerEvents = "none";
     deckCardsCounter.style.userSelect = "none";
-    deckCardsCounter.style.fontSize = Constants.TopPanelTextSize;
+    deckCardsCounter.style.fontSize = Common.TopPanelTextSize;
     deckCardsCounter.style.color = "white";
 
     //#endregion
@@ -681,12 +669,12 @@ document.head.appendChild(cssLink);
     topSettingsRightPanel.style.flexDirection = "row";
     topSettingsRightPanel.style.justifyContent = "flex-end";
     topSettingsRightPanel.style.alignItems = "center";
-    topSettingsRightPanel.style.width = Constants.TopRightPanelWidth;
+    topSettingsRightPanel.style.width = Common.TopRightPanelWidth;
     topSettingsRightPanel.style.height = "100%";
     topSettingsRightPanel.style.boxSizing = "border-box";
-    topSettingsRightPanel.style.paddingRight = Constants.TopPanelSidePadding;
-    topSettingsRightPanel.style.paddingLeft = Constants.TopPanelSidePadding;
-    topSettingsRightPanel.style.gap = Constants.TopLeftPanelGap;
+    topSettingsRightPanel.style.paddingRight = Common.TopPanelSidePadding;
+    topSettingsRightPanel.style.paddingLeft = Common.TopPanelSidePadding;
+    topSettingsRightPanel.style.gap = Common.TopLeftPanelGap;
     topSettingsPanel.appendChild(topSettingsRightPanel);
 
     const settingsButton = CreateButton(
@@ -741,7 +729,7 @@ document.head.appendChild(cssLink);
     bottomPanel.style.justifyContent = "space-between";
     bottomPanel.style.alignItems = "center";
     bottomPanel.style.width = "100%";
-    bottomPanel.style.height = `calc(100% - ${Constants.TopPanelHeight})`;
+    bottomPanel.style.height = `calc(100% - ${Common.TopPanelHeight})`;
     bottomPanel.style.boxSizing = "border-box";
     mainWindow.appendChild(bottomPanel);
 
@@ -808,7 +796,7 @@ document.head.appendChild(cssLink);
     InitChatCommands();
     TrackingModuleInitialization(modApi);
 
-    console.log(`${Constants.MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
+    console.log(`${Common.MoonCEAddonName} Loaded! Version: ${AddonType} ${AddonVersion}`);
   }
 
   /**
@@ -882,8 +870,9 @@ document.head.appendChild(cssLink);
    * @returns {void} - Nothing
    */
   function GetDeckData(decksCombobox) {
-    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
+    // const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+    // let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
+    let decksSources = Common.GetDecksList();
 
     let selectedIndex = decksCombobox.value;
     const encodedDeck = decksSources[selectedIndex];
@@ -923,12 +912,12 @@ document.head.appendChild(cssLink);
         const cardController = createCard(card);
 
         //Update border selected cards
-        if (MoonCEPageMode == Constants.WindowStatus.EDIT)
+        if (MoonCEPageMode == Common.WindowStatus.EDIT)
           if (MoonCEEditCurrentDeck.includes(card))
             cardController.showSelected();
 
         cardController.cardButton.addEventListener("click", () => {
-          const isEditMode = MoonCEPageMode == Constants.WindowStatus.EDIT;
+          const isEditMode = MoonCEPageMode == Common.WindowStatus.EDIT;
           if (isEditMode) {
             if (MoonCEEditCurrentDeck.includes(card)) {
               const indexToRemove = MoonCEEditCurrentDeck.findIndex(
@@ -1018,7 +1007,7 @@ document.head.appendChild(cssLink);
 
     groupSelect.selectedIndex = 0;
 
-    MoonCEPageMode = Constants.WindowStatus.EDIT;
+    MoonCEPageMode = Common.WindowStatus.EDIT;
     MoonCEEditCurrentDeck = [...MoonCECurrentDeck];
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
@@ -1037,7 +1026,7 @@ document.head.appendChild(cssLink);
   }
 
   function GetIconSwitchDeckStorageButton() {
-    return Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png";
+    return Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png";
   }
 
   function GetDeckStorageSources() {
@@ -1059,8 +1048,8 @@ document.head.appendChild(cssLink);
 
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftEditPanel.style.display = "none";
-    MoonCEPageMode = Constants.WindowStatus.VIEW;
-    MoonCECurrentGroup = Constants.CardTypes.ALL_CARDS.value;
+    MoonCEPageMode = Common.WindowStatus.VIEW;
+    MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
     MoonCEBuilderSeacrhGroupList = [];
     MoonCEBuilderCurrentGroupsList = [];
     MoonCECurrentCardsListPage = 0;
@@ -1083,8 +1072,8 @@ document.head.appendChild(cssLink);
     if (isDeckNameValidation && MoonCEEditCurrentDeck.length >= 30 && MoonCEEditCurrentDeck.length <= 40) {
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
-      MoonCEPageMode = Constants.WindowStatus.VIEW;
-      MoonCECurrentGroup = Constants.CardTypes.ALL_CARDS.value;
+      MoonCEPageMode = Common.WindowStatus.VIEW;
+      MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
       MoonCEBuilderSeacrhGroupList = [];
       MoonCEBuilderCurrentGroupsList = [];
       MoonCECurrentCardsListPage = 0;
@@ -1188,10 +1177,10 @@ document.head.appendChild(cssLink);
       AddonInfoMessage();
       if (MainWindowPanel) MainWindowPanel.remove();
 
-      MoonCECurrentGroup = Constants.CardTypes.ALL_CARDS.value;
+      MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
       MoonCEBuilderSeacrhGroupList = [];
       MoonCEBuilderCurrentGroupsList = [];
-      MoonCEPageMode = Constants.WindowStatus.VIEW;
+      MoonCEPageMode = Common.WindowStatus.VIEW;
       MoonCECurrentCardsListPage = 0;
 
       CardCells = [];
@@ -1201,7 +1190,7 @@ document.head.appendChild(cssLink);
       LoadMainWindow(deckIndex);
     }
 
-    MoonCEPageMode = Constants.WindowStatus.VIEW;
+    MoonCEPageMode = Common.WindowStatus.VIEW;
     isVisibleMainWindow = !isVisibleMainWindow;
   }
 
@@ -1267,7 +1256,7 @@ document.head.appendChild(cssLink);
         font-weight: bold;
         border-bottom: 1px solid #ccc;
     `;
-    header.style.backgroundImage = `url(${Constants.MoonCETopPanelBackground})`;
+    header.style.backgroundImage = `url(${Common.MoonCETopPanelBackground})`;
 
     const titleLabel = document.createElement("span");
     titleLabel.textContent = title || "Enter data";
@@ -1488,7 +1477,7 @@ document.head.appendChild(cssLink);
       padding: 10px 16px;
       font-weight: bold;
       border-bottom: 1px solid #ccc;
-      background-image: url(${Constants.MoonCETopPanelBackground});
+      background-image: url(${Common.MoonCETopPanelBackground});
     `;
 
     const titleLabel = document.createElement("span");
@@ -1628,26 +1617,26 @@ document.head.appendChild(cssLink);
     );
 
     switch (MoonCECurrentGroup) {
-      case Constants.CardTypes.ALL_CARDS.value:
+      case Common.CardTypes.ALL_CARDS.value:
         cardGroupList = [...MoonCEClubCardList];
         break;
-      case Constants.CardTypes.SELECTED_CARDS.value:
+      case Common.CardTypes.SELECTED_CARDS.value:
         cardGroupList = [...MoonCEEditCurrentDeck];
         break;
-      case Constants.CardTypes.EVENTS_CARDS.value:
+      case Common.CardTypes.EVENTS_CARDS.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) => card.Type == "Event"
         );
         break;
-      case Constants.CardTypes.UNGROUPED.value:
+      case Common.CardTypes.UNGROUPED.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) => card.Group == undefined && card.Type != "Event"
         );
         break;
-      case Constants.CardTypes.REWARD_CARDS.value:
+      case Common.CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
         break;
-      case Constants.CardTypes.ASYLUM.value:
+      case Common.CardTypes.ASYLUM.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1655,14 +1644,14 @@ document.head.appendChild(cssLink);
               card.Group.includes("AsylumNurse"))
         );
         break;
-      case Constants.CardTypes.DOMINANT_MISTRESS.value:
+      case Common.CardTypes.DOMINANT_MISTRESS.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
             (card.Group.includes("Dominant") || card.Group.includes("Mistress"))
         );
         break;
-      case Constants.CardTypes.ABDL.value:
+      case Common.CardTypes.ABDL.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1670,7 +1659,7 @@ document.head.appendChild(cssLink);
               card.Group.includes("ABDLMommy"))
         );
         break;
-      case Constants.CardTypes.COLLEGE.value:
+      case Common.CardTypes.COLLEGE.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1678,7 +1667,7 @@ document.head.appendChild(cssLink);
               card.Group.includes("CollegeTeacher"))
         );
         break;
-      case Constants.CardTypes.SHIBARI_SENSEI_KNOT.value:
+      case Common.CardTypes.SHIBARI_SENSEI_KNOT.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1687,7 +1676,7 @@ document.head.appendChild(cssLink);
               card.Group.includes("Knot"))
         );
         break;
-      case Constants.CardTypes.PET.value:
+      case Common.CardTypes.PET.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1695,7 +1684,7 @@ document.head.appendChild(cssLink);
               card.Group.includes("Owner"))
         );
         break;
-      case Constants.CardTypes.PORN.value:
+      case Common.CardTypes.PORN.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
             card.Group &&
@@ -1825,7 +1814,7 @@ document.head.appendChild(cssLink);
    */
   function AddonInfoMessage(target = null, isMenuOpen = false) {
     const message = {
-      Type: Constants.MessageTypeHidden,
+      Type: Common.MessageTypeHidden,
       Content: "MoonCE",
       Sender: Player.MemberNumber,
       Dictionary: [],
@@ -1882,11 +1871,11 @@ document.head.appendChild(cssLink);
     const formattedText = text
       .replace(
         fameRegex,
-        (match) => `<span style='color: ${Constants.fameTextColor};'>${match}</span>`
+        (match) => `<span style='color: ${Common.fameTextColor};'>${match}</span>`
       )
       .replace(
         moneyRegex,
-        (match) => `<span style='color: ${Constants.moneyTextColor};'>${match}</span>`
+        (match) => `<span style='color: ${Common.moneyTextColor};'>${match}</span>`
       );
 
     return formattedText;
@@ -1924,7 +1913,7 @@ document.head.appendChild(cssLink);
    * @returns {string} - The encoded string.
    */
   function encodeEIDeck(IdArrayDeck) {
-    let encrypted = IdArrayDeck.map(id => id ^ Constants.meow_key);
+    let encrypted = IdArrayDeck.map(id => id ^ Common.meow_key);
     let stringified = encrypted.join(",");
     return btoa(stringified);
   }
@@ -1954,7 +1943,7 @@ document.head.appendChild(cssLink);
       if (numbers.length < 30 || numbers.length > 40)
         throw new Error(`Invalid deck size: Expected 30-40, got ${numbers.length}`);
 
-      let decodedIds = numbers.map(id => id ^ Constants.meow_key);
+      let decodedIds = numbers.map(id => id ^ Common.meow_key);
 
       let allIdsExist = decodedIds.every(id => MoonCEClubCardList.some(card => card.ID === id));
       if (!allIdsExist)

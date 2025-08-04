@@ -1,5 +1,5 @@
-import { DrawAddonButtonWithImage, CreateCustomDropdown } from "./UIObject.js"
-import * as Constants from "./Constants.js";
+import { DrawAddonButtonWithImage, CreateCustomDropdown, CreateRect, CreateCenteredRect } from "./UIObject.js"
+import * as Common from "./Common.js";
 let selectedDeckIndex = 0;
 let decks = null;
 let SwitchDeckStorageModeIcon = null;
@@ -28,7 +28,7 @@ const ButtonWidth = 60;
  * Deck Loader Title Coordinates
  * @type {UIRect}
  */
-const TitleRect = createCenteredRect(340, 300, 32);
+const TitleRect = CreateCenteredRect(340, 300, 32);
 //#############
 
 //### Row 2 ###
@@ -36,25 +36,25 @@ const TitleRect = createCenteredRect(340, 300, 32);
  * Deck Loader Info Button Coordinates
  * @type {UIRect}
  */
-const InfoButtonRect = createRect(RectCenterX - ButtonWidth - Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+const InfoButtonRect = CreateRect(RectCenterX - ButtonWidth - Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
 /**
  * Sources Button Coordinates
  * @type {UIRect}
  */
-const SourcesButtonRect = createRect(RectCenterX + Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+const SourcesButtonRect = CreateRect(RectCenterX + Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
 //#############
 
 //### Row 3 ###
-const DecksDropdownRect = createCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 300, 90);
+const DecksDropdownRect = CreateCenteredRect(InfoButtonRect.y + InfoButtonRect.h + Gap, 300, 90);
 //#############
 //#endregion
 
 //### Row 4 ###
-const StartButtonRect = createCenteredRect(DecksDropdownRect.y + DecksDropdownRect.h - 25, 240, 75);
+const StartButtonRect = CreateCenteredRect(DecksDropdownRect.y + DecksDropdownRect.h - 25, 240, 75);
 //#############
 
 export function DeckSelectorRun() {
-	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png";
+	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png";
 
 	DrawRect(548, 298, 604, 404, "White");
 	DrawRect(550, 300, 600, 400, "Black");
@@ -78,7 +78,7 @@ export function DeckSelectorRun() {
 	if (container) {
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
 	} else {
-		decks = GetDeckNamesList();
+		decks = Common.GetDeckNamesList();
 		DropDownRef = CreateCustomDropdown("MoonDecksDropdown", decks, () => { selectedDeckIndex = DropDownRef.GetIndex(); });
 		ElementPositionFix("MoonDecksDropdown", 20, DecksDropdownRect.x, DecksDropdownRect.y, DecksDropdownRect.w, DecksDropdownRect.h);
 		DropDownRef.SetValue(decks[selectedDeckIndex]);
@@ -106,9 +106,12 @@ export function DeckSelectorClick(onInfoClick) {
 		onInfoClick(selectedDeckIndex);
 }
 
+/**
+ * Updated the standard ClubCardLoadDeckNumber function so that it can load decks from the addon.
+ */
 export function MoonClubCardLoadDeck() {
 	const DeckNum = DropDownRef.GetIndex();
-	const deckSources = GetDecksList();
+	const deckSources = Common.GetDecksList();
 	let Deck = [];
 	if (deckSources.length > DeckNum && deckSources[DeckNum]?.length >= ClubCardBuilderMinDeckSize && deckSources[DeckNum]?.length <= ClubCardBuilderMaxDeckSize) {
 		let msg = TextGet("UsingDeck").replace("PLAYERNAME", CharacterNickname(Player));
@@ -180,18 +183,10 @@ export function MoonClubCardLoadDeck() {
 	} else ClubCardAIStart();
 }
 
-function GetDeckNamesList() {
-	const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-	let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : Player.Game.ClubCard.DeckName;
-	return decksSources;
-}
-
-function GetDecksList() {
-	const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-	let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
-	return decksSources;
-}
-
+/**
+ * Toggles between using addon-based decks and base-game decks.
+ * Syncs the new setting with the server.
+ */
 function SwitchDeckStorageMode() {
 	const settings = Player.ExtensionSettings?.MoonCE?.Settings;
     if (!settings) return;
@@ -199,30 +194,12 @@ function SwitchDeckStorageMode() {
     settings.UseAddonDecks = !settings.UseAddonDecks;
 	ServerPlayerExtensionSettingsSync("MoonCE");
 	
-	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Constants.MoonDeckIcon : "Icons/Logo.png";
+	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png";
 
 	selectedDeckIndex = 0;
-	const newDecks = GetDeckNamesList();
+	const newDecks = Common.GetDeckNamesList();
 	DropDownRef.UpdateOptions(newDecks);
 	DropDownRef.SetValue(newDecks[0]);
-}
-
-function createCenteredRect(y, w, h) {
-	return {
-		x: RectCenterX - w / 2,
-		y,
-		w,
-		h
-	};
-}
-
-function createRect(x, y, w, h) {
-	return {
-		x,
-		y,
-		w,
-		h
-	};
 }
 
 /**

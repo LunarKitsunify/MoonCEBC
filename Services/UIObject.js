@@ -1,5 +1,5 @@
+import * as Common from "./Common.js";
 //#region DOM
-const TopPanelTextSize = "1.2vw";
 
 /**
  * Creates a button with an optional image or text.
@@ -48,7 +48,7 @@ export function CreateButton(
                 },
 
                 innerHTML: content
-                    ? `<span style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; font-size: ${TopPanelTextSize};">${content}</span>`
+                    ? `<span style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; font-size: ${Common.TopPanelTextSize};">${content}</span>`
                     : `<img src="${imageSrc}" alt="Button Image" style="max-width: 90%; max-height: 90%; object-fit: contain; display: block; margin: auto;" />`,
             },
             tooltip: {
@@ -224,3 +224,28 @@ export function DrawAddonButtonWithImage(Left, Top, Width, Height, Color, ImageS
     }
 }
 //#endregion
+
+/**
+ * Creates a rectangle centered horizontally around RectCenterX.
+ *
+ * @param {number} y - Top Y coordinate of the rectangle.
+ * @param {number} w - Width of the rectangle.
+ * @param {number} h - Height of the rectangle.
+ * @returns {UIRect} A rectangle object with centered X and given dimensions.
+ */
+export function CreateCenteredRect(y, w, h) {
+	return { x: Common.RectCenterX - w / 2, y, w, h };
+}
+
+/**
+ * Creates a rectangle with explicit X, Y, width, and height.
+ *
+ * @param {number} x - Left X coordinate.
+ * @param {number} y - Top Y coordinate.
+ * @param {number} w - Width of the rectangle.
+ * @param {number} h - Height of the rectangle.
+ * @returns {UIRect} A rectangle object with specified position and size.
+ */
+export function CreateRect(x, y, w, h) {
+	return { x, y, w, h };
+}
