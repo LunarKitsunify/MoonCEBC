@@ -123,9 +123,11 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
-    const result = next(args);
-    if (MouseIn(0, 930, 35, 70)) OpenExitAddonWindow();
-    return result;
+    if (MouseIn(0, 930, 35, 70)) {
+      OpenExitAddonWindow();
+      return;
+    }
+    return next(args);;
   });
   //#endregion
 
