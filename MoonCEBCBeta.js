@@ -118,12 +118,12 @@ document.head.appendChild(cssLink);
   //#region ---------------Button "Open Addon" in ChatRoom--------------- //
   modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
     const result = next(args);
-    DrawAddonButtonWithImage(0, 915, 45, 90, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
+    DrawAddonButtonWithImage(0, 910, 45, 90, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
     return result;
   });
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
-    if (MouseIn(0, 915, 45, 90)) {
+    if (MouseIn(0, 910, 45, 90)) {
       OpenExitAddonWindow();
       return;
     }
