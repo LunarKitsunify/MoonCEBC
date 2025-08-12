@@ -19,7 +19,7 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
-import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
+import { TrackingModuleInitialization, StartTrackingModule} from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
 import { InitSettings } from "./Services/Settings.js";
 import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
@@ -270,7 +270,17 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
-    MoonClubCardLoadDeck();
+      //const result = next(args);
+      MoonClubCardLoadDeck();
+    
+      if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
+          try {
+              StartTrackingModule();
+          } catch (error) {
+              console.error("MoonCE Hook ClubCardLoadDeckNumber:", error.message);
+          }
+      }
+      return result;
   });
   //#endregion
 

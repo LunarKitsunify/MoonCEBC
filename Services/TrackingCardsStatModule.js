@@ -6,18 +6,18 @@ const CardStatsMap = new Map();
 
 export function TrackingModuleInitialization(modApi) {
     //#region ---------------Card Tracking Module--------------- //
-    modApi.hookFunction("ClubCardLoadDeckNumber", 1, (args, next) => {
-        const result = next(args);
+    // modApi.hookFunction("ClubCardLoadDeckNumber", 1, (args, next) => {
+    //     const result = next(args);
 
-        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
-            try {
-                StartTrackingModule();
-            } catch (error) {
-                console.error("MoonCE Hook ClubCardLoadDeckNumber:", error.message);
-            }
-        }
-        return result;
-    });
+    //     if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
+    //         try {
+    //             StartTrackingModule();
+    //         } catch (error) {
+    //             console.error("MoonCE Hook ClubCardLoadDeckNumber:", error.message);
+    //         }
+    //     }
+    //     return result;
+    // });
 
     modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
         const result = next(args);
@@ -88,7 +88,7 @@ export function TrackingModuleInitialization(modApi) {
 }
 
 //#region Card Tracking Module
-function StartTrackingModule() {
+export function StartTrackingModule() {
     InitTrackingFromDeckAndHand(ClubCardPlayer[0].Deck, ClubCardPlayer[0].Hand);
     HookAllPlayerZones(ClubCardPlayer[0]);
 }
