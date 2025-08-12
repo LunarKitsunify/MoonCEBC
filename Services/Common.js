@@ -99,4 +99,22 @@ export function GetDecksList() {
     return decksSources;
 }
 
+/** 
+ * Checks if game statistics upload is enabled for the current player.
+ * 
+ * @returns {boolean} True if the GameStats setting is enabled in the player's MoonCE settings, otherwise false.
+ */
+export function IsStatsUploadEnabled() {
+    return Player?.ExtensionSettings?.MoonCE?.Settings?.GameStats;
+}
+
+/** 
+ * Checks if the opponent is using the MoonCE addon.
+ * 
+ * @returns {boolean} True if the second player (index 1) has MoonCE enabled in their character data, otherwise false.
+ */
+export function IsOpponentMoonCE() {
+    return ClubCardPlayer?.[1]?.Character?.MoonCE;
+}
+
 //#endregion

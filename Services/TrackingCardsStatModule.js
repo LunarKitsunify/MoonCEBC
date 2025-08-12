@@ -1,3 +1,4 @@
+import * as Common from "./Common.js";
 /** Card statistics repository. key = UniqueID
  * @type {Map<string, { id: number, uniqueID: string, name: string, seen: boolean, played: boolean }> } 
  * */
@@ -5,10 +6,10 @@ const CardStatsMap = new Map();
 
 export function TrackingModuleInitialization(modApi) {
     //#region ---------------Card Tracking Module--------------- //
-    modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
+    modApi.hookFunction("ClubCardLoadDeckNumber", 1, (args, next) => {
         const result = next(args);
 
-        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
+        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
             try {
                 StartTrackingModule();
             } catch (error) {
@@ -21,7 +22,7 @@ export function TrackingModuleInitialization(modApi) {
     modApi.hookFunction("GameClubCardLoadData", 0, (args, next) => {
         const result = next(args);
 
-        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
+        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
             try {
                 RefreshTrackingAfterSync(ClubCardPlayer[0]);
             } catch (error) {
@@ -36,7 +37,7 @@ export function TrackingModuleInitialization(modApi) {
         const isMiniGameEnded = MiniGameEnded;
         const result = next(args);
 
-        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
+        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying()) {
                     if (result && isMiniGameEnded != true) {
@@ -55,7 +56,7 @@ export function TrackingModuleInitialization(modApi) {
 
     //Hook to an event when a player has conceded for that very player.
     modApi.hookFunction("ClubCardConcede", 0, (args, next) => {
-        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
+        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying()) {
                     SendCardStatsToServer(false); 
@@ -72,7 +73,7 @@ export function TrackingModuleInitialization(modApi) {
     modApi.hookFunction("ClubCardPlayerConceded", 0, (args, next) => {
         if (args[0] == Player.MemberNumber) return next(args);
 
-        if (IsStatsUploadEnabled() && IsOpponentMoonCE()) {
+        if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
             try {
                 if (ClubCardIsOnline() && ClubCardIsPlaying())
                     SendCardStatsToServer(true);
@@ -260,14 +261,6 @@ function SendCardStatsToServer(win) {
             if (isDebugMode)
                 console.error("❌ Failed to send card stats:", err);
         });
-}
-
-function IsStatsUploadEnabled() {
-    return Player?.ExtensionSettings?.MoonCE?.Settings?.GameStats;
-}
-
-function IsOpponentMoonCE() {
-    return ClubCardPlayer?.[1]?.Character?.MoonCE;
 }
 
 //#endregion
