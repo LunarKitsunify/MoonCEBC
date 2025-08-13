@@ -19,7 +19,7 @@
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
-import { TrackingModuleInitialization } from './Services/TrackingCardsStatModule.js'
+import { TrackingModuleInitialization, StartTrackingModule} from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
 import { InitSettings } from "./Services/Settings.js";
 import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
@@ -118,12 +118,12 @@ document.head.appendChild(cssLink);
   //#region ---------------Button "Open Addon" in ChatRoom--------------- //
   modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
     const result = next(args);
-    DrawAddonButtonWithImage(0, 910, 45, 90, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
+    DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
     return result;
   });
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
-    if (MouseIn(0, 910, 45, 90)) {
+    if (MouseIn(0, 930, 35, 70)) {
       OpenExitAddonWindow();
       return;
     }
@@ -270,7 +270,15 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
-    MoonClubCardLoadDeck();
+      MoonClubCardLoadDeck();
+    
+      if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
+          try {
+              StartTrackingModule();
+          } catch (error) {
+              console.error("MoonCE Hook ClubCardLoadDeckNumber:", error.message);
+          }
+      }
   });
   //#endregion
 
