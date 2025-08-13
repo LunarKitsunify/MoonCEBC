@@ -270,7 +270,6 @@ document.head.appendChild(cssLink);
   });
 
   modApi.hookFunction("ClubCardLoadDeckNumber", 0, (args, next) => {
-      //const result = next(args);
       MoonClubCardLoadDeck();
     
       if (Common.IsStatsUploadEnabled() && Common.IsOpponentMoonCE()) {
@@ -280,7 +279,6 @@ document.head.appendChild(cssLink);
               console.error("MoonCE Hook ClubCardLoadDeckNumber:", error.message);
           }
       }
-      return result;
   });
   //#endregion
 
