@@ -152,7 +152,7 @@ export function MoonClubCardLoadDeck() {
 
 	// If a card can be won against the NPC
 	ClubCardReward = null;
-	if (!ClubCardIsOnline() && (ClubCardPlayer[1].Character.IsNpc()))
+	if (!ClubCardIsOnline())
 		for (let Card of ClubCardList)
 			if ((Card.Reward === "NPC-" + ClubCardPlayer[1].Character.Name) || (Card.Reward === ClubCardPlayer[1].Character.AccountName)) {
 				let Char = String.fromCharCode(Card.ID);
