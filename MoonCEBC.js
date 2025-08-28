@@ -1301,7 +1301,7 @@ document.head.appendChild(cssLink);
     if (textAreaText && textAreaText != "") {
       copyButton = createIconButton("📋", "Copy", () => {
         navigator.clipboard.writeText(inputField.value)
-          .then(() => toggleIcon(copyButton, "✅"))
+          .then(() => toggleIcon(copyButton, "O"))
           .catch(() => toggleIcon(copyButton, "❌"));
       });
     }
