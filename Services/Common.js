@@ -84,7 +84,7 @@ export const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
  */
 export function GetDeckNamesList() {
     const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : Player.Game.ClubCard.DeckName;
+    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : (Player.Game.ClubCard.DeckName ?? ['Deck #1', 'Deck #2', 'Deck #3', 'Deck #4', 'Deck #5', 'Deck #6', 'Deck #7', 'Deck #8', 'Deck #9', 'Deck #10']);
     return decksSources;
 }
 
