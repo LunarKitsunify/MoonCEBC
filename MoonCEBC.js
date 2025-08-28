@@ -242,7 +242,7 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
     next(args);
-    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
+    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor (Test)");
   });
 
   modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
