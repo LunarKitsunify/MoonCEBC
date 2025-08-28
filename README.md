@@ -29,10 +29,10 @@ The addon is available through the FUSAM Addon Manager.
 Install one of these extensions on your browser and click on the link.
 
 Stable
-https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js
+[https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoader.user.js](https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBCLoader.user.js)
 
 Beta
-https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoaderBeta.user.js
+[https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoaderBeta.user.js](https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBCLoaderBeta.user.js)
 
 ### 3. Bookmark
 
