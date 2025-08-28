@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name Beta MoonCEBC Loader
+// @name Beta MoonCEBC Loader (Test Branch)
 // @namespace https://www.bondageprojects.com/
 // @version 1.0.0
-// @description Addon for viewing and customizing card decks without Npc room.
+// @description Addon for viewing and customizing card decks without Npc room. (Beta test branch version)
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
 // @match https://www.bondage-europe.com/*
@@ -20,10 +20,8 @@
 (function () {
   "use strict";
   var script = document.createElement("script");
-  script.type = 'module';
+  script.type = "module";
   script.setAttribute("crossorigin", "anonymous");
-  script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
+  script.src = "https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBCBeta.js";
   document.head.appendChild(script);
 })();
-
-
