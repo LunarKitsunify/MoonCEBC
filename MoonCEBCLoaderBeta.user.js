@@ -22,7 +22,7 @@
   var script = document.createElement("script");
   script.type = 'module';
   script.setAttribute("crossorigin", "anonymous");
-  script.src = "https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js";
+  script.src = `https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js?${Date.now()}`;
   document.head.appendChild(script);
 })();
 
