@@ -38,10 +38,10 @@ https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCLoaderBeta.user.js
 
 Stable - Updated 30.04.2025
 ```javascript
-javascript:(()=>{import("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBC.js")})();
+javascript:(()=>{import("https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBC.js")})();
 ```
 
 Beta - Updated 30.04.2025
 ```javascript
-javascript:(()=>{import("https://lunarkitsunify.github.io/MoonCEBC/MoonCEBCBeta.js")})();
+javascript:(()=>{import("https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBCBeta.js")})();
 ```
