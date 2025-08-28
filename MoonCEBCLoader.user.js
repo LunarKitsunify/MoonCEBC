@@ -20,6 +20,6 @@
   var script = document.createElement("script");
   script.type = "module";
   script.setAttribute("crossorigin", "anonymous");
-  script.src = "https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBC.js";
+  script.src = `https://rawcdn.githack.com/LunarKitsunify/MoonCEBC/Test/MoonCEBC.js?${Date.now()}`;
   document.head.appendChild(script);
 })();
