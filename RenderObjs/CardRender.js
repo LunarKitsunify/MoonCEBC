@@ -9,10 +9,9 @@ const moneyTextColor = "#006400";
  */
 export function createCard(card) {
     //#region fix card null parameter
-    let Level =
-        card.RequiredLevel == null || card.RequiredLevel <= 1
-            ? 1
-            : card.RequiredLevel;
+    let Level = card.RequiredLevel == null || card.RequiredLevel <= 1
+                ? 1
+                : card.RequiredLevel;
     if (card.Type == null) card.Type = "Member";
     //#endregion
 

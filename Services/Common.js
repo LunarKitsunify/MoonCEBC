@@ -23,6 +23,7 @@ export const CardTypes = Object.freeze({
         text: "Dominant / Mistress",
     },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
+    KEMONOMIMI: { value: "Kemonomimi", text: "Kemonomimi" },
     LIABILITY: { value: "Liability", text: "Liability" },
     MAID: { value: "Maid", text: "Maid" },
     PET: { value: "PetOwner", text: "Pet / Owner" },
@@ -34,6 +35,7 @@ export const CardTypes = Object.freeze({
         text: "Shibari / Sensei / Knot",
     },
     STAFF: { value: "Staff", text: "Staff" },
+    SUBMISSIVE_SLAVE: { value: "SubmissiveSlave", text: "Submissive / Slave"},
     UNGROUPED: { value: "Ungrouped", text: "Ungrouped" },
 });
 

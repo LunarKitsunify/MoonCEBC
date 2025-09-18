@@ -1703,6 +1703,14 @@ document.head.appendChild(cssLink);
               card.Group.includes("Video"))
         );
         break;
+      case Common.CardTypes.SUBMISSIVE_SLAVE.value:
+        cardGroupList = MoonCEClubCardList.filter(
+          (card) =>
+            card.Group &&
+            (card.Group.includes("Submissive") ||
+              card.Group.includes("Slave"))
+        );
+        break;
       default:
         cardGroupList = MoonCEClubCardList.filter(
           (card) => card.Group && card.Group.includes(MoonCECurrentGroup)
