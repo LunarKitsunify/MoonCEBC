@@ -9,11 +9,19 @@ export const WindowStatus = Object.freeze({
     SETTINGS: "Settings",
 });
 
+export const UpdatedCardIDs = [
+    11008, 31025, 9001, 9005, 14004, 14013, 30024, 31028, 1010, 1011,
+    12009, 12010, 12011, 12012, 16000, 16001, 16002, 16006, 16003, 16004, 
+    16005, 16007, 1024, 1023, 1025, 15000, 15001, 15002, 15003, 15004,
+    9009, 3018, 3019, 31037, 31034, 31035, 31036, 31033, 31032
+];
+
 export const CardTypes = Object.freeze({
     ALL_CARDS: { value: "All Cards", text: "All Cards" },
     SELECTED_CARDS: { value: "Selected Cards", text: "Selected Cards" },
     EVENTS_CARDS: { value: "Events Cards", text: "Event Cards" },
     REWARD_CARDS: { value: "Reward Cards", text: "Reward Cards" },
+    UPDATED_CARDS: { value: "Updated Cards", text: "Updated Cards" },
     ABDL: { value: "ABDL", text: "ABDL" },
     ASYLUM: { value: "Asylum", text: "Asylum" },
     COLLEGE: { value: "College", text: "College" },
