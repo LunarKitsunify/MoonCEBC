@@ -148,17 +148,13 @@ function createCardValuesPanel(card) {
     const valueCardPanel = document.createElement("div");
     valueCardPanel.classList.add("value-card-panel");
 
-    //const basePath = new URL(".", import.meta.url).href;
     const metaUrl = typeof import.meta !== 'undefined' ? import.meta.url : document.currentScript?.src || window.location.href;
     const basePath = new URL('.', metaUrl).href;
-
-
 
     // Add Liability Icon if applicable
     if (card.Group && card.Group.includes("Liability")) {
         const liabilityIcon = document.createElement("img");
         liabilityIcon.src = new URL("../src/Images/Liability.png", basePath).href;
-        //liabilityIcon.src = "Screens/MiniGame/ClubCard/Bubble/Liability.png";
         liabilityIcon.classList.add("value-card-icon");
         valueCardPanel.appendChild(liabilityIcon);
     }
@@ -174,8 +170,6 @@ function createCardValuesPanel(card) {
     }
 
     // Add Fame Board if applicable
-    // "Screens/MiniGame/ClubCard/Bubble/Fame.png",
-    // new URL("../src/Images/Fame.png", basePath).href,
     if (card.FamePerTurn != null) {
         const fameBoard = createCardStatBoard(
             "Screens/MiniGame/ClubCard/Bubble/Fame.png",
@@ -185,8 +179,6 @@ function createCardValuesPanel(card) {
         valueCardPanel.appendChild(fameBoard);
     }
 
-    // "Screens/MiniGame/ClubCard/Bubble/Money.png",
-    // new URL("../src/Images/Money.png", basePath).href,
     // Add Money Board if applicable
     if (card.MoneyPerTurn != null) {
         const moneyBoard = createCardStatBoard(
@@ -196,7 +188,14 @@ function createCardValuesPanel(card) {
         );
         valueCardPanel.appendChild(moneyBoard);
     }
-
+    // Add Revealed Icon if applicable
+    if (card.Revealed != null) {
+        const revealedIcon = document.createElement("img");
+        revealedIcon.src = "Screens/MiniGame/ClubCard/Bubble/Revealed.png";
+        revealedIcon.classList.add("value-card-icon");
+        valueCardPanel.appendChild(revealedIcon);
+    }
+    
     if (card.Type == "Event") {
         const eventIcon = document.createElement("img");
         if (card.Reward) eventIcon.src = new URL("../src/Images/GoldLightning.png", basePath).href;
@@ -204,6 +203,7 @@ function createCardValuesPanel(card) {
         eventIcon.classList.add("value-card-icon");
         valueCardPanel.appendChild(eventIcon);
     }
+
 
     return valueCardPanel;
 }

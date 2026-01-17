@@ -1646,11 +1646,11 @@ document.head.appendChild(cssLink);
       case Common.CardTypes.REWARD_CARDS.value:
         cardGroupList = allRewardCards;
         break;
-      case Common.CardTypes.UPDATED_CARDS.value:
-        cardGroupList = MoonCEClubCardList.filter(
-          (card) => Common.UpdatedCardIDs.includes(card.ID)
-        );
-        break;
+      // case Common.CardTypes.UPDATED_CARDS.value:
+      //   cardGroupList = MoonCEClubCardList.filter(
+      //     (card) => Common.UpdatedCardIDs.includes(card.ID)
+      //   );
+      //   break;
       case Common.CardTypes.ASYLUM.value:
         cardGroupList = MoonCEClubCardList.filter(
           (card) =>
