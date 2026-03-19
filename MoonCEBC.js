@@ -124,6 +124,8 @@ document.head.appendChild(cssLink);
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
     if (MouseIn(0, 930, 35, 70)) {
+      if (ServerPlayerIsInChatRoom())
+        ChatRoomStatusUpdate("Preference");
       OpenExitAddonWindow();
       return;
     }
