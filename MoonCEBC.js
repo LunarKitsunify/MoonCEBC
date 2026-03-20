@@ -133,6 +133,14 @@ document.head.appendChild(cssLink);
   });
   //#endregion
 
+  //#region ---------------Editing Status Persistence in ChatRoom--------------- //
+  modApi.hookFunction("ChatRoomStatusCheckExpiration", 0, (args, next) => {
+    // if in editor dont check the status expiration
+    if (isVisibleMainWindow) return;
+    next(args);
+  });
+  //#endregion
+
   //#region ---------------Draw Addon Icons--------------- //
 
   modApi.hookFunction("ChatRoomDrawCharacterStatusIcons", 0, (args, next) => {
