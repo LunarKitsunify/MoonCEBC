@@ -131,6 +131,12 @@ export function MoonClubCardLoadDeck() {
 	if (Index >= 0) {
 		ClubCardPlayer[Index].Deck = ClubCardShuffle(ClubCardLoadDeck(Deck));
 		ClubCardPlayer[Index].FullDeck = ClubCardLoadDeck(Deck);
+		for (const Card of ClubCardPlayer[Index].FullDeck) if (Card.OnGameStart) Card.OnGameStart(ClubCardPlayer[Index]);
+
+		const VersionNumber = Number(GameVersion.match(/R(\d+)/)[1]); // Get just number version without letters
+		if ( VersionNumber >= 130 || ServerURL == 'https://bondage-club-server-test.herokuapp.com/')
+			for (const Card of ClubCardPlayer[Index].FullDeck)
+				if (Card.OnGameStart) Card.OnGameStart(ClubCardPlayer[Index]);
 	}
 
 	// Starts the game with the loaded deck
