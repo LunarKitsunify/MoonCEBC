@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.21
+// @version 1.2.22
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -35,7 +35,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.21";
+  const AddonVersion = "1.2.22";
   const AddonType = "Beta";
   
   /**
@@ -209,32 +209,54 @@ document.head.appendChild(cssLink);
     return next(args);
   });
 
-  //create and send game_id for stats
-  modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
-    const { Player1, Player2 } = args[0].Data;
-    const { RNG } = args[0];
+    const VersionNumber = Number(GameVersion.match(/R(\d+)/)?.[1] ?? 0);
+    const TEST_SERVER_URL = "https://bondage-club-server-test.herokuapp.com";
+  
+    //create and send game_id for stats
+    modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
+      const normalizedServerURL = String(ServerURL ?? "").replace(/\/+$/, "");
+      const usesNewSignature = VersionNumber >= 130 || normalizedServerURL === TEST_SERVER_URL;
 
-    const turnIndex = Math.floor(RNG * 2);
-    const goesFirst = (turnIndex === 0) ? Player1 : Player2;
-    const isMyTurn = Player.MemberNumber == goesFirst;
+      let data;
+      let rng;
 
-    const gameToken = CreateGameId();
+      if (usesNewSignature) [data, rng] = args;
+      else {
+        data = args[0].Data;
+        rng = args[0].RNG;
+      }
 
-    const game = Player.MoonCE.Game ??= { Player1Token: null, Player2Token: null, GoesFirst: isMyTurn };
-    if (isMyTurn) game.Player1Token = gameToken;
-    else game.Player2Token = gameToken;
+      const { Player1, Player2 } = data;
 
-    const message = {
-      Type: Common.MessageTypeHidden,
-      Content: "MoonCEToken",
-      Sender: Player.MemberNumber,
-      Dictionary: [{ Token: gameToken, IsFirstTurn: isMyTurn }],
-    };
+      const turnIndex = Math.floor(rng * 2);
+      const goesFirst = turnIndex === 0 ? Player1 : Player2;
+      const localPlayerGoesFirst = Player.MemberNumber === goesFirst;
 
-    ServerSend("ChatRoomChat", message);
+      const gameToken = CreateGameId();
 
-    return next(args);
-  });
+      const game = Player.MoonCE.Game ??= {
+        Player1Token: null,
+        Player2Token: null,
+        GoesFirst: localPlayerGoesFirst,
+      };
+
+      game.GoesFirst = localPlayerGoesFirst;
+
+      if (localPlayerGoesFirst) game.Player1Token = gameToken;
+      else game.Player2Token = gameToken;
+
+      ServerSend("ChatRoomChat", {
+        Type: Common.MessageTypeHidden,
+        Content: "MoonCEToken",
+        Sender: Player.MemberNumber,
+        Dictionary: [{
+          Token: gameToken,
+          IsFirstTurn: localPlayerGoesFirst,
+        }],
+      });
+
+      return next(args);
+    });
 
   //#endregion //------------------------------//
 

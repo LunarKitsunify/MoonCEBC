@@ -92,3 +92,7 @@ Update 1.2.21
 2. Changed the deck selection window at game start. Now you can freely change sources of decks ( BC or Addon ). 
    Also, you can open the addon window and view decks.
 3. Added button to open addon in configurator club card game in online room.
+
+Update 1.2.22
+1. Minor icon updates.
+2. Preparing for the BC R130 Update

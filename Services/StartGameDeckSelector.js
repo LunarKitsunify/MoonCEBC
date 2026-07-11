@@ -1,8 +1,11 @@
 import { DrawAddonButtonWithImage, CreateCustomDropdown, CreateRect, CreateCenteredRect } from "./UIObject.js"
+import { DecksMode } from "./Settings.js";
 import * as Common from "./Common.js";
 let selectedDeckIndex = 0;
 let decks = null;
 let SwitchDeckStorageModeIcon = null;
+let SwitchDefaultDecksModeIcon = null;
+let ViewEditIcon = null;
 /**
  * @type {{
  *   UpdateOptions: (newOptions: string[]) => void,    // Replace the list of options
@@ -36,12 +39,20 @@ const TitleRect = CreateCenteredRect(340, 300, 32);
  * Deck Loader Info Button Coordinates
  * @type {UIRect}
  */
-const InfoButtonRect = CreateRect(RectCenterX - ButtonWidth - Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+const InfoButtonRect = CreateRect(RectCenterX - 1.5 * ButtonWidth - Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+
+/**
+ * Default Deck Switcher Button Coordinates
+ * @type {UIRect}
+ */
+const DefaultDeckSwitcherRect = CreateRect(RectCenterX - 0.5 * ButtonWidth, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+
 /**
  * Sources Button Coordinates
  * @type {UIRect}
  */
-const SourcesButtonRect = CreateRect(RectCenterX + Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+const SourcesButtonRect = CreateRect(RectCenterX + 0.5 * ButtonWidth + Gap, TitleRect.y + TitleRect.h + Gap, ButtonWidth, ElementsHeight);
+
 //#############
 
 //### Row 3 ###
@@ -54,7 +65,13 @@ const StartButtonRect = CreateCenteredRect(DecksDropdownRect.y + DecksDropdownRe
 //#############
 
 export function DeckSelectorRun() {
+	ElementRemove("DefaultDecksDropdown"); 	//Removing Anna's Hat
 	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png";
+	SwitchDefaultDecksModeIcon = Player.ExtensionSettings.MoonCE.Settings.DecksMode == DecksMode.Default
+		? Common.MoonDefaultOnIcon
+		: Common.MoonDefaultOffIcon;
+	ViewEditIcon  = Common.ViewEditIcon;
+
 
 	DrawRect(548, 298, 604, 404, "White");
 	DrawRect(550, 300, 600, 400, "Black");
@@ -65,9 +82,11 @@ export function DeckSelectorRun() {
 	
 	//##### Deck Info
 	DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
-		"White", "Icons/Public.png", "Check current deck");
-
-	
+		"White", ViewEditIcon, "Check current deck");
+	//##### Default Deck Switcher Button Coordinates
+	//TODO uncomment here after r130
+	// DrawAddonButtonWithImage(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h,
+	// 	"transparent", SwitchDefaultDecksModeIcon, "Default deck switcher");
 	//##### decks sources button and dropdown
 	//decks sources button
 	DrawAddonButtonWithImage(SourcesButtonRect.x, SourcesButtonRect.y, SourcesButtonRect.w, SourcesButtonRect.h,
@@ -101,9 +120,15 @@ export function DeckSelectorClick(onInfoClick) {
 		ClubCardLoadDeckNumber(deckIndex);
 		ElementRemove("MoonDecksDropdown");
 	}
-	//Start game click
+	//Info button click
 	if (MouseIn(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h))
 		onInfoClick(selectedDeckIndex);
+
+	//Default deck switcher button click
+	//TODO uncomment here after r130
+	// if (MouseIn(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h))
+	// 	SwitchDeckStorageMode(DecksMode.Default);
+
 }
 
 /**
@@ -122,7 +147,7 @@ export function MoonClubCardLoadDeck() {
 		let msg = TextGet("NoValidDeckFound").replace("PLAYERNAME", CharacterNickname(Player));
 		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, null, {}, null, msg);
 		Deck = ClubCardBuilderDefaultDeck.slice();
-		}
+	}
 
 	ElementRemove("MoonDecksDropdown");
 
@@ -132,11 +157,6 @@ export function MoonClubCardLoadDeck() {
 		ClubCardPlayer[Index].Deck = ClubCardShuffle(ClubCardLoadDeck(Deck));
 		ClubCardPlayer[Index].FullDeck = ClubCardLoadDeck(Deck);
 		for (const Card of ClubCardPlayer[Index].FullDeck) if (Card.OnGameStart) Card.OnGameStart(ClubCardPlayer[Index]);
-
-		const VersionNumber = Number(GameVersion.match(/R(\d+)/)[1]); // Get just number version without letters
-		if ( VersionNumber >= 130 || ServerURL == 'https://bondage-club-server-test.herokuapp.com/')
-			for (const Card of ClubCardPlayer[Index].FullDeck)
-				if (Card.OnGameStart) Card.OnGameStart(ClubCardPlayer[Index]);
 	}
 
 	// Starts the game with the loaded deck
@@ -190,17 +210,34 @@ export function MoonClubCardLoadDeck() {
 }
 
 /**
- * Toggles between using addon-based decks and base-game decks.
+ * Sets the current deck storage mode.
+ * Available modes: BC, Addon, Default.
  * Syncs the new setting with the server.
+ *
+ * @param {string} decksMode
  */
-function SwitchDeckStorageMode() {
+function SwitchDeckStorageMode(decksMode = null) {
 	const settings = Player.ExtensionSettings?.MoonCE?.Settings;
-    if (!settings) return;
+	if (!settings) return;
 
-    settings.UseAddonDecks = !settings.UseAddonDecks;
+	if (decksMode == DecksMode.Default) {
+		if (settings.DecksMode === DecksMode.Default) {
+			settings.DecksMode = settings.UseAddonDecks ? DecksMode.Addon : DecksMode.BC;
+		} else {
+			settings.UseAddonDecks = settings.DecksMode === DecksMode.Addon;
+			settings.DecksMode = DecksMode.Default;
+		}
+	} else {
+		settings.UseAddonDecks = !settings.UseAddonDecks;
+		settings.DecksMode = settings.UseAddonDecks ? DecksMode.Addon : DecksMode.BC;
+	}
+
 	ServerPlayerExtensionSettingsSync("MoonCE");
 	
 	SwitchDeckStorageModeIcon = Player.ExtensionSettings.MoonCE.Settings.UseAddonDecks ? Common.MoonDeckIcon : "Icons/Logo.png";
+	SwitchDefaultDecksModeIcon = Player.ExtensionSettings.MoonCE.Settings.DecksMode == DecksMode.Default
+		? Common.MoonDefaultOnIcon
+		: Common.MoonDefaultOffIcon;
 
 	selectedDeckIndex = 0;
 	const newDecks = Common.GetDeckNamesList();

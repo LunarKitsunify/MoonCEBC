@@ -1,16 +1,24 @@
 /** Init MoonCE Settings */
 const DECK_SLOT_COUNT = 20;
+
+export const DecksMode = {
+    BC: "BC",
+    Addon: "Addon",
+    Default: "Default"
+};
+
 const DefaultMoonSettings = {
     DebugMode: false,
     GameStats: true,
     UseAddonDecks: false,
+    DecksMode: DecksMode.BC
 };
 
 export function InitSettings() {
     let syncNeeded = false;
     if (!Player.ExtensionSettings.MoonCE) {
         Player.ExtensionSettings.MoonCE = {
-            Settings: { DebugMode: false, GameStats: true, UseAddonDecks: false },
+            Settings: { DebugMode: false, GameStats: true, UseAddonDecks: false, DecksMode: DecksMode.BC },
             Decks: { Deck: [], DeckName: [] }
         };
         InitMoonDefaultDecks();

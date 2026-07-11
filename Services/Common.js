@@ -1,4 +1,5 @@
 //#region Variables    
+import { DecksMode } from "./Settings.js";
 export const MoonCEAddonName = "Moon Cards Editor";
 export const meow_key = 42;
 export const MessageTypeHidden = "Hidden";
@@ -30,6 +31,7 @@ export const CardTypes = Object.freeze({
     EXHIBITIONIST: { value: "Exhibitionist", text: "Exhibitionist" },
     FETISHIST: { value: "Fetishist", text: "Fetishist" },
     KEMONOMIMI: { value: "Kemonomimi", text: "Kemonomimi" },
+    LATEX: { value: "Latex", text: "Latex" },
     LIABILITY: { value: "Liability", text: "Liability" },
     MAID: { value: "Maid", text: "Maid" },
     PET: { value: "PetOwner", text: "Pet / Owner" },
@@ -55,6 +57,9 @@ export const MoonCEStatusIsAddonIcon = new URL("src/Images/IsAddon.png", basePat
 export const MoonCEIsOpenMenuIcon = new URL("src/Images/IsOpenMenu.png", basePath).href;
 export const MoonDeckIcon = new URL("src/Images/MoonDeckIcon.png", basePath).href; //MoonDeckIcon
 export const MoonLogo = new URL("src/Images/AddonIcon2.png", basePath).href;
+export const MoonDefaultOnIcon = new URL("src/Images/DefaultOn.png", basePath).href;
+export const MoonDefaultOffIcon = new URL("src/Images/DefaultOff.png", basePath).href;
+export const ViewEditIcon = new URL("src/Images/ViewEdit.png", basePath).href;
 //#endregion
 
 //#region Size and color customization
@@ -88,20 +93,54 @@ export const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
  * @returns {string[]} An array of deck name strings.
  */
 export function GetDeckNamesList() {
-    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : (Player.Game.ClubCard.DeckName ?? ['Deck #1', 'Deck #2', 'Deck #3', 'Deck #4', 'Deck #5', 'Deck #6', 'Deck #7', 'Deck #8', 'Deck #9', 'Deck #10']);
-    return decksSources;
+    const deckMode = Player.ExtensionSettings?.MoonCE?.Settings?.DecksMode;
+
+    if (deckMode == DecksMode.Default) {
+        if (typeof ClubCardBuilderDefaultDecksList === "undefined") return [];
+		return Object.keys(ClubCardBuilderDefaultDecksList);
+    } else {
+        const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
+        let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.DeckName : (Player.Game.ClubCard.DeckName ?? ['Deck #1', 'Deck #2', 'Deck #3', 'Deck #4', 'Deck #5', 'Deck #6', 'Deck #7', 'Deck #8', 'Deck #9', 'Deck #10']);
+        return decksSources;
+    }
 }
 
 /**
- * Returns the list of decks (raw encoded strings) based on the selected storage mode.
+ * Returns the list of decks as raw encoded strings based on the selected storage mode.
+ *
+ * Sources:
+ * - BC: player's base-game decks
+ * - Addon: MoonCE addon decks
+ * - Default: built-in default decks from ClubCardBuilderDefaultDecksList
  *
  * @returns {string[]} An array of encoded deck data strings.
  */
 export function GetDecksList() {
-    const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-    let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
-    return decksSources;
+	const settings = Player.ExtensionSettings?.MoonCE?.Settings;
+
+	const deckMode = settings?.DecksMode ?? (settings?.UseAddonDecks ? DecksMode.Addon : DecksMode.BC);
+
+	switch (deckMode) {
+		case DecksMode.Default:
+			return GetDefaultDecksList();
+
+		case DecksMode.Addon:
+			return Player.ExtensionSettings?.MoonCE?.Decks?.Deck ?? [];
+
+		case DecksMode.BC:
+		default:
+			return Player.Game?.ClubCard?.Deck ?? [];
+	}
+}
+
+/**
+ * Converts built-in default decks from number[] format to encoded string format.
+ *
+ * @returns {string[]}
+ */
+function GetDefaultDecksList() {
+	if (typeof ClubCardBuilderDefaultDecksList === "undefined") return [];
+	return Object.values(ClubCardBuilderDefaultDecksList).map(deck => String.fromCharCode(...deck));
 }
 
 /** 
