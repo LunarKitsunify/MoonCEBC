@@ -96,3 +96,7 @@ Update 1.2.21
 Update 1.2.22
 1. Minor icon updates.
 2. Preparing for the BC R130 Update
+
+Update 1.2.23
+1. Minor code update.
+2. Fixed a bug that allowed users to edit or import cards into the default deck, even though a different deck was actually being edited.

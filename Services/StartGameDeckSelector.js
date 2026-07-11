@@ -81,12 +81,13 @@ export function DeckSelectorRun() {
 	//#####
 	
 	//##### Deck Info
-	DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h,
-		"White", ViewEditIcon, "Check current deck");
-	//##### Default Deck Switcher Button Coordinates
+	DrawAddonButtonWithImage(InfoButtonRect.x, InfoButtonRect.y, InfoButtonRect.w, InfoButtonRect.h, "White", ViewEditIcon, "Check current deck");
 	//TODO uncomment here after r130
-	// DrawAddonButtonWithImage(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h,
-	// 	"transparent", SwitchDefaultDecksModeIcon, "Default deck switcher");
+	if (Common.CheckGameVersion()) {			
+		//##### Default Deck Switcher Button Coordinates
+		DrawAddonButtonWithImage(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h,
+			"transparent", SwitchDefaultDecksModeIcon, "Default deck switcher");
+	}
 	//##### decks sources button and dropdown
 	//decks sources button
 	DrawAddonButtonWithImage(SourcesButtonRect.x, SourcesButtonRect.y, SourcesButtonRect.w, SourcesButtonRect.h,
@@ -126,9 +127,10 @@ export function DeckSelectorClick(onInfoClick) {
 
 	//Default deck switcher button click
 	//TODO uncomment here after r130
-	// if (MouseIn(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h))
-	// 	SwitchDeckStorageMode(DecksMode.Default);
-
+	if (Common.CheckGameVersion()) {
+		if (MouseIn(DefaultDeckSwitcherRect.x, DefaultDeckSwitcherRect.y, DefaultDeckSwitcherRect.w, DefaultDeckSwitcherRect.h))
+			SwitchDeckStorageMode(DecksMode.Default);
+	}
 }
 
 /**

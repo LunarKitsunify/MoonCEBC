@@ -7,7 +7,7 @@ export const DecksMode = {
     Default: "Default"
 };
 
-const DefaultMoonSettings = {
+export const DefaultMoonSettings = {
     DebugMode: false,
     GameStats: true,
     UseAddonDecks: false,

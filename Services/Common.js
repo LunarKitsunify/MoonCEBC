@@ -160,5 +160,15 @@ export function IsStatsUploadEnabled() {
 export function IsOpponentMoonCE() {
     return ClubCardPlayer?.[1]?.Character?.MoonCE;
 }
-
+/** 
+ * Checks if the current game version uses the new game signature (version >= 130 or test server).
+ * 
+ * @returns {boolean} True if the new game signature is used (version >= 130 or test server), otherwise false.
+ */
+export function CheckGameVersion() {
+    const VersionNumber = Number(GameVersion.match(/R(\d+)/)?.[1] ?? 0);
+    const normalizedServerURL = String(ServerURL ?? "").replace(/\/+$/, "");
+    const usesNewSignature = VersionNumber >= 130 || normalizedServerURL === "https://bondage-club-server-test.herokuapp.com";
+    return usesNewSignature;
+}
 //#endregion

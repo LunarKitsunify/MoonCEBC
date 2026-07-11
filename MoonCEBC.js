@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.22
+// @version 1.2.23
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -35,7 +35,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.22";
+  const AddonVersion = "1.2.23";
   const AddonType = "Stable";
   
   /**
@@ -209,18 +209,12 @@ document.head.appendChild(cssLink);
     return next(args);
   });
 
-    const VersionNumber = Number(GameVersion.match(/R(\d+)/)?.[1] ?? 0);
-    const TEST_SERVER_URL = "https://bondage-club-server-test.herokuapp.com";
-  
     //create and send game_id for stats
     modApi.hookFunction("GameClubCardAssignPlayers", 0, (args, next) => {
-      const normalizedServerURL = String(ServerURL ?? "").replace(/\/+$/, "");
-      const usesNewSignature = VersionNumber >= 130 || normalizedServerURL === TEST_SERVER_URL;
-
       let data;
       let rng;
 
-      if (usesNewSignature) [data, rng] = args;
+      if (Common.CheckGameVersion()) [data, rng] = args;
       else {
         data = args[0].Data;
         rng = args[0].RNG;
@@ -1015,6 +1009,9 @@ document.head.appendChild(cssLink);
    * The function changes the top panel and updates the data to enter edit mode.
    */
   function SetEditMode() {
+    //If the open decks are the default, we prohibit editing them.
+    if (Player.ExtensionSettings.MoonCE.Settings.DecksMode == 'Default') return;
+
     const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftViewPanelId"
     );
