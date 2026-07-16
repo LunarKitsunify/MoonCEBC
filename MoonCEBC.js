@@ -435,7 +435,8 @@ document.head.appendChild(cssLink);
     // Addon is available only outside ClubCard and for custom deck modes
     const blockEditMode  = CurrentScreen == "ClubCard" && Player.ExtensionSettings.MoonCE.Settings.DecksMode == DecksMode.Default;
 
-    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
+    if (!blockEditMode) topSettingsLeftViewPanel.appendChild(deckModeSwitch);
+    if (!blockEditMode) topSettingsLeftViewPanel.appendChild(playerDecksSelect);
     if (!blockEditMode) topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
     if (!blockEditMode) topSettingsLeftViewPanel.appendChild(importButton);
