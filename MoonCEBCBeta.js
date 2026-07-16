@@ -432,15 +432,13 @@ document.head.appendChild(cssLink);
       "right"
     );
 
-    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
     // Addon is available only outside ClubCard and for custom deck modes
-    if (CurrentScreen != 'ClubCard' && Player.ExtensionSettings.MoonCE.Settings.DecksMode != DecksMode.Default)
-      topSettingsLeftViewPanel.appendChild(editButton);
+    const blockEditMode  = CurrentScreen == "ClubCard" && Player.ExtensionSettings.MoonCE.Settings.DecksMode == DecksMode.Default;
 
+    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
+    if (!blockEditMode) topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
-    // Addon is available only outside ClubCard and for custom deck modes
-    if (CurrentScreen != 'ClubCard' && Player.ExtensionSettings.MoonCE.Settings.DecksMode != DecksMode.Default)
-      topSettingsLeftViewPanel.appendChild(importButton);
+    if (!blockEditMode) topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
 
     //#region topSettingsLeftEditPanel
