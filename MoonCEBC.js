@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.23
+// @version 1.2.24
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -21,7 +21,7 @@ import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization, StartTrackingModule} from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
-import { InitSettings } from "./Services/Settings.js";
+import { InitSettings , DecksMode} from "./Services/Settings.js";
 import { DeckSelectorRun, DeckSelectorClick, MoonClubCardLoadDeck} from "./Services/StartGameDeckSelector.js"
 import { CreateButton, DrawAddonButtonWithImage } from "./Services/UIObject.js"
 import { bcModSdk } from './src/BCModSdk.js';
@@ -35,7 +35,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.23";
+  const AddonVersion = "1.2.24";
   const AddonType = "Stable";
   
   /**
@@ -434,9 +434,9 @@ document.head.appendChild(cssLink);
 
     topSettingsLeftViewPanel.appendChild(deckModeSwitch);
     topSettingsLeftViewPanel.appendChild(playerDecksSelect);
-    topSettingsLeftViewPanel.appendChild(editButton);
+    if (Player.ExtensionSettings.MoonCE.Settings.DecksMode != DecksMode.Default) topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
-    topSettingsLeftViewPanel.appendChild(importButton);
+    if (Player.ExtensionSettings.MoonCE.Settings.DecksMode != DecksMode.Default) topSettingsLeftViewPanel.appendChild(importButton);
     //#endregion
 
     //#region topSettingsLeftEditPanel
@@ -809,7 +809,8 @@ document.head.appendChild(cssLink);
    * Loads and stores card data.  Text_ClubCard.csv
    */
   async function AddonLoad() {
-    await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
+    //await waitFor(() => Player !== undefined && Player.MemberNumber !== undefined);
+    await ServerIsLoggedInAsync();
 
     //Load Cards data from BC Server
     TextPrefetchFile(ScreenFileGetPath(`Text_ClubCard.csv`, "MiniGame", "ClubCard"));
@@ -896,8 +897,6 @@ document.head.appendChild(cssLink);
    * @returns {void} - Nothing
    */
   function GetDeckData(decksCombobox) {
-    // const useAddonDecks = Player.ExtensionSettings?.MoonCE?.Settings?.UseAddonDecks === true;
-    // let decksSources = useAddonDecks ? Player.ExtensionSettings.MoonCE.Decks.Deck : Player.Game.ClubCard.Deck;
     let decksSources = Common.GetDecksList();
 
     let selectedIndex = decksCombobox.value;
@@ -1009,9 +1008,6 @@ document.head.appendChild(cssLink);
    * The function changes the top panel and updates the data to enter edit mode.
    */
   function SetEditMode() {
-    //If the open decks are the default, we prohibit editing them.
-    if (Player.ExtensionSettings.MoonCE.Settings.DecksMode == 'Default') return;
-
     const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
       "#TopSettingsLeftViewPanelId"
     );

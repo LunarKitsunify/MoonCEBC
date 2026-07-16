@@ -162,13 +162,15 @@ export function IsOpponentMoonCE() {
 }
 /** 
  * Checks if the current game version uses the new game signature (version >= 130 or test server).
+ * This may be a temporary function that will be used from time to time before new versions of BC are released.
  * 
  * @returns {boolean} True if the new game signature is used (version >= 130 or test server), otherwise false.
  */
 export function CheckGameVersion() {
+    const newVersion = 130;
     const VersionNumber = Number(GameVersion.match(/R(\d+)/)?.[1] ?? 0);
     const normalizedServerURL = String(ServerURL ?? "").replace(/\/+$/, "");
-    const usesNewSignature = VersionNumber >= 130 || normalizedServerURL === "https://bondage-club-server-test.herokuapp.com";
+    const usesNewSignature = VersionNumber >= newVersion || normalizedServerURL === "https://bondage-club-server-test.herokuapp.com";
     return usesNewSignature;
 }
 //#endregion

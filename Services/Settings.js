@@ -57,5 +57,4 @@ function InitMoonDefaultDecks() {
     for (let i = 0; i < DECK_SLOT_COUNT; i++)
         if (!Player.ExtensionSettings.MoonCE.Decks.DeckName[i])
             Player.ExtensionSettings.MoonCE.Decks.DeckName[i] = `Moon Deck #${i + 1}`;
-    //TODO Don't forget to update the GetDeckData code later so that it can grab decks from here.
 }

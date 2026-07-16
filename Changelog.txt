@@ -100,3 +100,7 @@ Update 1.2.22
 Update 1.2.23
 1. Minor code update.
 2. Fixed a bug that allowed users to edit or import cards into the default deck, even though a different deck was actually being edited.
+
+Update 1.2.24
+1. A minor code optimization.
+2. 
