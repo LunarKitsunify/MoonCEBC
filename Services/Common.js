@@ -95,7 +95,7 @@ export const movementKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'];
 export function GetDeckNamesList() {
     const deckMode = Player.ExtensionSettings?.MoonCE?.Settings?.DecksMode;
 
-    if (deckMode == DecksMode.Default) {
+    if (CurrentScreen == 'ClubCard' && deckMode == DecksMode.Default) {
         if (typeof ClubCardBuilderDefaultDecksList === "undefined") return [];
 		return Object.keys(ClubCardBuilderDefaultDecksList);
     } else {
@@ -118,11 +118,15 @@ export function GetDeckNamesList() {
 export function GetDecksList() {
 	const settings = Player.ExtensionSettings?.MoonCE?.Settings;
 
-	const deckMode = settings?.DecksMode ?? (settings?.UseAddonDecks ? DecksMode.Addon : DecksMode.BC);
+    const deckMode = settings?.DecksMode ?? (settings?.UseAddonDecks ? DecksMode.Addon : DecksMode.BC);
 
 	switch (deckMode) {
 		case DecksMode.Default:
-			return GetDefaultDecksList();
+			if (CurrentScreen === "ClubCard") return GetDefaultDecksList();
+
+			return settings?.UseAddonDecks
+				? Player.ExtensionSettings?.MoonCE?.Decks?.Deck ?? []
+				: Player.Game?.ClubCard?.Deck ?? [];
 
 		case DecksMode.Addon:
 			return Player.ExtensionSettings?.MoonCE?.Decks?.Deck ?? [];

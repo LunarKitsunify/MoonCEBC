@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.24
+// @version 1.2.25
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -35,7 +35,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.24";
+  const AddonVersion = "1.2.25";
   const AddonType = "Beta";
   
   /**
@@ -436,7 +436,7 @@ document.head.appendChild(cssLink);
     const blockEditMode  = CurrentScreen == "ClubCard" && Player.ExtensionSettings.MoonCE.Settings.DecksMode == DecksMode.Default;
 
     if (!blockEditMode) topSettingsLeftViewPanel.appendChild(deckModeSwitch);
-    if (!blockEditMode) topSettingsLeftViewPanel.appendChild(playerDecksSelect);
+    topSettingsLeftViewPanel.appendChild(playerDecksSelect);
     if (!blockEditMode) topSettingsLeftViewPanel.appendChild(editButton);
     topSettingsLeftViewPanel.appendChild(exportButton);
     if (!blockEditMode) topSettingsLeftViewPanel.appendChild(importButton);
@@ -857,24 +857,7 @@ document.head.appendChild(cssLink);
     if (deckIndex) oldSelectedIndex = deckIndex;
 
     playerDecksSelect.innerHTML = "";
-    let playerDecksData = [];
-
-    if (useAddonDecks) {
-      // ##### Moon decks storage ##### //
-      playerDecksData = Player.ExtensionSettings.MoonCE.Decks.DeckName;
-    } else {
-      // ##### BC deck storage ##### //
-      if (Player.Game.ClubCard.DeckName != null && Player.Game.ClubCard.DeckName.length > 0)
-        playerDecksData = Player.Game.ClubCard.DeckName;
-      else
-        playerDecksData = ["", "", "", "", "", "", "", "", "", ""];
-
-      for (let i = 0; i <= 9; i++)
-        if (playerDecksData[i] == "") playerDecksData[i] = `Deck #${i + 1}`;
-
-      //I'm deleting the 11th element of the deck array.
-      if (playerDecksData.length == 11) playerDecksData.pop();
-    }
+    let playerDecksData = Common.GetDeckNamesList();
 
     playerDecksData.forEach((name, index) => {
       if (name != null) {
@@ -1045,7 +1028,10 @@ document.head.appendChild(cssLink);
     const settings = Player.ExtensionSettings?.MoonCE?.Settings;
     if (!settings) return;
 
-    settings.UseAddonDecks = !settings.UseAddonDecks;
+    const useAddonDecks = !settings.UseAddonDecks;
+    settings.DecksMode = useAddonDecks ? DecksMode.Addon : DecksMode.BC;
+    settings.UseAddonDecks = useAddonDecks;
+
     ServerPlayerExtensionSettingsSync("MoonCE");
 
     const newIcon = GetIconSwitchDeckStorageButton();
