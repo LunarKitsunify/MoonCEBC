@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.25
+// @version 1.2.27
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -11,6 +11,8 @@
 // @match https://bondageprojects.elementfx.com/*
 // @match https://bondage-europe.com/*
 // @match https://bondageprojects.com/*
+// @match https://www.bondageeurope.com/*
+// @match https://bondageeurope.com/*
 // @match https://bc-cards-test.netlify.app/*
 // @icon data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant none
@@ -18,6 +20,7 @@
 // ==/UserScript==
 
 import { createCard, createGridLayout } from "./RenderObjs/CardRender.js";
+import { createSelectedCardMini } from "./RenderObjs/SelectedCardsRender.js";
 import { createModal, createSettingsMenu } from './RenderObjs/SettingsMenu.js';
 import { TrackingModuleInitialization, StartTrackingModule} from './Services/TrackingCardsStatModule.js'
 import { InitChatCommands } from "./Services/ChatCommand.js";
@@ -35,7 +38,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.25";
+  const AddonVersion = "1.2.27";
   const AddonType = "Beta";
   
   /**
@@ -703,7 +706,7 @@ document.head.appendChild(cssLink);
     topSettingsRightPanel.style.boxSizing = "border-box";
     topSettingsRightPanel.style.paddingRight = Common.TopPanelSidePadding;
     topSettingsRightPanel.style.paddingLeft = Common.TopPanelSidePadding;
-    topSettingsRightPanel.style.gap = Common.TopLeftPanelGap;
+    topSettingsRightPanel.style.gap = Common.TopRightPanelGap;
     topSettingsPanel.appendChild(topSettingsRightPanel);
 
     const settingsButton = CreateButton(
@@ -718,14 +721,29 @@ document.head.appendChild(cssLink);
       "left"
     );
 
+    const selectedCardsView = CreateButton(
+      null,
+      Player.ExtensionSettings.MoonCE.Settings.UseSelectedCardsView ? Common.SelectedCardsViewIcon : Common.UnSelectedCardsViewIcon,
+      () => ToggleSelectedCardsView(selectedCardsView),
+      "auto",
+      "80%",
+      "0",
+      "0",
+      "Switch selected cards view",
+      "left"
+    );
+
+    selectedCardsView.classList.add("selected-cards-view-toggle");
+    selectedCardsView.style.display = MoonCEPageMode === Common.WindowStatus.EDIT ? "flex" : "none";
+
     const infoButtonWithImage = CreateButton(
       null,
       "Icons/Question.png",
       OpenInfo,
-      "50%",
+      "auto",
       "80%",
       "0",
-      "5%",
+      "0",
       "Info",
       "left"
     );
@@ -734,16 +752,26 @@ document.head.appendChild(cssLink);
       null,
       "Icons/Exit.png",
       OpenExitAddonWindow,
-      "50%",
+      "auto",
       "80%",
       "0",
-      "5%",
+      "0",
       "Exit Addon",
       "left"
     );
 
-    topSettingsRightPanel.appendChild(infoButtonWithImage);
+    for (const button of [
+      selectedCardsView,
+      infoButtonWithImage,
+      exitButtonWithImage,
+    ]) {
+      button.style.aspectRatio = "1 / 1";
+      button.style.flex = "0 0 auto";
+    }
+
+    topSettingsRightPanel.appendChild(selectedCardsView);
     //topSettingsRightPanel.appendChild(settingsButton);
+    topSettingsRightPanel.appendChild(infoButtonWithImage);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
     //#endregion
@@ -936,17 +964,20 @@ document.head.appendChild(cssLink);
               );
               MoonCEEditCurrentDeck.splice(indexToRemove, 1);
               cardController.hideSelected();
-
               UpdateDeckCardsCounter();
+              RenderSelectedCards();
             } else {
               MoonCEEditCurrentDeck.push(card);
               cardController.showSelected();
               UpdateDeckCardsCounter();
+              RenderSelectedCards();
             }
           }
         });
 
         cardController.cardButton.addEventListener("mouseover", () => {
+          const useSelectedCardsView = Player.ExtensionSettings?.MoonCE?.Settings?.UseSelectedCardsView;
+          if (useSelectedCardsView && MoonCEPageMode === Common.WindowStatus.EDIT) return;
           if (MoonCEMouseOverCard != card) {
             MoonCEMouseOverCard = card;
             const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
@@ -986,6 +1017,41 @@ document.head.appendChild(cssLink);
     deckCardsCounter.style.color = isValidDeckSize ? "white" : "red";
   }
 
+  /**
+   * Renders selected cards from MoonCEEditCurrentDeck in CardInfoPanel using mini card elements.
+   * @returns 
+   */
+  function RenderSelectedCards() {
+      if (!Player.ExtensionSettings?.MoonCE?.Settings?.UseSelectedCardsView) return;
+      if (MoonCEPageMode !== Common.WindowStatus.EDIT) return;
+
+      const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
+
+      if (!cardInfoPanel) return;
+
+      cardInfoPanel.innerHTML = "";
+      const container = document.createElement("div");
+      container.classList.add("selected-cards-container");
+
+      const sortedCards = SortCardsList([...MoonCEEditCurrentDeck]);
+    
+      for (const card of sortedCards) {
+          const cardElement = createSelectedCardMini(card);
+          container.appendChild(cardElement);
+      }
+
+      cardInfoPanel.appendChild(container);
+  }
+
+  /**
+   * Clears the CardInfoPanel and resets the hovered card state.
+   */
+  function ClearCardInfoPanel() {
+      const cardInfoPanel = MainWindowPanel.querySelector("#CardInfoPanelId");
+      if (cardInfoPanel) cardInfoPanel.innerHTML = "";
+      MoonCEMouseOverCard = [];
+  }
+
   //#region Top Panel Button Logic
 
   //#region VIEW Left Top Panel
@@ -1019,9 +1085,11 @@ document.head.appendChild(cssLink);
     groupSelect.selectedIndex = 0;
 
     MoonCEPageMode = Common.WindowStatus.EDIT;
+    UpdateSelectedCardsViewButtonVisibility();
     MoonCEEditCurrentDeck = [...MoonCECurrentDeck];
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
+    RenderSelectedCards();
   }
 
   function SwitchDeckStorageMode(buttonElement) {
@@ -1053,16 +1121,16 @@ document.head.appendChild(cssLink);
   //#region EDIT Left Top Panel
 
   function CancelDeckButtonClick() {
-    const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
-      "#TopSettingsLeftViewPanelId"
-    );
-    const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
-      "#TopSettingsLeftEditPanelId"
-    );
+    const topSettingsLeftViewPanel = MainWindowPanel.querySelector("#TopSettingsLeftViewPanelId");
+    const topSettingsLeftEditPanel = MainWindowPanel.querySelector("#TopSettingsLeftEditPanelId");
+    const useSelectedCardsView = Player.ExtensionSettings?.MoonCE?.Settings?.UseSelectedCardsView;
 
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftEditPanel.style.display = "none";
     MoonCEPageMode = Common.WindowStatus.VIEW;
+    UpdateSelectedCardsViewButtonVisibility();
+
+    if (useSelectedCardsView) ClearCardInfoPanel();
     MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
     MoonCEBuilderSeacrhGroupList = [];
     MoonCEBuilderCurrentGroupsList = [];
@@ -1071,12 +1139,10 @@ document.head.appendChild(cssLink);
   }
 
   function SaveDeckButtonClick() {
-    const topSettingsLeftViewPanel = MainWindowPanel.querySelector(
-      "#TopSettingsLeftViewPanelId"
-    );
-    const topSettingsLeftEditPanel = MainWindowPanel.querySelector(
-      "#TopSettingsLeftEditPanelId"
-    );
+    const topSettingsLeftViewPanel = MainWindowPanel.querySelector("#TopSettingsLeftViewPanelId");
+    const topSettingsLeftEditPanel = MainWindowPanel.querySelector("#TopSettingsLeftEditPanelId");
+    const useSelectedCardsView = Player.ExtensionSettings?.MoonCE?.Settings?.UseSelectedCardsView;
+
     const deckNameInput = MainWindowPanel.querySelector("#MoonCEDeckNameInputId");
     const isDeckNameValidation =
       deckNameInput.value != "" &&
@@ -1087,6 +1153,8 @@ document.head.appendChild(cssLink);
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
       MoonCEPageMode = Common.WindowStatus.VIEW;
+      UpdateSelectedCardsViewButtonVisibility();
+      if (useSelectedCardsView) ClearCardInfoPanel();
       MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
       MoonCEBuilderSeacrhGroupList = [];
       MoonCEBuilderCurrentGroupsList = [];
@@ -1169,10 +1237,9 @@ document.head.appendChild(cssLink);
    */
   function ClearCurrentDeck() {
     MoonCEEditCurrentDeck = [];
-
     UpdateCardsCells(MoonCECurrent30Cards);
-
     UpdateDeckCardsCounter();
+    RenderSelectedCards();
   }
   /**
    * TODO Maybe I'll add a couple of my decks as a default deck?
@@ -1550,6 +1617,33 @@ document.head.appendChild(cssLink);
     MainWindowPanel.appendChild(overlay);
   }
 
+/**
+ * Toggles the selected-cards view and syncs the setting.
+ * @param {HTMLButtonElement} buttonElement
+ */
+function ToggleSelectedCardsView(buttonElement) {
+  const moonCe = Player.ExtensionSettings.MoonCE ??= {};
+  const settings = moonCe.Settings ??= {};
+  settings.UseSelectedCardsView = !settings.UseSelectedCardsView;
+
+  const image = buttonElement.querySelector("img");
+  if (image) image.src = settings.UseSelectedCardsView ? Common.SelectedCardsViewIcon : Common.UnSelectedCardsViewIcon;
+
+  if (MoonCEPageMode === Common.WindowStatus.EDIT) {
+    if (settings.UseSelectedCardsView) RenderSelectedCards();
+    else ClearCardInfoPanel();
+  }
+
+  ServerPlayerExtensionSettingsSync("MoonCE");
+}
+
+  /**
+ * Updates the selected-cards view button visibility.
+ */
+function UpdateSelectedCardsViewButtonVisibility() {
+  const button = MainWindowPanel?.querySelector(".selected-cards-view-toggle");
+  if (button) button.style.display = MoonCEPageMode === Common.WindowStatus.EDIT ? "flex" : "none";
+}
 
   //#endregion
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.26
+// @version 1.2.27
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -11,6 +11,8 @@
 // @match https://bondageprojects.elementfx.com/*
 // @match https://bondage-europe.com/*
 // @match https://bondageprojects.com/*
+// @match https://www.bondageeurope.com/*
+// @match https://bondageeurope.com/*
 // @match https://bc-cards-test.netlify.app/*
 // @icon data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant none
@@ -36,7 +38,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.26";
+  const AddonVersion = "1.2.27";
   const AddonType = "Stable";
   
   /**
@@ -704,7 +706,7 @@ document.head.appendChild(cssLink);
     topSettingsRightPanel.style.boxSizing = "border-box";
     topSettingsRightPanel.style.paddingRight = Common.TopPanelSidePadding;
     topSettingsRightPanel.style.paddingLeft = Common.TopPanelSidePadding;
-    topSettingsRightPanel.style.gap = Common.TopLeftPanelGap;
+    topSettingsRightPanel.style.gap = Common.TopRightPanelGap;
     topSettingsPanel.appendChild(topSettingsRightPanel);
 
     const settingsButton = CreateButton(
@@ -719,14 +721,29 @@ document.head.appendChild(cssLink);
       "left"
     );
 
+    const selectedCardsView = CreateButton(
+      null,
+      Player.ExtensionSettings.MoonCE.Settings.UseSelectedCardsView ? Common.SelectedCardsViewIcon : Common.UnSelectedCardsViewIcon,
+      () => ToggleSelectedCardsView(selectedCardsView),
+      "auto",
+      "80%",
+      "0",
+      "0",
+      "Switch selected cards view",
+      "left"
+    );
+
+    selectedCardsView.classList.add("selected-cards-view-toggle");
+    selectedCardsView.style.display = MoonCEPageMode === Common.WindowStatus.EDIT ? "flex" : "none";
+
     const infoButtonWithImage = CreateButton(
       null,
       "Icons/Question.png",
       OpenInfo,
-      "50%",
+      "auto",
       "80%",
       "0",
-      "5%",
+      "0",
       "Info",
       "left"
     );
@@ -735,16 +752,26 @@ document.head.appendChild(cssLink);
       null,
       "Icons/Exit.png",
       OpenExitAddonWindow,
-      "50%",
+      "auto",
       "80%",
       "0",
-      "5%",
+      "0",
       "Exit Addon",
       "left"
     );
 
-    topSettingsRightPanel.appendChild(infoButtonWithImage);
+    for (const button of [
+      selectedCardsView,
+      infoButtonWithImage,
+      exitButtonWithImage,
+    ]) {
+      button.style.aspectRatio = "1 / 1";
+      button.style.flex = "0 0 auto";
+    }
+
+    topSettingsRightPanel.appendChild(selectedCardsView);
     //topSettingsRightPanel.appendChild(settingsButton);
+    topSettingsRightPanel.appendChild(infoButtonWithImage);
     topSettingsRightPanel.appendChild(exitButtonWithImage);
 
     //#endregion
@@ -1058,6 +1085,7 @@ document.head.appendChild(cssLink);
     groupSelect.selectedIndex = 0;
 
     MoonCEPageMode = Common.WindowStatus.EDIT;
+    UpdateSelectedCardsViewButtonVisibility();
     MoonCEEditCurrentDeck = [...MoonCECurrentDeck];
     UpdateCardsListSetNewGroup();
     UpdateDeckCardsCounter();
@@ -1100,6 +1128,7 @@ document.head.appendChild(cssLink);
     topSettingsLeftViewPanel.style.display = "flex";
     topSettingsLeftEditPanel.style.display = "none";
     MoonCEPageMode = Common.WindowStatus.VIEW;
+    UpdateSelectedCardsViewButtonVisibility();
 
     if (useSelectedCardsView) ClearCardInfoPanel();
     MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
@@ -1124,6 +1153,7 @@ document.head.appendChild(cssLink);
       topSettingsLeftViewPanel.style.display = "flex";
       topSettingsLeftEditPanel.style.display = "none";
       MoonCEPageMode = Common.WindowStatus.VIEW;
+      UpdateSelectedCardsViewButtonVisibility();
       if (useSelectedCardsView) ClearCardInfoPanel();
       MoonCECurrentGroup = Common.CardTypes.ALL_CARDS.value;
       MoonCEBuilderSeacrhGroupList = [];
@@ -1587,6 +1617,33 @@ document.head.appendChild(cssLink);
     MainWindowPanel.appendChild(overlay);
   }
 
+/**
+ * Toggles the selected-cards view and syncs the setting.
+ * @param {HTMLButtonElement} buttonElement
+ */
+function ToggleSelectedCardsView(buttonElement) {
+  const moonCe = Player.ExtensionSettings.MoonCE ??= {};
+  const settings = moonCe.Settings ??= {};
+  settings.UseSelectedCardsView = !settings.UseSelectedCardsView;
+
+  const image = buttonElement.querySelector("img");
+  if (image) image.src = settings.UseSelectedCardsView ? Common.SelectedCardsViewIcon : Common.UnSelectedCardsViewIcon;
+
+  if (MoonCEPageMode === Common.WindowStatus.EDIT) {
+    if (settings.UseSelectedCardsView) RenderSelectedCards();
+    else ClearCardInfoPanel();
+  }
+
+  ServerPlayerExtensionSettingsSync("MoonCE");
+}
+
+  /**
+ * Updates the selected-cards view button visibility.
+ */
+function UpdateSelectedCardsViewButtonVisibility() {
+  const button = MainWindowPanel?.querySelector(".selected-cards-view-toggle");
+  if (button) button.style.display = MoonCEPageMode === Common.WindowStatus.EDIT ? "flex" : "none";
+}
 
   //#endregion
 

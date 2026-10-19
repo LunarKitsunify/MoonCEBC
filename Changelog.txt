@@ -1,3 +1,7 @@
+Update 1.2.27
+1. Fix compatibility with BC R133
+2. Added a button to switch between the selected-cards list and single-card view directly in the deck editor.
+
 Update 1.2.26
 1. Added optional selected cards view in deck editor.
 2. Added /moonselectedcards on | off. Disabled by default.

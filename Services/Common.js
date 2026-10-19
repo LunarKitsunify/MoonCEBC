@@ -60,6 +60,8 @@ export const MoonLogo = new URL("src/Images/AddonIcon2.png", basePath).href;
 export const MoonDefaultOnIcon = new URL("src/Images/DefaultOn.png", basePath).href;
 export const MoonDefaultOffIcon = new URL("src/Images/DefaultOff.png", basePath).href;
 export const ViewEditIcon = new URL("src/Images/ViewEdit.png", basePath).href;
+export const SelectedCardsViewIcon = new URL("src/Images/SelectedCardsViewIcon.png", basePath).href;
+export const UnSelectedCardsViewIcon = new URL("src/Images/UnSelectedCardsViewIcon.png", basePath).href;
 //#endregion
 
 //#region Size and color customization
@@ -70,6 +72,7 @@ export const TopPanelHeight = "7%";
 export const TopPanelTextSize = "1.2vw";
 export const DeckNamePanelWidth = "20%";
 export const TopLeftPanelGap = "1%";
+export const TopRightPanelGap = "2%";
 export const TopPanelSidePadding = "0.5%";
 export const TopLeftPanelWidth = "92%";
 export const TopRightPanelWidth = `calc(100% - ${TopLeftPanelWidth})`;
