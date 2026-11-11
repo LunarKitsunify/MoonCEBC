@@ -141,13 +141,11 @@ export function MoonClubCardLoadDeck() {
 	const deckSources = Common.GetDecksList();
 	let Deck = [];
 	if (deckSources.length > DeckNum && deckSources[DeckNum]?.length >= ClubCardBuilderMinDeckSize && deckSources[DeckNum]?.length <= ClubCardBuilderMaxDeckSize) {
-		let msg = TextGet("UsingDeck").replace("PLAYERNAME", CharacterNickname(Player));
-		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, null, {}, null, msg);
+		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, "UsingDeck");
 		for (let i = 0; i < deckSources[DeckNum]?.length; i++)
 			Deck.push(deckSources[DeckNum].charCodeAt(i));
 	} else {
-		let msg = TextGet("NoValidDeckFound").replace("PLAYERNAME", CharacterNickname(Player));
-		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, null, {}, null, msg);
+		ClubCardMessageAdd(ClubCardMessageType.SYSTEM, "NoValidDeckFound");
 		Deck = ClubCardBuilderDefaultDeck.slice();
 	}
 
@@ -206,7 +204,7 @@ export function MoonClubCardLoadDeck() {
 		if (ClubCardReward.Type == null) ClubCardReward.Type = "Member";
 		ClubCardFocus = { ...ClubCardReward, Location: 'Reward' , AnimationState: 'idle'};
 		if (ClubCardPlayer[1].Control === "AI") ClubCardPlayer[1].Hand.push({ ...ClubCardReward });
-		ClubCardCreatePopup("TEXT", TextGet("CanWinNewCard") + " " + ClubCardReward.Title, TextGet("Play"), null, "ClubCardAIStart()", null);
+		ClubCardCreatePopup("TEXT", { Text: TextGet("CanWinNewCard") + " " + ClubCardReward.Title, Button1: TextGet("Play"), Function1: "ClubCardAIStart()" });
 		ClubCardOptionSelection = true;
 	} else ClubCardAIStart();
 }
