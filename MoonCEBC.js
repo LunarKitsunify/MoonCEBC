@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Moon Cards Editor BC
 // @namespace https://www.bondageprojects.com/
-// @version 1.2.27
+// @version 1.2.28
 // @description Addon for viewing and customizing card decks without Npc room.
 // @author Lunar Kitsunify
 // @match http://localhost:*/*
@@ -38,7 +38,7 @@ document.head.appendChild(cssLink);
 (function () {
   "use strict";
   //#region Variables
-  const AddonVersion = "1.2.27";
+  const AddonVersion = "1.2.28";
   const AddonType = "Stable";
   
   /**
@@ -119,11 +119,11 @@ document.head.appendChild(cssLink);
   });
 
   //#region ---------------Button "Open Addon" in ChatRoom--------------- //
-  modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
-    const result = next(args);
-    DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
-    return result;
-  });
+  // modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
+  //   const result = next(args);
+  //   DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
+  //   return result;
+  // });
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
     if (MouseIn(0, 930, 35, 70)) {
@@ -259,10 +259,10 @@ document.head.appendChild(cssLink);
 
   //#region ---------------Button "Open Addon" in ClubCard Configuration--------------- //
 
-  modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
-    next(args);
-    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
-  });
+  // modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
+  //   next(args);
+  //   DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
+  // });
 
   modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
     next(args);
