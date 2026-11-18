@@ -119,11 +119,11 @@ document.head.appendChild(cssLink);
   });
 
   //#region ---------------Button "Open Addon" in ChatRoom--------------- //
-  // modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
-  //   const result = next(args);
-  //   DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
-  //   return result;
-  // });
+  modApi.hookFunction("ChatRoomRun", 0, (args, next) => {
+    const result = next(args);
+    DrawAddonButtonWithImage(0, 930, 35, 70, "White", "Screens/MiniGame/ClubCard/Sleeve/Default.png", "Moon Cards Editor");
+    return result;
+  });
 
   modApi.hookFunction("ChatRoomClick", 0, (args, next) => {
     if (MouseIn(0, 930, 35, 70)) {
@@ -259,10 +259,10 @@ document.head.appendChild(cssLink);
 
   //#region ---------------Button "Open Addon" in ClubCard Configuration--------------- //
 
-  // modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
-  //   next(args);
-  //   DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
-  // });
+  modApi.hookFunction("GameClubCardRun", 0, (args, next) => {
+    next(args);
+    DrawAddonButtonWithImage(1815, 190, 90, 90, "White", Common.MoonLogo, "Moon Cards Editor");
+  });
 
   modApi.hookFunction("GameClubCardClick", 0, (args, next) => {
     next(args);

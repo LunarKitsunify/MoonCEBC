@@ -214,7 +214,7 @@ export function CreateCustomDropdown(id, optionsList, onChange) {
  * @param {boolean} [Disabled] - Optional disabled flag
  */
 export function DrawAddonButtonWithImage(Left, Top, Width, Height, Color, ImageSrc, HoveringText = null, Disabled = false) {
-    ControllerAddActiveArea(Left, Top);
+    // ControllerAddActiveArea(Left, Top);
 
     // Draw button rectangle
     MainCanvas.beginPath();
